@@ -19,5 +19,15 @@
   "Home": {
     "title": "እንኳን ወደ ፓና ስፖርት በደህና መጡ",
     "description": "የኢትዮጵያ እግር ኳስ ዜና እና ዝማሬዎች ማዕከልዎ"
+  },
+  "premierLeague": {
+    "title": "የኢትዮጵያ ፕሪሚየር ሊግ",
+    "season": "2025/2026",
+    "teams": 16,
+    "matchesPlayed": 120,
+    "totalMatches": 240,
+    "status": "በሂደት ላይ",
+    "followLeague": "ሊጉው ይከተሉ",
+    "viewAllStats": "ሁሉንም ስታቲስቲክስ ይመልከቱ"
   }
 }

@@ -1,4 +1,3 @@
-
 {
   "nav": {
     "search": "Search",
@@ -20,5 +19,15 @@
   "Home": {
     "title": "Welcome to Pana Sports",
     "description": "Your hub for Ethiopian football news and updates"
+  },
+  "premierLeague": {
+    "title": "Ethiopian Premier League",
+    "season": "2025/2026",
+    "teams": 16,
+    "matchesPlayed": 120,
+    "totalMatches": 240,
+    "status": "In Progress",
+    "followLeague": "Follow League",
+    "viewAllStats": "View All Stats"
   }
 }
