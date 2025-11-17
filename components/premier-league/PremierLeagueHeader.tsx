@@ -13,7 +13,9 @@ import MatchesSection from './MatchesSection';
 import TeamsTable from './TeamsTable';
 import TeamOfTheWeek from './TeamOfTheWeek';
 import NewsSection from './NewsSection';
-import MatchesTab from './MatchesTab'; // Import new MatchesTab component
+import MatchesTab from './MatchesTab';
+import LeagueTableTab from './LeagueTableTab';
+import StatsTab from './StatsTab'; // Import new StatsTab component
 
 export default function PremierLeagueHeader() {
   const t = useTranslations('premierLeague');
@@ -34,9 +36,9 @@ export default function PremierLeagueHeader() {
       {/* League Info Card */}
       <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30 overflow-hidden">
         <CardContent className="p-0">
-          <div className="bg-zinc-900/40 p-6 relative overflow-hidden">
+          <div className="p-6 relative overflow-hidden">
             {/* Background Pattern */}
-            <div className="absolute inset-0 bg-[url('/api/placeholder/800/400')] opacity-10 mix-blend-overlay" />
+            <div className="absolute inset-0  opacity-10 mix-blend-overlay" />
             
             <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div className="space-y-2">
@@ -76,7 +78,7 @@ export default function PremierLeagueHeader() {
 
       {/* Tabs Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-6 bg-zinc-800/30 border-zinc-700/50 p-1 h-auto">
+        <TabsList className="grid w-full grid-cols-6 bg-zinc-800/30 border-zinc-700/50 p-1 h-auto items-center flex ">
           <TabsTrigger 
             value="overview" 
             className={cn(
@@ -108,16 +110,6 @@ export default function PremierLeagueHeader() {
             <span>Table</span>
           </TabsTrigger>
           <TabsTrigger 
-            value="teams" 
-            className={cn(
-              "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
-              "text-xs md:text-sm"
-            )}
-          >
-            <Users className="h-4 w-4" />
-            <span>Teams</span>
-          </TabsTrigger>
-          <TabsTrigger 
             value="stats" 
             className={cn(
               "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
@@ -127,20 +119,10 @@ export default function PremierLeagueHeader() {
             <TrendingUp className="h-4 w-4" />
             <span>Stats</span>
           </TabsTrigger>
-          <TabsTrigger 
-            value="news" 
-            className={cn(
-              "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
-              "text-xs md:text-sm"
-            )}
-          >
-            <Clock className="h-4 w-4" />
-            <span>News</span>
-          </TabsTrigger>
         </TabsList>
         
         {/* Tab Contents */}
-        <TabsContent value="overview" className="mt-6 space-y-6">
+        <TabsContent value="overview" className="mt-6 space-y-6 items-center">
           {/* First Row: Matches Section */}
           <MatchesSection />
           
@@ -166,27 +148,11 @@ export default function PremierLeagueHeader() {
         </TabsContent>
         
         <TabsContent value="table" className="mt-6">
-          <div className="text-center text-muted-foreground py-8">
-            <p>Table content will be added here...</p>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="teams" className="mt-6">
-          <div className="text-center text-muted-foreground py-8">
-            <p>Teams content will be added here...</p>
-          </div>
+          <LeagueTableTab />
         </TabsContent>
         
         <TabsContent value="stats" className="mt-6">
-          <div className="text-center text-muted-foreground py-8">
-            <p>Stats content will be added here...</p>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="news" className="mt-6">
-          <div className="text-center text-muted-foreground py-8">
-            <p>News content will be added here...</p>
-          </div>
+          <StatsTab />
         </TabsContent>
       </Tabs>
     </div>
