@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "search": "ፍለጋ",
+    "news": "ዜና",
+    "aboutUs": "ስለ እኛ",
+    "signIn": "ይግቡ",
+    "signOut": "ይውጡ",
+    "settings": "ቅንብሮች",
+    "premierLeague": "ፕሪሚየር ሊግ",
+    "ethiopianCup": "የኢትዮጵያ ዋንጫ",
+    "higherLeague": "ከፍተኛ ሊግ",
+    "leagueOne": "ሊግ አንድ",
+    "waliasU20PL": "ዋሊያስ ዩ-20 ፒኤል"
+  },
+  "common": {
+    "loading": "በመጫን ላይ...",
+    "error": "ስህተት ተፈጥሯል"
+  },
+  "Home": {
+    "title": "እንኳን ወደ ፓና ስፖርት በደህና መጡ",
+    "description": "የኢትዮጵያ እግር ኳስ ዜና እና ዝማሬዎች ማዕከልዎ"
+  }
+}

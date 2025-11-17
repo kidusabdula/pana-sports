@@ -1,0 +1,24 @@
+
+{
+  "nav": {
+    "search": "Search",
+    "news": "News",
+    "aboutUs": "About Us",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "settings": "Settings",
+    "premierLeague": "Premier League",
+    "ethiopianCup": "Ethiopian Cup",
+    "higherLeague": "Higher League",
+    "leagueOne": "League One",
+    "waliasU20PL": "Walias U-20 PL"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred"
+  },
+  "Home": {
+    "title": "Welcome to Pana Sports",
+    "description": "Your hub for Ethiopian football news and updates"
+  }
+}

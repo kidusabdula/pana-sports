@@ -148,4 +148,27 @@
     background: oklch(var(--primary));
     border-radius: 1px;
   }
+  
+  /* Glassmorphic zinc backgrounds */
+  .glass-zinc {
+    background: rgba(24, 24, 27, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(63, 63, 70, 0.3);
+  }
+  
+  .glass-zinc-light {
+    background: rgba(39, 39, 42, 0.3);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(63, 63, 70, 0.2);
+  }
+
+  /* Hide scrollbar for elements while keeping them scrollable */
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera*/
+  }
 }
