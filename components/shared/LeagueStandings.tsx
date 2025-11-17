@@ -4,7 +4,9 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, ChevronRight, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function LeagueStandings() {
   const [currentLeagueIndex, setCurrentLeagueIndex] = useState(0);
@@ -12,6 +14,7 @@ export default function LeagueStandings() {
   const leagues = [
     {
       name: "Premier League",
+      icon: <Trophy className="h-4 w-4" />,
       teams: [
         { team: 'Saint George', played: 10, goalDiff: 12, points: 28, position: 1, trend: 'up' },
         { team: 'Fasil Kenema', played: 10, goalDiff: 8, points: 25, position: 2, trend: 'up' },
@@ -22,6 +25,7 @@ export default function LeagueStandings() {
     },
     {
       name: "Higher League",
+      icon: <Trophy className="h-4 w-4" />,
       teams: [
         { team: 'Ethiopia Bunna', played: 10, goalDiff: 7, points: 22, position: 1, trend: 'up' },
         { team: 'Jimma Aba Jifar', played: 10, goalDiff: 5, points: 20, position: 2, trend: 'up' },
@@ -32,6 +36,7 @@ export default function LeagueStandings() {
     },
     {
       name: "League One",
+      icon: <Trophy className="h-4 w-4" />,
       teams: [
         { team: 'Wolkite Ketema', played: 10, goalDiff: 9, points: 24, position: 1, trend: 'up' },
         { team: 'Bahir Dar Kenema', played: 10, goalDiff: 6, points: 21, position: 2, trend: 'up' },
@@ -53,18 +58,18 @@ export default function LeagueStandings() {
   };
 
   return (
-    <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30 h-full">
+    <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30 overflow-hidden group hover:shadow-xl hover:shadow-primary/10 transition-all duration-500">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg text-pana-gradient flex items-center gap-2">
-            <Trophy className="h-4 w-4" />
+          <CardTitle className="text-lg bg-gradient-to-r from-foreground via-foreground/90 to-foreground/80 bg-clip-text text-transparent flex items-center gap-2">
+            <Trophy className="h-4 w-4 text-primary" />
             League Standings
           </CardTitle>
           <div className="flex items-center gap-1">
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-8 w-8 p-0 text-muted-foreground hover:text-primary" 
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-primary hover:bg-zinc-800/40 transition-all duration-300" 
               onClick={handlePreviousLeague}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -72,18 +77,23 @@ export default function LeagueStandings() {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-8 w-8 p-0 text-muted-foreground hover:text-primary" 
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-primary hover:bg-zinc-800/40 transition-all duration-300" 
               onClick={handleNextLeague}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
-        <div className="text-sm text-muted-foreground">{currentLeague.name}</div>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="bg-zinc-700/50 text-zinc-300 border-zinc-600/50">
+            {currentLeague.icon}
+            <span className="ml-1">{currentLeague.name}</span>
+          </Badge>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="bg-zinc-800/30 rounded-lg p-2">
-          <div className="grid grid-cols-4 gap-2 text-xs font-medium text-muted-foreground mb-1">
+      <CardContent className="space-y-3">
+        <div className="bg-zinc-800/30 rounded-lg p-3">
+          <div className="grid grid-cols-4 gap-2 text-xs font-medium text-muted-foreground mb-2">
             <div>Pos</div>
             <div>Team</div>
             <div className="text-center">GD</div>
@@ -91,10 +101,10 @@ export default function LeagueStandings() {
           </div>
           
           {currentLeague.teams.map((team) => (
-            <div key={team.position} className="grid grid-cols-4 gap-2 text-xs py-1.5 border-b border-zinc-700/30 last:border-0">
+            <div key={team.position} className="grid grid-cols-4 gap-2 text-xs py-1.5 border-b border-zinc-700/30 last:border-0 hover:bg-zinc-800/20 transition-colors">
               <div className="flex items-center gap-1">
                 <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
-                  team.position === 1 ? 'bg-primary/30' : 'bg-zinc-700/50'
+                  team.position === 1 ? 'bg-primary/30 text-primary' : 'bg-zinc-700/50'
                 }`}>
                   {team.position}
                 </div>
@@ -115,15 +125,16 @@ export default function LeagueStandings() {
           {leagues.map((_, index) => (
             <div 
               key={index}
-              className={`h-1.5 w-1.5 rounded-full ${
-                index === currentLeagueIndex ? 'bg-primary' : 'bg-zinc-700'
+              className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${
+                index === currentLeagueIndex ? 'bg-primary w-4' : 'bg-zinc-700'
               }`}
             />
           ))}
         </div>
 
-        <Button variant="outline" className="w-full bg-zinc-800/30 border-zinc-700/30 hover:bg-zinc-800/50">
+        <Button variant="outline" className="w-full bg-zinc-800/30 border-zinc-700/30 hover:bg-zinc-800/50 group">
           View Full Table
+          <ChevronRight className="ml-2 h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
         </Button>
       </CardContent>
     </Card>

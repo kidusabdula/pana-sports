@@ -1,12 +1,25 @@
 // components/shared/NewsSection.tsx
+"use client"
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, ExternalLink, TrendingUp, MessageCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Clock, ExternalLink, TrendingUp, MessageCircle, Heart, Eye } from 'lucide-react';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 export default function NewsSection() {
   const t = useTranslations('Home');
+  const [favorites, setFavorites] = useState<number[]>([]);
+
+  const toggleFavorite = (id: number) => {
+    setFavorites(prev => 
+      prev.includes(id) 
+        ? prev.filter(item => item !== id)
+        : [...prev, id]
+    );
+  };
 
   // Sample news data
   const newsItems = [
@@ -19,7 +32,8 @@ export default function NewsSection() {
       source: "Ethiopian Football Federation",
       category: "Match Report",
       comments: 24,
-      trending: true
+      trending: true,
+      views: 1250
     },
     {
       id: 2,
@@ -30,7 +44,8 @@ export default function NewsSection() {
       source: "Ethio Sports",
       category: "National Team",
       comments: 18,
-      trending: false
+      trending: false,
+      views: 980
     },
     {
       id: 3,
@@ -41,7 +56,8 @@ export default function NewsSection() {
       source: "Zehabesha Sports",
       category: "Transfer News",
       comments: 42,
-      trending: true
+      trending: true,
+      views: 2150
     },
     {
       id: 4,
@@ -52,7 +68,8 @@ export default function NewsSection() {
       source: "Soccer Ethiopia",
       category: "Analysis",
       comments: 15,
-      trending: false
+      trending: false,
+      views: 750
     },
     {
       id: 5,
@@ -63,15 +80,16 @@ export default function NewsSection() {
       source: "Ethiopian Football Federation",
       category: "Development",
       comments: 8,
-      trending: false
+      trending: false,
+      views: 520
     }
   ];
 
   return (
-    <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30 h-full">
+    <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30 overflow-hidden group hover:shadow-xl hover:shadow-primary/10 transition-all duration-500">
       <CardHeader className="pb-3 flex flex-row items-center justify-between">
-        <CardTitle className="text-lg text-pana-gradient flex items-center gap-2">
-          <TrendingUp className="h-4 w-4" />
+        <CardTitle className="text-lg bg-gradient-to-r from-foreground via-foreground/90 to-foreground/80 bg-clip-text text-transparent flex items-center gap-2">
+          <TrendingUp className="h-4 w-4 text-primary" />
           Latest News
         </CardTitle>
         <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 h-8 px-2">
@@ -80,27 +98,29 @@ export default function NewsSection() {
       </CardHeader>
       <CardContent className="space-y-3">
         {newsItems.map((item) => (
-          <div key={item.id} className="border-b border-zinc-700/30 pb-3 last:border-0">
+          <div key={item.id} className="border-b border-zinc-700/30 pb-3 last:border-0 group/news">
             <div className="flex gap-3">
               <div className="relative w-16 h-16 flex-shrink-0 rounded-md overflow-hidden">
                 <Image
                   src={item.image}
                   alt={item.title}
                   fill
-                  className="object-cover"
+                  className="object-cover transition-transform duration-500 group-hover/news:scale-110"
                 />
               </div>
               <div className="flex-1 space-y-1">
                 <div className="flex items-center gap-2">
                   {item.trending && (
-                    <div className="bg-primary/20 text-primary text-xs px-1.5 py-0.5 rounded flex items-center gap-1">
-                      <TrendingUp className="h-3 w-3" />
-                      <span>Trending</span>
-                    </div>
+                    <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">
+                      <TrendingUp className="h-3 w-3 mr-1" />
+                      Trending
+                    </Badge>
                   )}
-                  <div className="text-xs text-muted-foreground">{item.category}</div>
+                  <Badge variant="secondary" className="bg-zinc-700/50 text-zinc-300 border-zinc-600/50 text-xs">
+                    {item.category}
+                  </Badge>
                 </div>
-                <h3 className="font-medium text-sm leading-tight line-clamp-2 hover:text-primary cursor-pointer">
+                <h3 className="font-medium text-sm leading-tight line-clamp-2 hover:text-primary cursor-pointer transition-colors">
                   {item.title}
                 </h3>
                 <p className="text-xs text-muted-foreground line-clamp-2">
@@ -113,10 +133,26 @@ export default function NewsSection() {
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-1">
+                      <Eye className="h-3 w-3" />
+                      <span>{item.views}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
                       <MessageCircle className="h-3 w-3" />
                       <span>{item.comments}</span>
                     </div>
-                    <span>{item.source}</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={cn(
+                        "h-5 w-5 p-0 rounded transition-all duration-300",
+                        favorites.includes(item.id) 
+                          ? "text-red-500 bg-red-500/10 hover:bg-red-500/20" 
+                          : "text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
+                      )}
+                      onClick={() => toggleFavorite(item.id)}
+                    >
+                      <Heart className={cn("h-3 w-3 transition-all", favorites.includes(item.id) && "fill-current")} />
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -124,8 +160,9 @@ export default function NewsSection() {
           </div>
         ))}
         
-        <Button variant="outline" className="w-full mt-2 bg-zinc-800/30 border-zinc-700/30 hover:bg-zinc-800/50">
+        <Button variant="outline" className="w-full mt-2 bg-zinc-800/30 border-zinc-700/30 hover:bg-zinc-800/50 group">
           Load More News
+          <ExternalLink className="ml-2 h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
         </Button>
       </CardContent>
     </Card>

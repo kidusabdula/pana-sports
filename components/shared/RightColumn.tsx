@@ -1,3 +1,4 @@
+// components/shared/RightColumn.tsx
 import { useTranslations } from 'next-intl';
 import NewsSection from './NewsSection';
 import LeagueStandings from './LeagueStandings';
@@ -7,7 +8,7 @@ export default function RightColumn() {
   const t = useTranslations('Home');
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="space-y-6">
       {/* News Section - Takes natural height */}
       <NewsSection />
       

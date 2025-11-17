@@ -1,4 +1,4 @@
-// components/premier-league/PremierLeagueHeader.tsx
+// components/ethiopian-cup/EthiopianCupHeader.tsx
 "use client";
 
 import { useState } from 'react';
@@ -9,36 +9,40 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Trophy, Calendar, BarChart3, Users, TrendingUp, Clock, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import MatchesSection from './MatchesSection';
-import TeamsTable from './TeamsTable';
-import TeamOfTheWeek from './TeamOfTheWeek';
-import NewsSection from './NewsSection';
-import MatchesTab from './MatchesTab';
-import LeagueTableTab from './LeagueTableTab';
-import StatsTab from './StatsTab'; // Import new StatsTab component
+import MatchesSection from '../premier-league/MatchesSection';
+import TeamsTable from '../premier-league/TeamsTable';
+import TeamOfTheWeek from '../premier-league/TeamOfTheWeek';
+import NewsSection from '../premier-league/NewsSection';
+import MatchesTab from '../premier-league/MatchesTab';
+import LeagueTableTab from '../premier-league/LeagueTableTab';
+import StatsTab from '../premier-league/StatsTab';
 
-export default function PremierLeagueHeader() {
-  const t = useTranslations('premierLeague');
+export default function EthiopianCupHeader() {
+  const t = useTranslations('ethiopianCup');
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Sample league data
-  const leagueInfo = {
-    name: "Ethiopian Premier League",
+  // Sample Ethiopian Cup data
+  const cupInfo = {
+    name: "Ethiopian Cup",
     season: "2025/2026",
-    teams: 16,
-    matchesPlayed: 120,
-    totalMatches: 240,
-    status: "In Progress"
+    teams: 32,
+    matchesPlayed: 60,
+    totalMatches: 120,
+    status: "In Progress",
+    currentRound: "Round of 16",
+    defendingChampion: "Saint George",
+    topScorer: "Getaneh Kebede",
+    goals: 12
   };
 
   return (
     <div className="space-y-6">
-      {/* League Info Card */}
+      {/* Cup Info Card */}
       <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30 overflow-hidden">
         <CardContent className="p-0">
-          <div className="p-6 relative overflow-hidden">
+          <div className=" p-6 relative overflow-hidden">
             {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-10 mix-blend-overlay" />
+            <div className="absolute inset-0  opacity-10 mix-blend-overlay" />
             
             <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div className="space-y-2">
@@ -47,28 +51,28 @@ export default function PremierLeagueHeader() {
                     <Trophy className="h-8 w-8 text-primary" />
                   </div>
                   <div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-foreground">{leagueInfo.name}</h1>
-                    <p className="text-muted-foreground">Season {leagueInfo.season}</p>
+                    <h1 className="text-2xl md:text-3xl font-bold text-foreground">{cupInfo.name}</h1>
+                    <p className="text-muted-foreground">Season {cupInfo.season}</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-4">
                   <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
-                    {leagueInfo.status}
+                    {cupInfo.status}
                   </Badge>
                   <div className="text-sm text-muted-foreground">
-                    {leagueInfo.matchesPlayed} of {leagueInfo.totalMatches} matches played
+                    {cupInfo.matchesPlayed} of {cupInfo.totalMatches} matches played
                   </div>
                 </div>
               </div>
               
               <div className="flex items-center gap-2 mt-4 md:mt-0">
                 <Button className="btn-pana">
-                  Follow League
+                  {t('followCup')}
                 </Button>
                 <Button variant="outline" className="bg-zinc-800/40 border-zinc-700/50 hover:bg-zinc-800/60">
                   <ChevronRight className="h-4 w-4 mr-1" />
-                  View All Stats
+                  {t('viewAllStats')}
                 </Button>
               </div>
             </div>
@@ -78,7 +82,7 @@ export default function PremierLeagueHeader() {
 
       {/* Tabs Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-6 bg-zinc-800/30 border-zinc-700/50 p-1 h-auto items-center flex ">
+        <TabsList className="grid w-full grid-cols-6 bg-zinc-800/30 border-zinc-700/50 p-1 h-auto items-center flex">
           <TabsTrigger 
             value="overview" 
             className={cn(
@@ -87,7 +91,7 @@ export default function PremierLeagueHeader() {
             )}
           >
             <BarChart3 className="h-4 w-4" />
-            <span>Overview</span>
+            <span>{t('overview')}</span>
           </TabsTrigger>
           <TabsTrigger 
             value="matches" 
@@ -97,7 +101,7 @@ export default function PremierLeagueHeader() {
             )}
           >
             <Calendar className="h-4 w-4" />
-            <span>Matches</span>
+            <span>{t('matches')}</span>
           </TabsTrigger>
           <TabsTrigger 
             value="table" 
@@ -107,7 +111,7 @@ export default function PremierLeagueHeader() {
             )}
           >
             <Trophy className="h-4 w-4" />
-            <span>Table</span>
+            <span>{t('table')}</span>
           </TabsTrigger>
           <TabsTrigger 
             value="stats" 
@@ -117,12 +121,12 @@ export default function PremierLeagueHeader() {
             )}
           >
             <TrendingUp className="h-4 w-4" />
-            <span>Stats</span>
+            <span>{t('stats')}</span>
           </TabsTrigger>
         </TabsList>
         
         {/* Tab Contents */}
-        <TabsContent value="overview" className="mt-6 space-y-6 items-center">
+        <TabsContent value="overview" className="mt-6 space-y-6">
           {/* First Row: Matches Section */}
           <MatchesSection />
           
@@ -151,8 +155,20 @@ export default function PremierLeagueHeader() {
           <LeagueTableTab />
         </TabsContent>
         
+        <TabsContent value="teams" className="mt-6">
+          <div className="text-center text-muted-foreground py-8">
+            <p>{t('teamsContent')}</p>
+          </div>
+        </TabsContent>
+        
         <TabsContent value="stats" className="mt-6">
           <StatsTab />
+        </TabsContent>
+        
+        <TabsContent value="news" className="mt-6">
+          <div className="text-center text-muted-foreground py-8">
+            <p>{t('newsContent')}</p>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
