@@ -1,3 +1,4 @@
+// components/premier-league/PremierLeagueHeader.tsx
 "use client";
 
 import { useState } from 'react';
@@ -8,6 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Trophy, Calendar, BarChart3, Users, TrendingUp, Clock, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import MatchesSection from './MatchesSection';
+import TeamsTable from './TeamsTable';
+import TeamOfTheWeek from './TeamOfTheWeek';
+import NewsSection from './NewsSection';
+import MatchesTab from './MatchesTab'; // Import new MatchesTab component
 
 export default function PremierLeagueHeader() {
   const t = useTranslations('premierLeague');
@@ -24,150 +30,165 @@ export default function PremierLeagueHeader() {
   };
 
   return (
-    <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30 overflow-hidden">
-      <CardContent className="p-0">
-        {/* League Info Section */}
-        <div className="bg-zinc-900/40 p-6 relative overflow-hidden">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 bg-[url('/api/placeholder/800/400')] opacity-10 mix-blend-overlay" />
-          
-          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-lg">
-                  <Trophy className="h-8 w-8 text-primary-foreground" />
+    <div className="space-y-6">
+      {/* League Info Card */}
+      <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30 overflow-hidden">
+        <CardContent className="p-0">
+          <div className="bg-zinc-900/40 p-6 relative overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-[url('/api/placeholder/800/400')] opacity-10 mix-blend-overlay" />
+            
+            <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-16 h-16 bg-zinc-700/50 rounded-xl flex items-center justify-center shadow-lg">
+                    <Trophy className="h-8 w-8 text-primary" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl md:text-3xl font-bold text-foreground">{leagueInfo.name}</h1>
+                    <p className="text-muted-foreground">Season {leagueInfo.season}</p>
+                  </div>
                 </div>
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground">{leagueInfo.name}</h1>
-                  <p className="text-muted-foreground">Season {leagueInfo.season}</p>
+                
+                <div className="flex items-center gap-4">
+                  <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
+                    {leagueInfo.status}
+                  </Badge>
+                  <div className="text-sm text-muted-foreground">
+                    {leagueInfo.matchesPlayed} of {leagueInfo.totalMatches} matches played
+                  </div>
                 </div>
               </div>
               
-              <div className="flex items-center gap-4">
-                <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
-                  {leagueInfo.status}
-                </Badge>
-                <div className="text-sm text-muted-foreground">
-                  {leagueInfo.matchesPlayed} of {leagueInfo.totalMatches} matches played
-                </div>
+              <div className="flex items-center gap-2 mt-4 md:mt-0">
+                <Button className="btn-pana">
+                  Follow League
+                </Button>
+                <Button variant="outline" className="bg-zinc-800/40 border-zinc-700/50 hover:bg-zinc-800/60">
+                  <ChevronRight className="h-4 w-4 mr-1" />
+                  View All Stats
+                </Button>
               </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tabs Navigation */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-6 bg-zinc-800/30 border-zinc-700/50 p-1 h-auto">
+          <TabsTrigger 
+            value="overview" 
+            className={cn(
+              "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
+              "text-xs md:text-sm"
+            )}
+          >
+            <BarChart3 className="h-4 w-4" />
+            <span>Overview</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="matches" 
+            className={cn(
+              "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
+              "text-xs md:text-sm"
+            )}
+          >
+            <Calendar className="h-4 w-4" />
+            <span>Matches</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="table" 
+            className={cn(
+              "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
+              "text-xs md:text-sm"
+            )}
+          >
+            <Trophy className="h-4 w-4" />
+            <span>Table</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="teams" 
+            className={cn(
+              "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
+              "text-xs md:text-sm"
+            )}
+          >
+            <Users className="h-4 w-4" />
+            <span>Teams</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="stats" 
+            className={cn(
+              "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
+              "text-xs md:text-sm"
+            )}
+          >
+            <TrendingUp className="h-4 w-4" />
+            <span>Stats</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="news" 
+            className={cn(
+              "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
+              "text-xs md:text-sm"
+            )}
+          >
+            <Clock className="h-4 w-4" />
+            <span>News</span>
+          </TabsTrigger>
+        </TabsList>
+        
+        {/* Tab Contents */}
+        <TabsContent value="overview" className="mt-6 space-y-6">
+          {/* First Row: Matches Section */}
+          <MatchesSection />
+          
+          {/* Second Row: Teams Table and Team of the Week */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Teams Table - Takes 2 columns (65%) */}
+            <div className="lg:col-span-2">
+              <TeamsTable />
+            </div>
             
-            <div className="flex items-center gap-2 mt-4 md:mt-0">
-              <Button className="btn-pana">
-                Follow League
-              </Button>
-              <Button variant="outline" className="bg-zinc-800/40 border-zinc-700/50 hover:bg-zinc-800/60">
-                <ChevronRight className="h-4 w-4 mr-1" />
-                View All Stats
-              </Button>
+            {/* Team of the Week - Takes 1 column (35%) */}
+            <div className="lg:col-span-1">
+              <TeamOfTheWeek />
             </div>
           </div>
-        </div>
-
-        {/* Tabs Navigation */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 bg-zinc-800/30 border-zinc-700/50 p-1 h-auto">
-            <TabsTrigger 
-              value="overview" 
-              className={cn(
-                "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
-                "text-xs md:text-sm"
-              )}
-            >
-              <BarChart3 className="h-4 w-4" />
-              <span>Overview</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="matches" 
-              className={cn(
-                "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
-                "text-xs md:text-sm"
-              )}
-            >
-              <Calendar className="h-4 w-4" />
-              <span>Matches</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="table" 
-              className={cn(
-                "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
-                "text-xs md:text-sm"
-              )}
-            >
-              <Trophy className="h-4 w-4" />
-              <span>Table</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="teams" 
-              className={cn(
-                "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
-                "text-xs md:text-sm"
-              )}
-            >
-              <Users className="h-4 w-4" />
-              <span>Teams</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="stats" 
-              className={cn(
-                "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
-                "text-xs md:text-sm"
-              )}
-            >
-              <TrendingUp className="h-4 w-4" />
-              <span>Stats</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="news" 
-              className={cn(
-                "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
-                "text-xs md:text-sm"
-              )}
-            >
-              <Clock className="h-4 w-4" />
-              <span>News</span>
-            </TabsTrigger>
-          </TabsList>
           
-          {/* Tab Contents - Placeholder for now */}
-          <TabsContent value="overview" className="mt-6">
-            <div className="text-center text-muted-foreground py-8">
-              <p>Overview content will be added here...</p>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="matches" className="mt-6">
-            <div className="text-center text-muted-foreground py-8">
-              <p>Matches content will be added here...</p>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="table" className="mt-6">
-            <div className="text-center text-muted-foreground py-8">
-              <p>Table content will be added here...</p>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="teams" className="mt-6">
-            <div className="text-center text-muted-foreground py-8">
-              <p>Teams content will be added here...</p>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="stats" className="mt-6">
-            <div className="text-center text-muted-foreground py-8">
-              <p>Stats content will be added here...</p>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="news" className="mt-6">
-            <div className="text-center text-muted-foreground py-8">
-              <p>News content will be added here...</p>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+          {/* Third Row: News Section */}
+          <NewsSection />
+        </TabsContent>
+        
+        <TabsContent value="matches" className="mt-6">
+          <MatchesTab />
+        </TabsContent>
+        
+        <TabsContent value="table" className="mt-6">
+          <div className="text-center text-muted-foreground py-8">
+            <p>Table content will be added here...</p>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="teams" className="mt-6">
+          <div className="text-center text-muted-foreground py-8">
+            <p>Teams content will be added here...</p>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="stats" className="mt-6">
+          <div className="text-center text-muted-foreground py-8">
+            <p>Stats content will be added here...</p>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="news" className="mt-6">
+          <div className="text-center text-muted-foreground py-8">
+            <p>News content will be added here...</p>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }
