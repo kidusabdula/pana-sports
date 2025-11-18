@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, Calendar, BarChart3, Users, TrendingUp, Clock, ChevronRight } from 'lucide-react';
+import { Trophy, Calendar, BarChart3, Users, TrendingUp, Clock, ChevronRight, Shield, Star, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import MatchesSection from '../premier-league/MatchesSection';
 import TeamsTable from '../premier-league/TeamsTable';
@@ -30,15 +30,18 @@ export default function WaliasU20Header() {
     totalMatches: 80,
     status: "In Progress",
     currentRound: "Round of 8",
-    defendingChampion: "Sidama City"
+    defendingChampion: "Sidama City",
+    topScorer: "Mekonen Getachew",
+    goals: 10,
+    bestYoungPlayer: "Samuel Alemu"
   };
 
   return (
     <div className="space-y-6">
       {/* League Info Card */}
-      <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30 overflow-hidden">
+      <Card className="backdrop-blur-sm border-zinc-700/30 overflow-hidden">
         <CardContent className="p-0">
-          <div className="bg-zinc-800/40 p-6 relative overflow-hidden">
+          <div className="p-6 relative overflow-hidden">
             {/* Background Pattern */}
             <div className="absolute inset-0 bg-[url('/api/placeholder/800/400')] opacity-10 mix-blend-overlay" />
             
@@ -46,7 +49,7 @@ export default function WaliasU20Header() {
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
                   <div className="w-16 h-16 bg-zinc-700/50 rounded-xl flex items-center justify-center shadow-lg">
-                        <Trophy className="h-8 w-8 text-primary" />
+                    <User className="h-8 w-8 text-primary" />
                   </div>
                   <div>
                     <h1 className="text-2xl md:text-3xl font-bold text-foreground">{leagueInfo.name}</h1>
@@ -77,6 +80,49 @@ export default function WaliasU20Header() {
           </div>
         </CardContent>
       </Card>
+
+      {/* League Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">{t('currentRound')}</p>
+              <p className="text-lg font-semibold">{t('roundOf8')}</p>
+            </div>
+            <Trophy className="h-8 w-8 text-primary/70" />
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">{t('defendingChampion')}</p>
+              <p className="text-lg font-semibold">{t('sidamaCity')}</p>
+            </div>
+            <Shield className="h-8 w-8 text-primary/70" />
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">{t('topScorer')}</p>
+              <p className="text-lg font-semibold">{leagueInfo.topScorer} ({leagueInfo.goals})</p>
+            </div>
+            <Star className="h-8 w-8 text-primary/70" />
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">{t('bestYoungPlayer')}</p>
+              <p className="text-lg font-semibold">{leagueInfo.bestYoungPlayer}</p>
+            </div>
+            <User className="h-8 w-8 text-primary/70" />
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Tabs Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -112,16 +158,6 @@ export default function WaliasU20Header() {
             <span>{t('table')}</span>
           </TabsTrigger>
           <TabsTrigger 
-            value="teams" 
-            className={cn(
-              "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
-              "text-xs md:text-sm"
-            )}
-          >
-            <Users className="h-4 w-4" />
-            <span>{t('teams')}</span>
-          </TabsTrigger>
-          <TabsTrigger 
             value="stats" 
             className={cn(
               "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
@@ -130,16 +166,6 @@ export default function WaliasU20Header() {
           >
             <TrendingUp className="h-4 w-4" />
             <span>{t('stats')}</span>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="news" 
-            className={cn(
-              "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
-              "text-xs md:text-sm"
-            )}
-          >
-            <Clock className="h-4 w-4" />
-            <span>{t('news')}</span>
           </TabsTrigger>
         </TabsList>
         
@@ -177,7 +203,7 @@ export default function WaliasU20Header() {
           <div className="text-center text-muted-foreground py-8">
             <h2 className="text-2xl font-bold mb-4">{t('title')}</h2>
             <p className="text-lg mb-2">{t('teams')}: {leagueInfo.teams}</p>
-            <p className="text-lg mb-2">{t('matchesPlayed')}: {leagueInfo.matchesPlayed}/{leagueInfo.totalMatches}</p>
+            <p className="text-lg mb-2">{t('matchesPlayedLabel')}: {leagueInfo.matchesPlayed}/{leagueInfo.totalMatches}</p>
             <p className="text-lg">{t('currentRound')}: {t('roundOf8')}</p>
             <p className="text-lg mb-4">{t('defendingChampion')}: {t('sidamaCity')}</p>
           </div>

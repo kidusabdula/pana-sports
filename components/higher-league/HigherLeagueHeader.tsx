@@ -36,9 +36,9 @@ export default function HigherLeagueHeader() {
   return (
     <div className="space-y-6">
       {/* League Info Card */}
-      <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30 overflow-hidden">
+      <Card className="backdrop-blur-sm border-zinc-700/30 overflow-hidden">
         <CardContent className="p-0">
-          <div className="bg-zinc-800/40 p-6 relative overflow-hidden">
+          <div className="p-6 relative overflow-hidden">
             {/* Background Pattern */}
             <div className="absolute inset-0 bg-[url('/api/placeholder/800/400')] opacity-10 mix-blend-overlay" />
             
