@@ -2,34 +2,58 @@
 "use client";
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  Filter, 
-  ChevronLeft, 
-  ChevronRight, 
-  Eye, 
-  Users, 
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Users,
   Trophy,
   X,
-  Play
+  MapPin
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+type Team = {
+  name: string;
+  logo: string;
+  shortName: string;
+};
+
+type MatchEvent = {
+  minute: number;
+  team: "home" | "away";
+  type: "goal" | "card";
+  player: string;
+};
+
+type Match = {
+  id: number;
+  homeTeam: Team;
+  awayTeam: Team;
+  homeScore: number | null;
+  awayScore: number | null;
+  date: string;
+  time: string;
+  status: "FT" | "LIVE" | "UPCOMING";
+  venue: string;
+  matchday: number;
+  attendance?: string;
+  highlights?: boolean;
+  matchEvents?: MatchEvent[];
+  broadcast?: string;
+};
 
 export default function MatchesTab() {
   const [activeTab, setActiveTab] = useState("fixtures");
   const [currentMatchday, setCurrentMatchday] = useState(11);
-  const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedMatch, setSelectedMatch] = useState<number | null>(null);
 
   // Sample match data
-  const recentMatches = [
+  const recentMatches: Match[] = [
     {
       id: 1,
       homeTeam: { name: "Saint George", logo: "/api/placeholder/60/60", shortName: "STG" },
@@ -108,7 +132,7 @@ export default function MatchesTab() {
     }
   ];
 
-  const upcomingMatches = [
+  const upcomingMatches: Match[] = [
     {
       id: 5,
       homeTeam: { name: "Ethiopia Bunna", logo: "/api/placeholder/60/60", shortName: "ETH" },
@@ -163,7 +187,7 @@ export default function MatchesTab() {
     }
   ];
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: Match['status']) => {
     switch (status) {
       case "FT": return "bg-green-500/20 text-green-400 border-green-500/30";
       case "LIVE": return "bg-red-500/20 text-red-400 border-red-500/30 animate-pulse";
@@ -190,7 +214,7 @@ export default function MatchesTab() {
   };
 
   // Mobile-optimized Match Card Component
-  const MatchCard = ({ match, viewType }: { match: any; viewType: string }) => {
+  const MatchCard = ({ match, viewType }: { match: Match; viewType: string }) => {
     const isResult = viewType === "results";
     
     return (
@@ -212,6 +236,7 @@ export default function MatchesTab() {
                 variant="outline" 
                 size="sm"
                 className="h-8 w-8 sm:h-10 sm:w-10 bg-zinc-800/40 border-zinc-700/50 hover:bg-zinc-800/60"
+                onClick={() => setSelectedMatch(match.id)}
               >
                 <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
@@ -262,17 +287,17 @@ export default function MatchesTab() {
           </div>
           
           {/* Match Events - Mobile Optimized */}
-          {match.matchEvents && (
+          {match.matchEvents && ( // Check if matchEvents exists
             <div className="mt-3 sm:mt-4 bg-zinc-800/30 rounded-lg p-2 sm:p-3">
               <div className="text-xs text-muted-foreground font-medium mb-1 sm:mb-2">Match Events</div>
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-1 sm:gap-2">
-                {match.matchEvents.slice(0, isResult ? 4 : 2).map((event, index) => (
+                {match.matchEvents.slice(0, isResult ? 4 : 2).map((event: MatchEvent, index: number) => (
                   <div key={index} className="text-xs text-foreground/80 text-center">
                     <div className={cn(
                       "inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full",
                       event.team === "home" ? "bg-green-500" : "bg-red-500"
                     )}>
-                      <span className="text-white font-bold">{event.minute}'</span>
+                      <span className="text-white font-bold">{event.minute}&apos;</span>
                     </div>
                     <div className="mt-1 text-center text-xs">
                       {event.player}
@@ -294,12 +319,12 @@ export default function MatchesTab() {
             <div className="text-center">
               Matchday {match.matchday}
             </div>
-            {match.broadcast && (
+            {match.broadcast && ( // Conditionally render broadcast
               <div className="text-center sm:text-right">
                 {match.broadcast}
               </div>
             )}
-            {match.attendance && (
+            {match.attendance && ( // Conditionally render attendance
               <div className="flex items-center gap-1">
                 <Users className="h-3 w-3" />
                 <span>{match.attendance}</span>
@@ -486,18 +511,18 @@ export default function MatchesTab() {
                     </div>
                   </div>
                   
-                  {match.matchEvents && (
+                  {match.matchEvents && ( // Conditionally render matchEvents
                     <div className="space-y-3">
                       <h4 className="text-sm font-medium text-muted-foreground">Match Events</h4>
                       <div className="bg-zinc-800/30 rounded-xl p-3 sm:p-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-                          {match.matchEvents.map((event, index) => (
+                          {match.matchEvents.map((event: MatchEvent, index: number) => (
                             <div key={index} className="flex items-center gap-2">
                               <div className={cn(
                                 "flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full",
                                 event.team === "home" ? "bg-green-500" : "bg-red-500"
                               )}>
-                                <span className="text-white font-bold">{event.minute}'</span>
+                                <span className="text-white font-bold">{event.minute}&apos;</span>
                               </div>
                               <div>
                                 <div className="text-sm font-medium">{event.player}</div>
