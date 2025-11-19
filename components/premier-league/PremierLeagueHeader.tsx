@@ -15,7 +15,8 @@ import TeamOfTheWeek from './TeamOfTheWeek';
 import NewsSection from './NewsSection';
 import MatchesTab from './MatchesTab';
 import LeagueTableTab from './LeagueTableTab';
-import StatsTab from './StatsTab'; // Import new StatsTab component
+import StatsTab from './StatsTab';
+import TeamsTab from './TeamsTab'; // Import new TeamsTab component
 
 export default function PremierLeagueHeader() {
   const t = useTranslations('premierLeague');
@@ -78,7 +79,7 @@ export default function PremierLeagueHeader() {
 
       {/* Tabs Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-6 bg-zinc-800/30 border-zinc-700/50 p-1 h-auto items-center flex ">
+        <TabsList className="grid w-full grid-cols-5 bg-zinc-800/30 border-zinc-700/50 p-1 h-auto items-center flex">
           <TabsTrigger 
             value="overview" 
             className={cn(
@@ -108,6 +109,16 @@ export default function PremierLeagueHeader() {
           >
             <Trophy className="h-4 w-4" />
             <span>Table</span>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="teams" 
+            className={cn(
+              "flex flex-col items-center gap-1 py-3 data-[state=active]:bg-zinc-700/50",
+              "text-xs md:text-sm"
+            )}
+          >
+            <Users className="h-4 w-4" />
+            <span>Teams</span>
           </TabsTrigger>
           <TabsTrigger 
             value="stats" 
@@ -149,6 +160,10 @@ export default function PremierLeagueHeader() {
         
         <TabsContent value="table" className="mt-6">
           <LeagueTableTab />
+        </TabsContent>
+        
+        <TabsContent value="teams" className="mt-6">
+          <TeamsTab />
         </TabsContent>
         
         <TabsContent value="stats" className="mt-6">

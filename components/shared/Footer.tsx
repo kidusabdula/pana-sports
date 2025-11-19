@@ -137,16 +137,16 @@ export default function Footer() {
             </ul>
             
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Get the App</h3>
+              {/* <h3 className="text-lg font-semibold text-foreground">Get the App</h3> */}
               <div className="flex space-x-2">
-                <Button variant="outline" className="flex items-center gap-2 bg-zinc-800/40 border-zinc-700/50 hover:bg-zinc-800/60">
+                {/* <Button variant="outline" className="flex items-center gap-2 bg-zinc-800/40 border-zinc-700/50 hover:bg-zinc-800/60">
                   <Apple className="h-4 w-4" />
                   <span className="text-xs">App Store</span>
                 </Button>
                 <Button variant="outline" className="flex items-center gap-2 bg-zinc-800/40 border-zinc-700/50 hover:bg-zinc-800/60">
                   <Smartphone className="h-4 w-4" />
                   <span className="text-xs">Google Play</span>
-                </Button>
+                </Button> */}
               </div>
             </div>
           </div>
