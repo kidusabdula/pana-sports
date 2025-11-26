@@ -86,7 +86,7 @@ export default function StatsTab() {
   const [showFilters, setShowFilters] = useState(false);
 
   // Enhanced player stats data with actual player images
-  const playerStats: {
+  const playerStats = {
     goals: [
       { 
         rank: 1, 
@@ -292,7 +292,7 @@ export default function StatsTab() {
       },
       { 
         rank: 4, 
-        name: "Samuel Aregawi", 
+        name: "Abduljelil Hassen", 
         team: "Dire Dawa City",
         teamLogo: "https://img.sofascore.com/api/v1/team/237728/image",
         rating: 7.7, 
@@ -302,7 +302,7 @@ export default function StatsTab() {
       },
       { 
         rank: 5, 
-        name: "Abduljelil Hassen", 
+        name: "Mekonnen Kassa", 
         team: "Hadiya Hossana",
         teamLogo: "https://img.sofascore.com/api/v1/team/315378/image",
         rating: 7.6, 
@@ -312,7 +312,7 @@ export default function StatsTab() {
       },
       { 
         rank: 6, 
-        name: "Mekonnen Kassa", 
+        name: "Biruk Wondimu", 
         team: "Bahir Dar Kenema",
         teamLogo: "https://img.sofascore.com/api/v1/team/317333/image",
         rating: 7.4, 
@@ -322,7 +322,7 @@ export default function StatsTab() {
       },
       { 
         rank: 7, 
-        name: "Biruk Wondimu", 
+        name: "Dawit Fekadu", 
         team: "Wolaitta Dicha",
         teamLogo: "https://img.sofascore.com/api/v1/team/277540/image",
         rating: 7.3, 
@@ -332,7 +332,7 @@ export default function StatsTab() {
       },
       { 
         rank: 8, 
-        name: "Dawit Fekadu", 
+        name: "Abebe Animaw", 
         team: "Sebeta City",
         teamLogo: "https://img.sofascore.com/api/v1/team/258167/image",
         rating: 7.2, 
@@ -344,7 +344,7 @@ export default function StatsTab() {
   };
 
   // Enhanced team stats data with actual team logos
-  const teamStats: {
+  const teamStats = {
     attack: [
       { 
         rank: 1, 
@@ -979,19 +979,6 @@ export default function StatsTab() {
           </Tabs>
         </CardContent>
       </Card>
-
-      {/* Load More Button */}
-      <div className="flex justify-center">
-        <Button 
-          variant="outline" 
-          className="bg-zinc-800/40 border-white/5 hover:bg-zinc-800/60 text-zinc-300 hover:text-white"
-        >
-          Load More Stats
-        </Button>
-      </div>
-    </div>
-  );
-}
 
       {/* Load More Button */}
       <div className="flex justify-center">

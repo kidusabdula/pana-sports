@@ -166,8 +166,8 @@ export default function TopScorerTable() {
                   Top Scorer
                 </p>
                 <p className="text-3xl font-bold text-foreground mt-1">
-                  {topScorers?.length > 0
-                    ? Math.max(...topScorers.map((s) => s.goals))
+                  {(topScorers?.length ?? 0) > 0
+                    ? Math.max(...(topScorers ?? []).map((s) => s.goals))
                     : 0}
                 </p>
               </div>
