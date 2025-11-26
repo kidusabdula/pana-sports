@@ -85,6 +85,7 @@ export default function Navbar() {
   };
 
   const leagueLinks = [
+    { href: '/news', label: 'News' },
     { href: '/premier-league', label: 'Premier League' },
     { href: '/ethiopian-cup', label: 'Ethiopian Cup' },
     { href: '/higher-league', label: 'Higher League' },
