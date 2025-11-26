@@ -40,6 +40,7 @@ import {
 } from "@/lib/schemas/transfer";
 import { useCreateTransfer, useUpdateTransfer } from "@/lib/hooks/useTransfers";
 import { useTeams } from "@/lib/hooks/useTeams";
+import { usePlayers } from "@/lib/hooks/usePlayers";
 import {
   ArrowRightLeft,
   Globe,
@@ -49,9 +50,6 @@ import {
   DollarSign,
   User,
 } from "lucide-react";
-
-// We'll need to create a usePlayersHook - for now using a placeholder
-const usePlayers = () => ({ data: [] as any[] });
 
 interface TransferFormProps {
   transfer?: Transfer;
