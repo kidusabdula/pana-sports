@@ -15,19 +15,22 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { usePlayers, useDeletePlayer} from "@/lib/hooks/usePlayers";
+import {
+  useMatchEvents,
+  useDeleteMatchEvent,
+} from "@/lib/hooks/useMatchEvents";
+import { useMatches } from "@/lib/hooks/useMatches";
+import { usePlayers } from "@/lib/hooks/usePlayers";
 import { useTeams } from "@/lib/hooks/useTeams";
-import { Player } from "@/lib/schemas/player";
 import {
   Edit,
   Trash2,
   Plus,
   Search,
-  User,
   Calendar,
   Filter,
   ChevronDown,
-  Shirt,
+  Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -49,37 +52,44 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function PlayerTable() {
+export default function MatchEventTable() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterTeam, setFilterTeam] = useState("all");
-  const { data: players, isLoading, error } = usePlayers();
+  const [filterMatch, setFilterMatch] = useState("all");
+  const [filterType, setFilterType] = useState("all");
+  const { data: matchEvents, isLoading, error } = useMatchEvents();
+  const { data: matches } = useMatches();
+  const { data: players } = usePlayers();
   const { data: teams } = useTeams();
-  const deletePlayerMutation = useDeletePlayer();
+  const deleteMatchEventMutation = useDeleteMatchEvent();
 
-  const filteredPlayers = players?.filter((player) => {
-    const matchesSearch =
-      player.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (player.name_am?.toLowerCase() ?? "").includes(
-        searchTerm.toLowerCase()
-      ) ||
-      player.slug.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredMatchEvents =
+    matchEvents?.filter((event) => {
+      const matchesSearch =
+        event.description_en
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        (event.description_am?.toLowerCase() ?? "").includes(
+          searchTerm.toLowerCase()
+        );
 
-    const matchesTeam =
-      filterTeam === "all" || player.team_slug === filterTeam;
+      const matchesMatch =
+        filterMatch === "all" || event.match_id === filterMatch;
 
-    return matchesSearch && matchesTeam;
-  }) || [];
+      const matchesType = filterType === "all" || event.type === filterType;
 
-  const handleDelete = async (id: string, name: string) => {
-    const promise = deletePlayerMutation.mutateAsync(id);
+      return matchesSearch && matchesMatch && matchesType;
+    }) || [];
+
+  const handleDelete = async (id: string, description: string) => {
+    const promise = deleteMatchEventMutation.mutateAsync(id);
 
     toast.promise(promise, {
-      loading: `Deleting "${name}"...`,
-      success: `Player "${name}" deleted successfully`,
+      loading: `Deleting event...`,
+      success: `Match event deleted successfully`,
       error: (error) => {
         return error instanceof Error
           ? error.message
-          : "Failed to delete player";
+          : "Failed to delete match event";
       },
     });
 
@@ -89,6 +99,25 @@ export default function PlayerTable() {
       // Error is handled by toast.promise
       console.error(error);
     }
+  };
+
+  const getEventTypeBadge = (type: string) => {
+    const typeConfig = {
+      goal: { label: "Goal", variant: "default" as const },
+      yellow: { label: "Yellow Card", variant: "secondary" as const },
+      red: { label: "Red Card", variant: "destructive" as const },
+      sub: { label: "Substitution", variant: "outline" as const },
+      assist: { label: "Assist", variant: "default" as const },
+      own_goal: { label: "Own Goal", variant: "secondary" as const },
+      penalty: { label: "Penalty", variant: "default" as const },
+    };
+
+    return (
+      typeConfig[type as keyof typeof typeConfig] || {
+        label: type,
+        variant: "outline" as const,
+      }
+    );
   };
 
   if (isLoading)
@@ -103,9 +132,9 @@ export default function PlayerTable() {
       <Card className="border-destructive/50 bg-destructive/5">
         <CardContent className="p-6">
           <div className="flex items-center space-x-2 text-destructive">
-            <User className="h-5 w-5" />
+            <Calendar className="h-5 w-5" />
             <span>
-              Error loading players:{" "}
+              Error loading match events:{" "}
               {error instanceof Error ? error.message : "Unknown error"}
             </span>
           </div>
@@ -116,20 +145,20 @@ export default function PlayerTable() {
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  Total Players
+                  Total Events
                 </p>
                 <p className="text-3xl font-bold text-foreground mt-1">
-                  {players?.length || 0}
+                  {matchEvents?.length || 0}
                 </p>
               </div>
               <div className="p-3 bg-primary/10 rounded-full">
-                <User className="h-6 w-6 text-primary" />
+                <Calendar className="h-6 w-6 text-primary" />
               </div>
             </div>
           </CardContent>
@@ -140,21 +169,34 @@ export default function PlayerTable() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  Active This Month
+                  Goals
                 </p>
                 <p className="text-3xl font-bold text-foreground mt-1">
-                  {players?.filter((p) => {
-                    const createdAt = new Date(p.created_at);
-                    const now = new Date();
-                    return (
-                      createdAt.getMonth() === now.getMonth() &&
-                      createdAt.getFullYear() === now.getFullYear()
-                    );
-                  }).length || 0}
+                  {matchEvents?.filter((e) => e.type === "goal").length || 0}
                 </p>
               </div>
               <div className="p-3 bg-blue-500/10 rounded-full">
-                <Calendar className="h-6 w-6 text-blue-500" />
+                <span className="text-blue-500 font-bold">⚽</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-yellow-500/5 to-yellow-500/10 border-yellow-500/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Cards
+                </p>
+                <p className="text-3xl font-bold text-foreground mt-1">
+                  {matchEvents?.filter(
+                    (e) => e.type === "yellow" || e.type === "red"
+                  ).length || 0}
+                </p>
+              </div>
+              <div className="p-3 bg-yellow-500/10 rounded-full">
+                <span className="text-yellow-600 font-bold">🟨</span>
               </div>
             </div>
           </CardContent>
@@ -165,14 +207,18 @@ export default function PlayerTable() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  With Teams
+                  Today
                 </p>
                 <p className="text-3xl font-bold text-foreground mt-1">
-                  {players?.filter((p) => p.team_slug).length || 0}
+                  {matchEvents?.filter((e) => {
+                    const eventDate = new Date(e.created_at);
+                    const today = new Date();
+                    return eventDate.toDateString() === today.toDateString();
+                  }).length || 0}
                 </p>
               </div>
               <div className="p-3 bg-green-500/10 rounded-full">
-                <Shirt className="h-6 w-6 text-green-500" />
+                <Clock className="h-6 w-6 text-green-500" />
               </div>
             </div>
           </CardContent>
@@ -185,7 +231,7 @@ export default function PlayerTable() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <CardTitle className="text-xl font-bold text-foreground flex items-center gap-2">
-                Players ({players?.length || 0})
+                Match Events ({matchEvents?.length || 0})
               </CardTitle>
             </div>
             <div className="flex items-center gap-3">
@@ -198,23 +244,38 @@ export default function PlayerTable() {
                   className="pl-9 h-9 bg-background border-input focus:border-primary w-64 rounded-lg transition-all"
                 />
               </div>
-              <Select value={filterTeam} onValueChange={setFilterTeam}>
+              <Select value={filterMatch} onValueChange={setFilterMatch}>
                 <SelectTrigger className="h-9 w-40">
-                  <SelectValue placeholder="Filter by team" />
+                  <SelectValue placeholder="Filter by match" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Teams</SelectItem>
-                  {teams?.map((team) => (
-                    <SelectItem key={team.slug} value={team.slug}>
-                      {team.name_en}
+                  <SelectItem value="all">All Matches</SelectItem>
+                  {matches?.map((match) => (
+                    <SelectItem key={match.id} value={match.id}>
+                      {match.home_team_slug} vs {match.away_team_slug}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <Link href="/cms/players/create">
+              <Select value={filterType} onValueChange={setFilterType}>
+                <SelectTrigger className="h-9 w-40">
+                  <SelectValue placeholder="Filter by type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="goal">Goals</SelectItem>
+                  <SelectItem value="yellow">Yellow Cards</SelectItem>
+                  <SelectItem value="red">Red Cards</SelectItem>
+                  <SelectItem value="sub">Substitutions</SelectItem>
+                  <SelectItem value="assist">Assists</SelectItem>
+                  <SelectItem value="own_goal">Own Goals</SelectItem>
+                  <SelectItem value="penalty">Penalties</SelectItem>
+                </SelectContent>
+              </Select>
+              <Link href="/cms/match-events/create">
                 <Button size="sm" className="h-9 gap-2 rounded-lg shadow-sm">
                   <Plus className="h-4 w-4" />
-                  Add Player
+                  Add Event
                 </Button>
               </Link>
             </div>
@@ -232,16 +293,19 @@ export default function PlayerTable() {
                   />
                 </TableHead>
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  Name
+                  Match
+                </TableHead>
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                  Type
+                </TableHead>
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                  Player
                 </TableHead>
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
                   Team
                 </TableHead>
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  Position
-                </TableHead>
-                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  Jersey
+                  Minute
                 </TableHead>
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
                   Created Date
@@ -252,19 +316,21 @@ export default function PlayerTable() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredPlayers.length === 0 ? (
+              {filteredMatchEvents.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-12">
                     <div className="flex flex-col items-center space-y-3">
-                      <User className="h-12 w-12 text-muted-foreground/20" />
-                      <p className="text-muted-foreground">No players found.</p>
+                      <Calendar className="h-12 w-12 text-muted-foreground/20" />
+                      <p className="text-muted-foreground">
+                        No match events found.
+                      </p>
                     </div>
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredPlayers.map((player) => (
+                filteredMatchEvents.map((event) => (
                   <TableRow
-                    key={player.id}
+                    key={event.id}
                     className="hover:bg-muted/30 transition-colors border-b border-border/40"
                   >
                     <TableCell className="pl-6">
@@ -274,53 +340,54 @@ export default function PlayerTable() {
                       />
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                          {player.photo_url ? (
-                            <img
-                              src={player.photo_url}
-                              alt={player.name_en}
-                              className="h-6 w-6 rounded-full object-cover"
-                            />
-                          ) : (
-                            <span className="text-primary font-bold text-xs">
-                              {player.name_en.charAt(0)}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-medium text-foreground text-sm">
-                            {player.name_en}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {player.name_am || player.slug}
-                          </span>
-                        </div>
-                      </div>
+                      <span className="text-sm text-foreground">
+                        {
+                          matches?.find((m) => m.id === event.match_id)
+                            ?.home_team_slug
+                        }{" "}
+                        vs{" "}
+                        {
+                          matches?.find((m) => m.id === event.match_id)
+                            ?.away_team_slug
+                        }
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={getEventTypeBadge(event.type).variant}
+                        className="text-xs"
+                      >
+                        {getEventTypeBadge(event.type).label}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <span className="text-sm text-foreground">
-                        {teams?.find(t => t.slug === player.team_slug)?.name_en || "Unassigned"}
+                        {players?.find((p) => p.slug === event.player_slug)
+                          ?.name_en || "N/A"}
                       </span>
                     </TableCell>
                     <TableCell>
                       <span className="text-sm text-foreground">
-                        {player.position_en || "N/A"}
+                        {teams?.find((t) => t.slug === event.team_slug)
+                          ?.name_en || "N/A"}
                       </span>
                     </TableCell>
                     <TableCell>
                       <span className="text-sm text-foreground">
-                        {player.jersey_number || "N/A"}
+                        {event.minute}'
                       </span>
                     </TableCell>
                     <TableCell>
                       <span className="text-sm text-muted-foreground">
-                        {format(new Date(player.created_at), "MMM dd, yyyy")}
+                        {format(
+                          new Date(event.created_at),
+                          "MMM dd, yyyy HH:mm"
+                        )}
                       </span>
                     </TableCell>
                     <TableCell className="text-right pr-6">
                       <div className="flex items-center justify-end gap-1">
-                        <Link href={`/cms/players/${player.id}/edit`}>
+                        <Link href={`/cms/match-events/${event.id}/edit`}>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -342,17 +409,22 @@ export default function PlayerTable() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Player</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                Delete Match Event
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete &quot;
-                                {player.name_en}&quot;? This action cannot be undone.
+                                Are you sure you want to delete this match
+                                event? This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() =>
-                                  handleDelete(player.id, player.name_en)
+                                  handleDelete(
+                                    event.id,
+                                    event.description_en || "Match event"
+                                  )
                                 }
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
@@ -384,7 +456,7 @@ export default function PlayerTable() {
                 <SelectItem value="50">50</SelectItem>
               </SelectContent>
             </Select>
-            <span>players per page</span>
+            <span>events per page</span>
           </div>
 
           <div className="flex items-center gap-2">

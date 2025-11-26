@@ -406,7 +406,7 @@ export default function PlayerForm({
                           />
                         </FormControl>
                         <FormDescription>
-                          URL to the player's photo
+                          URL to the player&apos;s photo
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
