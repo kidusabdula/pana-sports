@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
-import { useRouter, usePathname } from '@/i18n/navigation';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Menu, X } from 'lucide-react';
@@ -10,9 +9,6 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 export default function Navbar() {
-  const t = useTranslations('nav');
-  const locale = useLocale();
-  const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -32,11 +28,11 @@ export default function Navbar() {
   }, [pathname]);
 
   const leagueLinks = [
-    { href: '/premier-league', label: t('premierLeague') },
-    { href: '/ethiopian-cup', label: t('ethiopianCup') },
-    { href: '/higher-league', label: t('higherLeague') },
-    { href: '/league-one', label: t('leagueOne') },
-    { href: '/walias-u20-pl', label: t('waliasU20PL') },
+    { href: '/premier-league', label: 'Premier League' },
+    { href: '/ethiopian-cup', label: 'Ethiopian Cup' },
+    { href: '/higher-league', label: 'Higher League' },
+    { href: '/league-one', label: 'League One' },
+    { href: '/walias-u20-pl', label: 'Walias U-20 PL' },
   ];
 
   const NavLink = ({ href, label, isLeague = false, onClick }: { 
@@ -108,7 +104,7 @@ export default function Navbar() {
             <div className="relative group">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-20" />
               <Input
-                placeholder={t('search')}
+                placeholder="Search"
                 className="pl-10 pr-4 w-48 md:w-64 bg-zinc-800/40 border-zinc-700/50 rounded-xl focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:bg-zinc-800/60 transition-all duration-300 h-9"
               />
             </div>
@@ -146,7 +142,7 @@ export default function Navbar() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-20" />
             <Input
-              placeholder={t('search')}
+              placeholder="Search"
               className="pl-10 pr-4 w-full bg-zinc-800/40 border-zinc-700/50 rounded-xl focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:bg-zinc-800/60 transition-all duration-300 h-9"
               autoFocus
             />

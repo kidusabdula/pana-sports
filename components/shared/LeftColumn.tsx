@@ -2,7 +2,6 @@
 "use client";
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,6 @@ import { Calendar, Trophy, TrendingUp, Clock, Users, Target, Flag, Star, Activit
 import { cn } from '@/lib/utils';
 
 export default function LeftColumn() {
-  const t = useTranslations('Home');
   const [activeTab, setActiveTab] = useState("matches");
   const [favorites, setFavorites] = useState<number[]>([]);
 
@@ -76,22 +74,22 @@ export default function LeftColumn() {
                     Live Matches
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
+                <CardContent className="space-y-2">
+                  <div className="space-y-1">
                     {[
                       { home: 'Saint George', away: 'Fasil Kenema', homeScore: 1, awayScore: 1, minute: '65', league: 'Premier League', venue: 'Addis Ababa Stadium', id: 101 },
                       { home: 'Mekelle 70 Enderta', away: 'Dire Dawa City', homeScore: 2, awayScore: 1, minute: '42', league: 'Premier League', venue: 'Mekelle Stadium', id: 102 },
                     ].map((match) => (
-                      <div key={match.id} className="bg-zinc-800/40 rounded-lg p-4 hover:bg-zinc-800/50 transition-colors relative overflow-hidden group/match">
+                      <div key={match.id} className="bg-zinc-800/40 rounded-lg p-5 hover:bg-zinc-800/50 transition-colors relative overflow-hidden group/match">
                         {/* Live indicator */}
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-orange-500"></div>
                         
-                        <div className="relative z-10 space-y-4">
+                        <div className="relative z-10 space-y-2">
                           {/* Badges + Favorite */}
-                          <div className="flex flex-wrap justify-between items-center gap-2">
+                          <div className="flex flex-wrap justify-between items-center gap-1">
                             <div className="flex flex-wrap items-center gap-2">
                               <Badge variant="secondary" className="bg-red-900/30 text-red-400 border-red-800/30 text-xs animate-pulse">
-                                <Radio className="h-3 w-3 mr-1" />
+                                <Radio className="h-1 w-3 mr-1" />
                                 LIVE {match.minute}&apos;
                               </Badge>
                               <Badge variant="outline" className="bg-zinc-700/50 border-zinc-600/50 text-xs">

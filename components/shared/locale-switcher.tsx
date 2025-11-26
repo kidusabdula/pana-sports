@@ -1,26 +1,7 @@
 'use client';
 
-import { usePathname, useRouter } from '@/i18n/navigation';
-import { useLocale } from 'next-intl';
-
 export default function LocaleSwitcher() {
-  const locale = useLocale();
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const switchLocale = (newLocale: string) => {
-    if (newLocale !== locale) {
-      router.replace(pathname, { locale: newLocale });
-      router.refresh();
-    }
-  };
-
-  return (
-    <select
-      value={locale}
-      onChange={e => switchLocale(e.target.value)}>
-      <option value="en">EN</option>
-      <option value="am">AM</option>
-    </select>
-  );
+  // Locale switching removed when i18n was reverted.
+  // Keep a no-op component to avoid breaking imports.
+  return null;
 }

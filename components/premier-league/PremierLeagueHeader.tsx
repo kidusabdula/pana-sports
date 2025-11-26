@@ -2,7 +2,6 @@
 "use client";
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,7 +18,6 @@ import StatsTab from './StatsTab';
 import TeamsTab from './TeamsTab'; // Import new TeamsTab component
 
 export default function PremierLeagueHeader() {
-  const t = useTranslations('premierLeague');
   const [activeTab, setActiveTab] = useState("overview");
 
   // Sample league data

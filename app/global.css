@@ -1,0 +1,281 @@
+/* app/globals.css */
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-dm-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+
+  /* Pana Branding Colors - Dark Theme Only */
+  --background: oklch(
+    0.09 0.01 285.823
+  ); /* Very dark gray with hint of warmth */
+  --foreground: oklch(0.985 0 0); /* Near-white */
+  --card: oklch(0.12 0.01 285.823); /* Dark cards */
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.12 0.01 285.823);
+  --popover-foreground: oklch(0.985 0 0);
+
+  /* Primary - Light yellow for dark mode */
+  --primary: oklch(0.85 0.18 75); /* Light yellow matching logo */
+  --primary-foreground: oklch(
+    0.09 0.01 285.823
+  ); /* Dark text on light yellow */
+
+  /* Secondary - Darker gray */
+  --secondary: oklch(0.16 0.01 285.823);
+  --secondary-foreground: oklch(0.985 0 0);
+
+  /* Muted - Dark muted */
+  --muted: oklch(0.18 0.01 285.823);
+  --muted-foreground: oklch(0.705 0.015 286.067);
+
+  /* Accent - Light yellow */
+  --accent: oklch(0.75 0.15 75); /* Light yellow for dark mode */
+  --accent-foreground: oklch(0.985 0 0);
+
+  /* Destructive - Brighter red for dark mode */
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%); /* Subtle border */
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.85 0.18 75); /* Light yellow ring */
+
+  /* Chart colors - Dark theme */
+  --chart-1: oklch(0.85 0.18 75); /* Light yellow matching logo */
+  --chart-2: oklch(0.75 0.15 75); /* Light yellow matching logo */
+  --chart-3: oklch(0.705 0.015 286.067); /* Gray */
+  --chart-4: oklch(0.985 0 0); /* White */
+  --chart-5: oklch(0.18 0.01 285.823); /* Dark muted */
+
+  /* Sidebar colors - Dark theme */
+  --sidebar: oklch(0.12 0.01 285.823);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.85 0.18 75); /* Light yellow matching logo */
+  --sidebar-primary-foreground: oklch(0.09 0.01 285.823);
+  --sidebar-accent: oklch(0.16 0.01 285.823);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.85 0.18 75); /* Light yellow matching logo */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* Add subtle gradient background */
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      oklch(var(--primary) / 0.03) 1px,
+      transparent 0
+    );
+    background-size: 20px 20px;
+  }
+}
+
+@layer components {
+  /* Pana-specific button styles */
+  .btn-pana {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 rounded-[var(--radius)] transition-all duration-200 shadow-sm hover:shadow-md;
+  }
+
+  /* Pana card with subtle border */
+  .card-pana {
+    @apply border border-border/50 shadow-sm hover:shadow-md transition-all duration-200;
+  }
+
+  /* Pana gradient background */
+  .bg-pana-gradient {
+    background: linear-gradient(
+      135deg,
+      oklch(var(--primary) / 0.1) 0%,
+      oklch(var(--secondary) / 0.5) 100%
+    );
+  }
+
+  /* Pana text gradient for headings */
+  .text-pana-gradient {
+    background: linear-gradient(
+      135deg,
+      oklch(var(--primary)) 0%,
+      oklch(var(--primary) / 0.7) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Pana section divider */
+  .divider-pana {
+    @apply border-t border-border/30;
+    position: relative;
+  }
+
+  .divider-pana::after {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: oklch(var(--primary));
+    border-radius: 1px;
+  }
+
+  /* Glassmorphic zinc backgrounds */
+  .glass-zinc {
+    background: rgba(24, 24, 27, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(63, 63, 70, 0.3);
+  }
+
+  .glass-zinc-light {
+    background: rgba(39, 39, 42, 0.3);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(63, 63, 70, 0.2);
+  }
+
+  /* Hide scrollbar for elements while keeping them scrollable */
+  .hide-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera*/
+  }
+}
+
+/* CMS Light Theme Styles */
+.cms-light-theme {
+  --background: oklch(0.985 0 0); /* White background */
+  --foreground: oklch(0.09 0.01 285.823); /* Dark text */
+  --card: oklch(1 0 0); /* White cards */
+  --card-foreground: oklch(0.09 0.01 285.823);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.09 0.01 285.823);
+
+  /* Primary - Dark yellow for light mode */
+  --primary: oklch(0.65 0.18 75); /* Darker yellow */
+  --primary-foreground: oklch(1 0 0); /* White text on yellow */
+
+  /* Secondary - Light gray */
+  --secondary: oklch(0.96 0.01 285.823);
+  --secondary-foreground: oklch(0.09 0.01 285.823);
+
+  /* Muted - Light muted */
+  --muted: oklch(0.94 0.01 285.823);
+  --muted-foreground: oklch(0.45 0.01 285.823);
+
+  /* Accent - Medium yellow */
+  --accent: oklch(0.75 0.15 75);
+  --accent-foreground: oklch(0.09 0.01 285.823);
+
+  /* Destructive - Red for light mode */
+  --destructive: oklch(0.604 0.191 22.216);
+  --border: oklch(0.09 0.01 285.823 / 10%); /* Subtle border */
+  --input: oklch(0.09 0.01 285.823 / 15%);
+  --ring: oklch(0.65 0.18 75); /* Darker yellow ring */
+
+  /* Chart colors - Light theme */
+  --chart-1: oklch(0.65 0.18 75); /* Darker yellow */
+  --chart-2: oklch(0.75 0.15 75); /* Medium yellow */
+  --chart-3: oklch(0.45 0.01 285.823); /* Gray */
+  --chart-4: oklch(0.09 0.01 285.823); /* Dark */
+  --chart-5: oklch(0.94 0.01 285.823); /* Light muted */
+
+  /* Sidebar colors - Light theme */
+  --sidebar: oklch(0.98 0 0); /* Very light gray */
+  --sidebar-foreground: oklch(0.09 0.01 285.823);
+  --sidebar-primary: oklch(0.65 0.18 75); /* Darker yellow */
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.96 0.01 285.823);
+  --sidebar-accent-foreground: oklch(0.09 0.01 285.823);
+  --sidebar-border: oklch(0.09 0.01 285.823 / 10%);
+  --sidebar-ring: oklch(0.65 0.18 75); /* Darker yellow */
+}
+
+.cms-light-theme body {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    oklch(var(--primary) / 0.03) 1px,
+    transparent 0
+  );
+  background-size: 20px 20px;
+}
+
+/* Override for specific CMS components */
+.cms-light-theme .bg-white {
+  background-color: var(--card) !important;
+}
+
+.cms-light-theme .text-gray-600 {
+  color: var(--muted-foreground) !important;
+}
+
+.cms-light-theme .text-gray-900 {
+  color: var(--foreground) !important;
+}
+
+.cms-light-theme .text-gray-500 {
+  color: var(--muted-foreground) !important;
+}
+
+.cms-light-theme .text-gray-700 {
+  color: var(--foreground) !important;
+}
+
+.cms-light-theme .border-gray-200 {
+  border-color: var(--border) !important;
+}
+
+.cms-light-theme .hover\:bg-gray-50:hover {
+  background-color: var(--muted) !important;
+}
+
+.cms-light-theme .shadow-sm {
+  box-shadow: 0 1px 2px 0 oklch(0.09 0.01 285.823 / 0.05) !important;
+}

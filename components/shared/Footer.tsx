@@ -1,6 +1,5 @@
 // components/shared/Footer.tsx
-import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
@@ -17,7 +16,6 @@ import {
 } from 'lucide-react';
 
 export default function Footer() {
-  const t = useTranslations('footer');
 
   const quickLinks = [
     { href: '/premier-league', label: 'Premier League' },

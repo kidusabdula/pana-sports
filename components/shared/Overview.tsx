@@ -1,11 +1,9 @@
 // components/shared/Overview.tsx
-import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Trophy, TrendingUp } from 'lucide-react';
 
 export default function Overview() {
-  const t = useTranslations('Home');
 
   return (
     <Card className="card-pana h-full">
