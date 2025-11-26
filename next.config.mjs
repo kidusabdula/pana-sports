@@ -1,19 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   dangerouslyAllowSVG: true,
+
   contentDispositionType: "attachment",
-  contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+  contentSecurityPolicy:
+    "default-src 'self'; script-src 'none'; sandbox;",
+
   typescript: {
-    // !! WARN !!
-    // Dangerously allow production builds to successfully complete even if
-    // your project has type errors.
     ignoreBuildErrors: true,
   },
+
   eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+
   images: {
     remotePatterns: [
       {
@@ -24,9 +24,12 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "img.sofascore.com",
-        // Remove pathname to allow all paths from this domain
       },
     ],
+
+    // Enable your custom loader
+    loader: "custom",
+    loaderFile: "./imageLoader.js",
   },
 };
 
