@@ -121,7 +121,7 @@ export default function TopScorerTable() {
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+        <Card className="bg-linear-to-br from-primary/5 to-primary/10 border-primary/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -139,7 +139,7 @@ export default function TopScorerTable() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
+        <Card className="bg-linear-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -157,7 +157,7 @@ export default function TopScorerTable() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
+        <Card className="bg-linear-to-br from-green-500/5 to-green-500/10 border-green-500/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -165,8 +165,8 @@ export default function TopScorerTable() {
                   Top Scorer
                 </p>
                 <p className="text-3xl font-bold text-foreground mt-1">
-                  {topScorers?.length > 0 
-                    ? Math.max(...topScorers.map(s => s.goals)) 
+                  {(topScorers?.length ?? 0) > 0 
+                    ? Math.max(...(topScorers ?? []).map(s => s.goals)) 
                     : 0}
                 </p>
               </div>

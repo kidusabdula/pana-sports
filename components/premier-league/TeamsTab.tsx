@@ -2,6 +2,9 @@
 "use client";
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getTeamsByLeagueSlug } from '@/lib/data/teams';
+import { getStandingsByLeagueSlug } from '@/lib/data/standings';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,292 +12,41 @@ import { Input } from '@/components/ui/input';
 import { Search, MapPin, Calendar, Trophy, TrendingUp, Users, Star, ChevronRight, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export default function TeamsTab() {
+export default function TeamsTab({ initialTeams = [], initialStandings = [], leagueSlug = 'premier-league' }: { initialTeams?: any[]; initialStandings?: any[]; leagueSlug?: string }) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
-
-  // Mock data for Ethiopian Premier League teams
-  const teams = [
-    {
-      id: 1,
-      name: "Saint George SC",
-      shortName: "SGE",
-      founded: 1935,
-      city: "Addis Ababa",
-      stadium: "Addis Ababa Stadium",
-      capacity: 35000,
-      position: 1,
-      points: 28,
-      played: 10,
-      won: 8,
-      drawn: 4,
-      lost: 2,
-      gf: 24,
-      ga: 12,
-      gd: 12,
-      form: ["W", "W", "D", "W", "W"],
-      topScorer: "Getaneh Kebede",
-      topScorerGoals: 8,
-      colors: ["#FF0000", "#FFFFFF"],
-      logo: "/placeholder.svg"
-    },
-    {
-      id: 2,
-      name: "Fasil Kenema SC",
-      shortName: "FKC",
-      founded: 2017,
-      city: "Bahir Dar",
-      stadium: "Bahir Dar Stadium",
-      capacity: 60000,
-      position: 2,
-      points: 25,
-      played: 10,
-      won: 7,
-      drawn: 4,
-      lost: 3,
-      gf: 19,
-      ga: 11,
-      gd: 8,
-      form: ["W", "D", "W", "L", "W"],
-      topScorer: "Shimeles Bekele",
-      topScorerGoals: 7,
-      colors: ["#008000", "#FFFFFF"],
-      logo: "/placeholder.svg"
-    },
-    {
-      id: 3,
-      name: "Mekelle 70 Enderta SC",
-      shortName: "MKE",
-      founded: 2007,
-      city: "Mekelle",
-      stadium: "Mekelle Stadium",
-      capacity: 15000,
-      position: 3,
-      points: 23,
-      played: 10,
-      won: 7,
-      drawn: 2,
-      lost: 4,
-      gf: 18,
-      ga: 13,
-      gd: 5,
-      form: ["L", "W", "W", "D", "W"],
-      topScorer: "Abel Yalew",
-      topScorerGoals: 6,
-      colors: ["#0000FF", "#FFFFFF"],
-      logo: "/placeholder.svg"
-    },
-    {
-      id: 4,
-      name: "Dire Dawa City SC",
-      shortName: "DDC",
-      founded: 2012,
-      city: "Dire Dawa",
-      stadium: "Dire Dawa Stadium",
-      capacity: 18000,
-      position: 4,
-      points: 20,
-      played: 10,
-      won: 6,
-      drawn: 2,
-      lost: 5,
-      gf: 16,
-      ga: 13,
-      gd: 3,
-      form: ["D", "W", "L", "W", "D"],
-      topScorer: "Dawit Fekadu",
-      topScorerGoals: 5,
-      colors: ["#800080", "#FFFFFF"],
-      logo: "/placeholder.svg"
-    },
-    {
-      id: 5,
-      name: "Hadiya Hossana SC",
-      shortName: "HHS",
-      founded: 2005,
-      city: "Hosaena",
-      stadium: "Hossaena Stadium",
-      capacity: 10000,
-      position: 5,
-      points: 18,
-      played: 10,
-      won: 5,
-      drawn: 3,
-      lost: 5,
-      gf: 14,
-      ga: 12,
-      gd: 2,
-      form: ["W", "L", "D", "W", "L"],
-      topScorer: "Salhadin Seid",
-      topScorerGoals: 5,
-      colors: ["#FFA500", "#000000"],
-      logo: "/placeholder.svg"
-    },
-    {
-      id: 6,
-      name: "Bahir Dar Kenema SC",
-      shortName: "BDK",
-      founded: 2018,
-      city: "Bahir Dar",
-      stadium: "Bahir Dar Stadium",
-      capacity: 60000,
-      position: 6,
-      points: 16,
-      played: 10,
-      won: 4,
-      drawn: 4,
-      lost: 6,
-      gf: 15,
-      ga: 16,
-      gd: -1,
-      form: ["L", "D", "L", "W", "D"],
-      topScorer: "Mesfin Tadesse",
-      topScorerGoals: 4,
-      colors: ["#000080", "#FFFFFF"],
-      logo: "/placeholder.svg"
-    },
-    {
-      id: 7,
-      name: "Wolaitta Dicha SC",
-      shortName: "WDS",
-      founded: 2009,
-      city: "Sodo",
-      stadium: "Wolaitta Sodo Stadium",
-      capacity: 30000,
-      position: 7,
-      points: 14,
-      played: 10,
-      won: 4,
-      drawn: 2,
-      lost: 7,
-      gf: 13,
-      ga: 16,
-      gd: -3,
-      form: ["D", "L", "W", "L", "D"],
-      topScorer: "Yonatan Kebede",
-      topScorerGoals: 4,
-      colors: ["#008080", "#FFFFFF"],
-      logo: "/placeholder.svg"
-    },
-    {
-      id: 8,
-      name: "Sebeta City SC",
-      shortName: "SCC",
-      founded: 2019,
-      city: "Sebeta",
-      stadium: "Sebeta Stadium",
-      capacity: 12000,
-      position: 8,
-      points: 12,
-      played: 10,
-      won: 3,
-      drawn: 3,
-      lost: 7,
-      gf: 11,
-      ga: 16,
-      gd: -5,
-      form: ["L", "D", "L", "L", "W"],
-      topScorer: "Abebe Animaw",
-      topScorerGoals: 3,
-      colors: ["#FF0000", "#000000"],
-      logo: "/placeholder.svg"
-    },
-    {
-      id: 9,
-      name: "Ethiopia Bunna SC",
-      shortName: "EBS",
-      founded: 1945,
-      city: "Addis Ababa",
-      stadium: "Mekanesa Yesus Stadium",
-      capacity: 30000,
-      position: 9,
-      points: 10,
-      played: 10,
-      won: 2,
-      drawn: 4,
-      lost: 6,
-      gf: 9,
-      ga: 16,
-      gd: -7,
-      form: ["L", "L", "D", "L", "W"],
-      topScorer: "Sisay Girma",
-      topScorerGoals: 3,
-      colors: ["#FFFF00", "#000000"],
-      logo: "/placeholder.svg"
-    },
-    {
-      id: 10,
-      name: "Jimma Aba Jifar SC",
-      shortName: "JAJ",
-      founded: 2015,
-      city: "Jimma",
-      stadium: "Jimma Stadium",
-      capacity: 15000,
-      position: 10,
-      points: 8,
-      played: 10,
-      won: 2,
-      drawn: 2,
-      lost: 8,
-      gf: 8,
-      ga: 17,
-      gd: -9,
-      form: ["L", "W", "L", "L", "D"],
-      topScorer: "Abduljelil Hassen",
-      topScorerGoals: 2,
-      colors: ["#000000", "#FFFFFF"],
-      logo: "/placeholder.svg"
-    },
-    {
-      id: 11,
-      name: "Welwalo Adigrat University SC",
-      shortName: "WAU",
-      founded: 2015,
-      city: "Adigrat",
-      stadium: "Adigrat Stadium",
-      capacity: 10000,
-      position: 11,
-      points: 6,
-      played: 10,
-      won: 1,
-      drawn: 3,
-      lost: 7,
-      gf: 7,
-      ga: 18,
-      gd: -11,
-      form: ["L", "L", "D", "L", "L"],
-      topScorer: "Mekonnen Bekele",
-      topScorerGoals: 2,
-      colors: ["#008000", "#FF0000"],
-      logo: "/placeholder.svg"
-    },
-    {
-      id: 12,
-      name: "Arba Minch Ketema SC",
-      shortName: "AMK",
-      founded: 2015,
-      city: "Arba Minch",
-      stadium: "Arba Minch Stadium",
-      capacity: 12000,
-      position: 12,
-      points: 5,
-      played: 10,
-      won: 1,
-      drawn: 2,
-      lost: 8,
-      gf: 6,
-      ga: 19,
-      gd: -13,
-      form: ["L", "L", "L", "D", "W"],
-      topScorer: "Biruk Wondimu",
-      topScorerGoals: 1,
-      colors: ["#0000FF", "#FFFF00"],
-      logo: "/placeholder.svg"
+  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  const teamsQuery = useQuery({ queryKey: ['teams', leagueSlug], queryFn: () => getTeamsByLeagueSlug(leagueSlug), initialData: initialTeams })
+  const standingsQuery = useQuery({ queryKey: ['standings', leagueSlug], queryFn: () => getStandingsByLeagueSlug(leagueSlug), initialData: initialStandings })
+  
+  const teams = (teamsQuery.data || []).map((t: any) => {
+    const s = (standingsQuery.data || []).find((st: any) => st.team_slug === t.slug)
+    return {
+      id: t.slug,
+      name: t.name_en,
+      shortName: t.short_name_en || t.slug,
+      founded: t.founded || '',
+      city: t.stadium_en ? t.stadium_en.split(' ').pop() : '', // Extract city from stadium name if available
+      stadium: t.stadium_en || '',
+      capacity: '',
+      position: s?.rank || '',
+      points: s?.points || 0,
+      played: s?.played || 0,
+      won: s?.won || 0,
+      drawn: s?.drawn || 0,
+      lost: s?.lost || 0,
+      gf: s?.goals_for || 0,
+      ga: s?.goals_against || 0,
+      gd: s?.gd || 0,
+      form: ['W', 'D', 'L', 'W', 'D'], // Mock form data for now
+      topScorer: 'TBD', // Will need to fetch from top scorers API
+      topScorerGoals: 0,
+      colors: ["#1f2937", "#111827"],
+      logo: t.logo_url || '/placeholder.svg',
     }
-  ];
+  })
 
   // Filter teams based on search term
-  const filteredTeams = teams.filter(team =>
+  const filteredTeams = teams.filter((team: any) =>
     team.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     team.city.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -308,6 +60,48 @@ export default function TeamsTab() {
       default: return "bg-gray-500";
     }
   };
+
+  // Loading state
+  if (teamsQuery.isLoading || standingsQuery.isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (teamsQuery.error || standingsQuery.error) {
+    const error = teamsQuery.error || standingsQuery.error
+    return (
+      <Card className="border-destructive/50 bg-destructive/5">
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-2 text-destructive">
+            <Users className="h-5 w-5" />
+            <span>
+              Error loading teams:{" "}
+              {error instanceof Error 
+                ? error.message 
+                : "Unknown error"}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Empty state
+  if (teams.length === 0) {
+    return (
+      <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30">
+        <CardContent className="p-12 text-center">
+          <Users className="h-12 w-12 text-muted-foreground/20 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-foreground mb-2">No teams found</h3>
+          <p className="text-muted-foreground">No teams available for this league.</p>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -324,7 +118,7 @@ export default function TeamsTab() {
 
       {/* Teams Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTeams.map((team) => (
+        {filteredTeams.map((team: any) => (
           <Card key={team.id} className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30 overflow-hidden group hover:shadow-xl hover:shadow-primary/10 transition-all duration-500">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -403,7 +197,7 @@ export default function TeamsTab() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Form</span>
                   <div className="flex gap-1">
-                    {team.form.map((result, index) => (
+                    {team.form.map((result: string, index: number) => (
                       <div
                         key={index}
                         className={cn(
@@ -447,7 +241,7 @@ export default function TeamsTab() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <Card className="bg-zinc-800/90 border-zinc-700/50 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {(() => {
-              const team = teams.find(t => t.id === selectedTeam);
+              const team = teams.find((t: any) => t.id === selectedTeam);
               if (!team) return null;
 
               return (
@@ -490,7 +284,7 @@ export default function TeamsTab() {
                         </div>
                         <div>
                           <div className="text-sm text-muted-foreground">Capacity</div>
-                          <div className="font-medium">{team.capacity.toLocaleString()}</div>
+                          <div className="font-medium">{team.capacity ? team.capacity.toLocaleString() : 'N/A'}</div>
                         </div>
                         <div>
                           <div className="text-sm text-muted-foreground">Founded</div>

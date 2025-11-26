@@ -193,13 +193,13 @@ export default function WaliasU20Header() {
         {/* Tab Contents */}
         <TabsContent value="overview" className="mt-6 space-y-6">
           {/* First Row: Matches Section */}
-          <MatchesSection />
+          <MatchesSection leagueSlug="walias-u20-pl" />
 
           {/* Second Row: Teams Table and Team of the Week */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Teams Table - Takes 2 columns (65%) */}
             <div className="lg:col-span-2">
-              <TeamsTable />
+              <TeamsTable leagueSlug="walias-u20-pl" />
             </div>
 
             {/* Team of the Week - Takes 1 column (35%) */}
@@ -209,15 +209,15 @@ export default function WaliasU20Header() {
           </div>
 
           {/* Third Row: News Section */}
-          <NewsSection />
+          <NewsSection leagueSlug="walias-u20-pl" />
         </TabsContent>
 
         <TabsContent value="matches" className="mt-6">
-          <MatchesTab />
+          <MatchesTab leagueSlug="walias-u20-pl" />
         </TabsContent>
 
         <TabsContent value="table" className="mt-6">
-          <LeagueTableTab />
+          <LeagueTableTab leagueSlug="walias-u20-pl" />
         </TabsContent>
 
         <TabsContent value="teams" className="mt-6">

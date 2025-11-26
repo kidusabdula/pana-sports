@@ -2,6 +2,8 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getMatchesByLeagueSlug } from "@/lib/data/matches";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,39 +26,17 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Team = {
-  name: string;
-  logo: string;
-  shortName: string;
-  form?: string;
-};
+type Props = { initialData?: any[]; leagueSlug?: string };
 
-type Match = {
-  id: number;
-  homeTeam: Team;
-  awayTeam: Team;
-  date: string;
-  time?: string;
-  venue: string;
-  league: string;
-  isLive: boolean;
-  isFeatured: boolean;
-  homeScore?: number;
-  awayScore?: number;
-  viewers?: number;
-  importance?: string;
-  matchEvents?: string[];
-  highlightVideo?: string;
-  videoDuration?: string;
-  views?: string;
-  popularity?: number;
-  trending?: boolean;
-};
-
-export default function MatchesSection() {
+export default function MatchesSection({ initialData = [], leagueSlug = "premier-league" }: Props) {
   const [currentViewIndex, setCurrentViewIndex] = useState(0);
   const [favorites, setFavorites] = useState<number[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<number | null>(null);
+  const query = useQuery({
+    queryKey: ["matches", leagueSlug],
+    queryFn: () => getMatchesByLeagueSlug(leagueSlug),
+    initialData,
+  });
 
   const matchViews = [
     {
@@ -77,228 +57,35 @@ export default function MatchesSection() {
 
   const currentView = matchViews[currentViewIndex];
 
-  // Sample match data
-  const upcomingMatches: Match[] = [
-    {
-      id: 1,
-      homeTeam: {
-        name: "Saint George",
-        logo: "/api/placeholder/100/100",
-        shortName: "STG",
-        form: "W-W-D-W-L",
-      },
-      awayTeam: {
-        name: "Fasil Kenema",
-        logo: "/api/placeholder/100/100",
-        shortName: "FSK",
-        form: "D-W-L-W-W",
-      },
-      date: "Oct 22, 2025",
-      time: "3:00 PM",
-      venue: "Addis Ababa Stadium",
-      league: "Premier League",
-      isLive: false,
-      isFeatured: true,
-      viewers: 12500,
-      importance: "Derby",
+  const items = (query.data || []).map((m: any) => ({
+    id: m.id,
+    homeTeam: {
+      name: m.home_team?.name_en || m.home_team_slug,
+      logo: m.home_team?.logo_url || "/api/placeholder/100/100",
+      shortName: m.home_team?.short_name_en || m.home_team_slug,
     },
-    {
-      id: 2,
-      homeTeam: {
-        name: "Mekelle 70 Enderta",
-        logo: "/api/placeholder/100/100",
-        shortName: "MEK",
-        form: "W-L-W-D-W",
-      },
-      awayTeam: {
-        name: "Dire Dawa City",
-        logo: "/api/placeholder/100/100",
-        shortName: "DDC",
-        form: "L-D-W-L-D",
-      },
-      date: "Oct 22, 2025",
-      time: "5:30 PM",
-      venue: "Mekelle Stadium",
-      league: "Premier League",
-      isLive: false,
-      isFeatured: false,
-      viewers: 8500,
+    awayTeam: {
+      name: m.away_team?.name_en || m.away_team_slug,
+      logo: m.away_team?.logo_url || "/api/placeholder/100/100",
+      shortName: m.away_team?.short_name_en || m.away_team_slug,
     },
-    {
-      id: 3,
-      homeTeam: {
-        name: "Hadiya Hossana",
-        logo: "/api/placeholder/100/100",
-        shortName: "HAD",
-        form: "D-D-W-L-W",
-      },
-      awayTeam: {
-        name: "Bahir Dar Kenema",
-        logo: "/api/placeholder/100/100",
-        shortName: "BDK",
-        form: "W-W-L-D-L",
-      },
-      date: "Oct 23, 2025",
-      time: "2:00 PM",
-      venue: "Hossana Stadium",
-      league: "Premier League",
-      isLive: false,
-      isFeatured: false,
-      viewers: 7200,
-    },
-  ];
+    date: new Date(m.date).toLocaleString(undefined, { month: "short", day: "numeric", year: "numeric" }),
+    time: new Date(m.date).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }),
+    venue: m.venue_en || "",
+    league: m.league?.name_en || m.league_slug,
+    isLive: m.status === "live",
+    isFeatured: false,
+    homeScore: m.score_home ?? undefined,
+    awayScore: m.score_away ?? undefined,
+    viewers: m.attendance ?? undefined,
+  }))
 
-  const recentMatches: Match[] = [
-    {
-      id: 4,
-      homeTeam: {
-        name: "Saint George",
-        logo: "/api/placeholder/100/100",
-        shortName: "STG",
-        form: "W-W-D-W-L",
-      },
-      awayTeam: {
-        name: "Wolaitta Dicha",
-        logo: "/api/placeholder/100/100",
-        shortName: "WOD",
-        form: "L-D-W-L-W",
-      },
-      date: "Oct 18, 2025",
-      time: "3:00 PM",
-      venue: "Addis Ababa Stadium",
-      league: "Premier League",
-      homeScore: 2,
-      awayScore: 1,
-      isLive: false,
-      isFeatured: true,
-      viewers: 14200,
-      matchEvents: [
-        "⚽ 23' Saladin",
-        "🟨 45' Tekeste",
-        "⚽ 67' Getaneh",
-        "🟨 78' Abebe",
-      ],
-    },
-    {
-      id: 5,
-      homeTeam: {
-        name: "Fasil Kenema",
-        logo: "/api/placeholder/100/100",
-        shortName: "FSK",
-        form: "D-W-L-W-W",
-      },
-      awayTeam: {
-        name: "Sebeta City",
-        logo: "/api/placeholder/100/100",
-        shortName: "SEC",
-        form: "W-L-D-L-D",
-      },
-      date: "Oct 17, 2025",
-      time: "4:00 PM",
-      venue: "Bahir Dar Stadium",
-      league: "Premier League",
-      homeScore: 1,
-      awayScore: 1,
-      isLive: false,
-      isFeatured: false,
-      viewers: 9800,
-    },
-  ];
-
-  const highlightMatches: Match[] = [
-    {
-      id: 7,
-      homeTeam: {
-        name: "Saint George",
-        logo: "/api/placeholder/100/100",
-        shortName: "STG",
-      },
-      awayTeam: {
-        name: "Fasil Kenema",
-        logo: "/api/placeholder/100/100",
-        shortName: "FSK",
-      },
-      date: "Oct 18, 2025",
-      time: "3:00 PM",
-      venue: "Addis Ababa Stadium",
-      league: "Premier League",
-      homeScore: 2,
-      awayScore: 1,
-      isLive: false,
-      isFeatured: true,
-      highlightVideo: "/api/placeholder/320/180",
-      videoDuration: "4:23",
-      views: "12.4K",
-    },
-    {
-      id: 8,
-      homeTeam: {
-        name: "Mekelle 70 Enderta",
-        logo: "/api/placeholder/100/100",
-        shortName: "MEK",
-      },
-      awayTeam: {
-        name: "Dire Dawa City",
-        logo: "/api/placeholder/100/100",
-        shortName: "DDC",
-      },
-      date: "Oct 15, 2025",
-      time: "5:00 PM",
-      venue: "Mekelle Stadium",
-      league: "Premier League",
-      homeScore: 2,
-      awayScore: 2,
-      isLive: false,
-      isFeatured: true,
-      highlightVideo: "/api/placeholder/320/180",
-      videoDuration: "3:45",
-      views: "8.7K",
-    },
-  ];
-
-  const popularMatches: Match[] = [
-    {
-      id: 9,
-      homeTeam: {
-        name: "Saint George",
-        logo: "/api/placeholder/100/100",
-        shortName: "STG",
-      },
-      awayTeam: {
-        name: "Mekelle 70 Enderta",
-        logo: "/api/placeholder/100/100",
-        shortName: "MEK",
-      },
-      date: "Oct 22, 2025",
-      time: "3:00 PM",
-      venue: "Addis Ababa Stadium",
-      league: "Premier League",
-      isLive: false,
-      isFeatured: true,
-      popularity: 98,
-      trending: true,
-    },
-    {
-      id: 10,
-      homeTeam: {
-        name: "Fasil Kenema",
-        logo: "/api/placeholder/100/100",
-        shortName: "FSK",
-      },
-      awayTeam: {
-        name: "Dire Dawa City",
-        logo: "/api/placeholder/100/100",
-        shortName: "DDC",
-      },
-      date: "Oct 22, 2025",
-      time: "5:30 PM",
-      venue: "Bahir Dar Stadium",
-      league: "Premier League",
-      isLive: false,
-      isFeatured: true,
-      popularity: 92,
-    },
-  ];
+  const upcomingMatches = items.filter((m: any) => !m.homeScore && !m.awayScore)
+  const recentMatches = items.filter((m: any) => m.homeScore !== undefined && m.awayScore !== undefined)
+  const highlightMatches: any[] = []
+  const popularMatches = items
+    .filter((m: any) => typeof m.viewers === "number")
+    .sort((a: any, b: any) => (b.viewers as number) - (a.viewers as number))
 
   const getMatchesForView = () => {
     switch (currentView.id) {

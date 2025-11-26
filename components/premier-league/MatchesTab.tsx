@@ -2,6 +2,8 @@
 "use client";
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getMatchesByLeagueSlug } from '@/lib/data/matches';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -47,145 +49,28 @@ type Match = {
   broadcast?: string;
 };
 
-export default function MatchesTab() {
+export default function MatchesTab({ initialData = [], leagueSlug = 'premier-league' }: { initialData?: any[]; leagueSlug?: string }) {
   const [activeTab, setActiveTab] = useState("fixtures");
   const [currentMatchday, setCurrentMatchday] = useState(11);
   const [selectedMatch, setSelectedMatch] = useState<number | null>(null);
+  const query = useQuery({ queryKey: ['matches', leagueSlug], queryFn: () => getMatchesByLeagueSlug(leagueSlug), initialData })
 
-  // Sample match data
-  const recentMatches: Match[] = [
-    {
-      id: 1,
-      homeTeam: { name: "Saint George", logo: "/api/placeholder/60/60", shortName: "STG" },
-      awayTeam: { name: "Fasil Kenema", logo: "/api/placeholder/60/60", shortName: "FAK" },
-      homeScore: 3,
-      awayScore: 0,
-      date: "2025-10-15",
-      time: "15:00",
-      status: "FT",
-      venue: "Addis Ababa Stadium",
-      matchday: 11,
-      attendance: "25,000",
-      highlights: true,
-      matchEvents: [
-        { minute: 23, team: "home", type: "goal", player: "Saladin" },
-        { minute: 45, team: "home", type: "goal", player: "Tekeste" },
-        { minute: 67, team: "home", type: "goal", player: "Getaneh" },
-        { minute: 78, team: "home", type: "goal", player: "Abebe" }
-      ]
-    },
-    {
-      id: 2,
-      homeTeam: { name: "Mekelle 70 Enderta", logo: "/api/placeholder/60/60", shortName: "MEK" },
-      awayTeam: { name: "Dire Dawa City", logo: "/api/placeholder/60/60", shortName: "DDC" },
-      homeScore: 2,
-      awayScore: 1,
-      date: "2025-10-15",
-      time: "15:00",
-      status: "FT",
-      venue: "Mekelle Stadium",
-      matchday: 11,
-      attendance: "18,000",
-      highlights: false,
-      matchEvents: [
-        { minute: 15, team: "away", type: "goal", player: "Samuel" },
-        { minute: 58, team: "home", type: "goal", player: "Dawit" },
-        { minute: 82, team: "away", type: "goal", player: "Michael" }
-      ]
-    },
-    {
-      id: 3,
-      homeTeam: { name: "Hadiya Hossana", logo: "/api/placeholder/60/60", shortName: "HAD" },
-      awayTeam: { name: "Bahir Dar Kenema", logo: "/api/placeholder/60/60", shortName: "BDK" },
-      homeScore: 1,
-      awayScore: 2,
-      date: "2025-10-15",
-      time: "15:00",
-      status: "FT",
-      venue: "Hossana Stadium",
-      matchday: 11,
-      attendance: "12,000",
-      highlights: false,
-      matchEvents: [
-        { minute: 34, team: "away", type: "goal", player: "Mekonnen" },
-        { minute: 67, team: "away", type: "goal", player: "Tadesse" },
-        { minute: 78, team: "home", type: "goal", player: "Kassahun" }
-      ]
-    },
-    {
-      id: 4,
-      homeTeam: { name: "Wolaitta Dicha", logo: "/api/placeholder/60/60", shortName: "WOD" },
-      awayTeam: { name: "Sebeta City", logo: "/api/placeholder/60/60", shortName: "SEC" },
-      homeScore: 2,
-      awayScore: 2,
-      date: "2025-10-15",
-      time: "15:00",
-      status: "FT",
-      venue: "Wolaitta Stadium",
-      matchday: 11,
-      attendance: "8,000",
-      highlights: false,
-      matchEvents: [
-        { minute: 22, team: "home", type: "goal", player: "Yonas" },
-        { minute: 58, team: "away", type: "goal", player: "Fikre" }
-      ]
-    }
-  ];
-
-  const upcomingMatches: Match[] = [
-    {
-      id: 5,
-      homeTeam: { name: "Ethiopia Bunna", logo: "/api/placeholder/60/60", shortName: "ETH" },
-      awayTeam: { name: "Jimma Aba Jifar", logo: "/api/placeholder/60/60", shortName: "JIM" },
-      homeScore: null,
-      awayScore: null,
-      date: "2025-10-22",
-      time: "15:00",
-      status: "UPCOMING",
-      venue: "Addis Ababa Stadium",
-      matchday: 12,
-      broadcast: "ETV Sports"
-    },
-    {
-      id: 6,
-      homeTeam: { name: "Welwalo Adigrat", logo: "/api/placeholder/60/60", shortName: "WEL" },
-      awayTeam: { name: "Arba Minch Ketema", logo: "/api/placeholder/60/60", shortName: "ARB" },
-      homeScore: null,
-      awayScore: null,
-      date: "2025-10-22",
-      time: "15:00",
-      status: "UPCOMING",
-      venue: "Adigrat Stadium",
-      matchday: 12,
-      broadcast: "ETV Sports"
-    },
-    {
-      id: 7,
-      homeTeam: { name: "Sidama", logo: "/api/placeholder/60/60", shortName: "SID" },
-      awayTeam: { name: "Mekelle", logo: "/api/placeholder/60/60", shortName: "MEK" },
-      homeScore: null,
-      awayScore: null,
-      date: "2025-10-25",
-      time: "16:00",
-      status: "UPCOMING",
-      venue: "Hawassa Stadium",
-      matchday: 12,
-      broadcast: "Fana TV"
-    },
-    {
-      id: 8,
-      homeTeam: { name: "Saint George", logo: "/api/placeholder/60/60", shortName: "STG" },
-      awayTeam: { name: "Wolaitta Dicha", logo: "/api/placeholder/60/60", shortName: "WOD" },
-      homeScore: null,
-      awayScore: null,
-      date: "2025-10-25",
-      time: "16:00",
-      status: "UPCOMING",
-      venue: "Addis Ababa Stadium",
-      matchday: 12,
-      broadcast: "ETV Sports"
-    }
-  ];
+  const items = (query.data || []).map((m: any) => ({
+    id: m.id,
+    homeTeam: { name: m.home_team?.name_en || m.home_team_slug, logo: m.home_team?.logo_url || '/api/placeholder/60/60', shortName: m.home_team?.short_name_en || m.home_team_slug },
+    awayTeam: { name: m.away_team?.name_en || m.away_team_slug, logo: m.away_team?.logo_url || '/api/placeholder/60/60', shortName: m.away_team?.short_name_en || m.away_team_slug },
+    homeScore: m.score_home ?? null,
+    awayScore: m.score_away ?? null,
+    date: m.date,
+    time: new Date(m.date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }),
+    status: (m.status === 'finished' ? 'FT' : m.status === 'live' ? 'LIVE' : 'UPCOMING') as 'FT' | 'LIVE' | 'UPCOMING',
+    venue: m.venue_en || '',
+    matchday: 0,
+    attendance: m.attendance ? String(m.attendance) : undefined,
+    highlights: false,
+  }))
+  const recentMatches: Match[] = items.filter((m: any) => m.status === 'FT')
+  const upcomingMatches: Match[] = items.filter((m: any) => m.status !== 'FT')
 
   const getStatusColor = (status: Match['status']) => {
     switch (status) {

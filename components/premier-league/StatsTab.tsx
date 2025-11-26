@@ -2,6 +2,9 @@
 "use client";
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getTopScorersByLeagueSlug } from '@/lib/data/topScorers';
+import { getPlayersByLeagueSlug } from '@/lib/data/players';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -77,88 +80,67 @@ interface TeamDiscipline extends TeamStats {
   offsides: number;
 }
 
-export default function StatsTab() {
+export default function StatsTab({ initialTopScorers = [], initialPlayers = [], leagueSlug = 'premier-league' }: { initialTopScorers?: any[]; initialPlayers?: any[]; leagueSlug?: string }) {
   const [activeTab, setActiveTab] = useState("player-stats");
   const [playerStatType, setPlayerStatType] = useState("goals");
   const [teamStatType, setTeamStatType] = useState("attack");
   const [selectedSeason, setSelectedSeason] = useState("2025/2026");
   const [showFilters, setShowFilters] = useState(false);
+  const topScorersQuery = useQuery({ queryKey: ['top-scorers', leagueSlug], queryFn: () => getTopScorersByLeagueSlug(leagueSlug), initialData: initialTopScorers })
+  const playersQuery = useQuery({ queryKey: ['players', leagueSlug], queryFn: () => getPlayersByLeagueSlug(leagueSlug), initialData: initialPlayers })
 
-  // Sample player stats data
-  const playerStats: {
-    goals: GoalScorer[];
-    assists: Assister[];
-    rating: PlayerRating[];
-  } = {
-    goals: [
-      { rank: 1, name: "Getaneh Kebede", team: "Saint George", goals: 12, matches: 10, assists: 3, shots: 35, accuracy: "34%" },
-      { rank: 2, name: "Shimeles Bekele", team: "Fasil Kenema", goals: 10, matches: 10, assists: 5, shots: 28, accuracy: "36%" },
-      { rank: 3, name: "Abel Yalew", team: "Mekelle 70 Enderta", goals: 9, matches: 10, assists: 4, shots: 25, accuracy: "36%" },
-      { rank: 4, name: "Dawit Fekadu", team: "Dire Dawa City", goals: 8, matches: 10, assists: 2, shots: 22, accuracy: "36%" },
-      { rank: 5, name: "Salhadin Seid", team: "Hadiya Hossana", goals: 7, matches: 10, assists: 6, shots: 20, accuracy: "35%" },
-      { rank: 6, name: "Mesfin Tadesse", team: "Bahir Dar Kenema", goals: 6, matches: 10, assists: 3, shots: 18, accuracy: "33%" },
-      { rank: 7, name: "Yonatan Kebede", team: "Wolaitta Dicha", goals: 5, matches: 10, assists: 2, shots: 16, accuracy: "31%" },
-      { rank: 8, name: "Abebe Animaw", team: "Sebeta City", goals: 5, matches: 10, assists: 4, shots: 15, accuracy: "33%" },
-    ],
-    assists: [
-      { rank: 1, name: "Salhadin Seid", team: "Hadiya Hossana", assists: 8, matches: 10, goals: 7, keyPasses: 45, passAccuracy: "78%" },
-      { rank: 2, name: "Shimeles Bekele", team: "Fasil Kenema", assists: 7, matches: 10, goals: 10, keyPasses: 42, passAccuracy: "75%" },
-      { rank: 3, name: "Tekle Welday", team: "Saint George", assists: 6, matches: 10, goals: 3, keyPasses: 38, passAccuracy: "80%" },
-      { rank: 4, name: "Abel Yalew", team: "Mekelle 70 Enderta", assists: 5, matches: 10, goals: 9, keyPasses: 35, passAccuracy: "77%" },
-      { rank: 5, name: "Getaneh Kebede", team: "Saint George", assists: 5, matches: 10, goals: 12, keyPasses: 32, passAccuracy: "76%" },
-      { rank: 6, name: "Dawit Fekadu", team: "Dire Dawa City", assists: 4, matches: 10, goals: 8, keyPasses: 30, passAccuracy: "74%" },
-      { rank: 7, name: "Mesfin Tadesse", team: "Bahir Dar Kenema", assists: 4, matches: 10, goals: 6, keyPasses: 28, passAccuracy: "73%" },
-      { rank: 8, name: "Abebe Animaw", team: "Sebeta City", assists: 4, matches: 10, goals: 5, keyPasses: 26, passAccuracy: "75%" },
-    ],
-    rating: [
-      { rank: 1, name: "Tekle Welday", team: "Saint George", rating: 8.5, matches: 10, mom: 4, avgRating: 8.2 },
-      { rank: 2, name: "Samuel Aregawi", team: "Fasil Kenema", rating: 8.2, matches: 10, mom: 3, avgRating: 7.9 },
-      { rank: 3, name: "Yared Bayeh", team: "Mekelle 70 Enderta", rating: 7.9, matches: 10, mom: 2, avgRating: 7.6 },
-      { rank: 4, name: "Mekonnen Kassa", team: "Dire Dawa City", rating: 7.7, matches: 10, mom: 2, avgRating: 7.4 },
-      { rank: 5, name: "Abduljelil Hassen", team: "Hadiya Hossana", rating: 7.6, matches: 10, mom: 1, avgRating: 7.3 },
-      { rank: 6, name: "Biruk Wondimu", team: "Bahir Dar Kenema", rating: 7.5, matches: 10, mom: 1, avgRating: 7.2 },
-      { rank: 7, name: "Dawit Fekadu", team: "Dire Dawa City", rating: 7.4, matches: 10, mom: 1, avgRating: 7.1 },
-      { rank: 8, name: "Salhadin Seid", team: "Hadiya Hossana", rating: 7.3, matches: 10, mom: 0, avgRating: 7.0 },
-    ]
-  };
+  const topScorers = (topScorersQuery.data || [])
+  const players = (playersQuery.data || [])
+  const playerStats: { goals: GoalScorer[]; assists: Assister[]; rating: PlayerRating[] } = {
+    goals: topScorers.map((t: any, i: number) => ({
+      rank: i + 1,
+      name: t.player_slug,
+      team: t.team_slug,
+      goals: t.goals,
+      matches: 0,
+      assists: t.assists ?? 0,
+      shots: 0,
+      accuracy: "",
+    })),
+    assists: players
+      .map((p: any) => ({
+        rank: 0,
+        name: p.name_en,
+        team: p.team_slug,
+        assists: Number(p.stats?.assists ?? 0),
+        matches: 0,
+        goals: Number(p.stats?.goals ?? 0),
+        keyPasses: Number(p.stats?.key_passes ?? 0),
+        passAccuracy: String(p.stats?.pass_accuracy ?? ""),
+      }))
+      .sort((a: any, b: any) => b.assists - a.assists)
+      .map((p: any, i: number) => ({ ...p, rank: i + 1 })),
+    rating: players
+      .map((p: any) => ({
+        rank: 0,
+        name: p.name_en,
+        team: p.team_slug,
+        rating: Number(p.stats?.rating ?? 0),
+        matches: 0,
+        mom: Number(p.stats?.mom ?? 0),
+        avgRating: Number(p.stats?.avg_rating ?? 0),
+      }))
+      .sort((a: any, b: any) => b.rating - a.rating)
+      .map((p: any, i: number) => ({ ...p, rank: i + 1 })),
+  }
 
-  // Sample team stats data
-  const teamStats: {
-    attack: TeamAttack[];
-    defense: TeamDefense[];
-    discipline: TeamDiscipline[];
-  } = {
-    attack: [
-      { rank: 1, team: "Saint George", goals: 28, shots: 120, shotsOnTarget: 65, possession: "58%", bigChances: 24 },
-      { rank: 2, team: "Fasil Kenema", goals: 22, shots: 105, shotsOnTarget: 55, possession: "54%", bigChances: 20 },
-      { rank: 3, team: "Mekelle 70 Enderta", goals: 20, shots: 98, shotsOnTarget: 48, possession: "52%", bigChances: 18 },
-      { rank: 4, team: "Dire Dawa City", goals: 18, shots: 92, shotsOnTarget: 42, possession: "50%", bigChances: 16 },
-      { rank: 5, team: "Hadiya Hossana", goals: 16, shots: 85, shotsOnTarget: 38, possession: "48%", bigChances: 14 },
-      { rank: 6, team: "Bahir Dar Kenema", goals: 15, shots: 80, shotsOnTarget: 35, possession: "46%", bigChances: 12 },
-      { rank: 7, team: "Wolaitta Dicha", goals: 14, shots: 75, shotsOnTarget: 32, possession: "44%", bigChances: 11 },
-      { rank: 8, team: "Sebeta City", goals: 12, shots: 70, shotsOnTarget: 28, possession: "42%", bigChances: 10 },
-    ],
-    defense: [
-      { rank: 1, team: "Saint George", goalsConceded: 8, cleanSheets: 4, tackles: 120, interceptions: 85, blocks: 45 },
-      { rank: 2, team: "Fasil Kenema", goalsConceded: 10, cleanSheets: 3, tackles: 110, interceptions: 78, blocks: 40 },
-      { rank: 3, team: "Mekelle 70 Enderta", goalsConceded: 12, cleanSheets: 2, tackles: 105, interceptions: 72, blocks: 38 },
-      { rank: 4, team: "Dire Dawa City", goalsConceded: 14, cleanSheets: 2, tackles: 98, interceptions: 68, blocks: 35 },
-      { rank: 5, team: "Hadiya Hossana", goalsConceded: 15, cleanSheets: 1, tackles: 92, interceptions: 65, blocks: 32 },
-      { rank: 6, team: "Bahir Dar Kenema", goalsConceded: 16, cleanSheets: 1, tackles: 85, interceptions: 60, blocks: 30 },
-      { rank: 7, team: "Wolaitta Dicha", goalsConceded: 18, cleanSheets: 0, tackles: 80, interceptions: 55, blocks: 28 },
-      { rank: 8, team: "Sebeta City", goalsConceded: 20, cleanSheets: 0, tackles: 75, interceptions: 50, blocks: 25 },
-    ],
-    discipline: [
-      { rank: 1, team: "Saint George", yellowCards: 12, redCards: 0, fouls: 85, offsides: 20 },
-      { rank: 2, team: "Fasil Kenema", yellowCards: 15, redCards: 1, fouls: 92, offsides: 25 },
-      { rank: 3, team: "Mekelle 70 Enderta", yellowCards: 18, redCards: 1, fouls: 98, offsides: 22 },
-      { rank: 4, team: "Dire Dawa City", yellowCards: 20, redCards: 2, fouls: 105, offsides: 28 },
-      { rank: 5, team: "Hadiya Hossana", yellowCards: 22, redCards: 2, fouls: 110, offsides: 30 },
-      { rank: 6, team: "Bahir Dar Kenema", yellowCards: 25, redCards: 3, fouls: 118, offsides: 32 },
-      { rank: 7, team: "Wolaitta Dicha", yellowCards: 28, redCards: 3, fouls: 125, offsides: 35 },
-      { rank: 8, team: "Sebeta City", yellowCards: 30, redCards: 4, fouls: 132, offsides: 38 },
-    ]
-  };
+  const teamAttackMap = topScorers
+    .reduce((acc: any, t: any) => {
+      acc[t.team_slug] = (acc[t.team_slug] || 0) + Number(t.goals || 0)
+      return acc
+    }, {})
+  const teamIds = Array.from(new Set([ ...Object.keys(teamAttackMap), ...players.map((p: any) => p.team_slug) ]))
+  const attackRows: TeamAttack[] = Object.entries(teamAttackMap)
+    .map(([team, goals]: any, i: number) => ({ rank: i + 1, team, goals, shots: 0, shotsOnTarget: 0, possession: "", bigChances: 0 }))
+    .sort((a, b) => b.goals - a.goals)
+    .map((row, i) => ({ ...row, rank: i + 1 }))
+  const defenseRows: TeamDefense[] = teamIds.map((team, i) => ({ rank: i + 1, team, goalsConceded: 0, cleanSheets: 0, tackles: 0, interceptions: 0, blocks: 0 }))
+  const disciplineRows: TeamDiscipline[] = teamIds.map((team, i) => ({ rank: i + 1, team, yellowCards: 0, redCards: 0, fouls: 0, offsides: 0 }))
 
   const seasons = [
     { value: "2025/2026", label: "2025/2026" },
@@ -491,7 +473,7 @@ export default function StatsTab() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {teamStats[teamStatType as keyof typeof teamStats].map((team, index) => (
+                      {(teamStatType === 'attack' ? attackRows : teamStatType === 'defense' ? defenseRows : disciplineRows).map((team, index) => (
                         <TableRow key={index} className="hover:bg-zinc-800/30 transition-colors">
                           <TableCell className="font-medium text-center">
                             <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${getRankBadgeColor(team.rank)}`}>

@@ -2,6 +2,9 @@
 "use client";
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getStandingsByLeagueSlug } from '@/lib/data/standings';
+import { getTeamsByLeagueSlug } from '@/lib/data/teams';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,153 +12,29 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Trophy, TrendingUp, TrendingDown, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export default function TeamsTable() {
+export default function TeamsTable({ initialStandings = [], initialTeams = [], leagueSlug = 'premier-league' }: { initialStandings?: any[]; initialTeams?: any[]; leagueSlug?: string }) {
   const [sortColumn, setSortColumn] = useState('position');
   const [sortDirection, setSortDirection] = useState('asc');
+  const standingsQuery = useQuery({ queryKey: ['standings', leagueSlug], queryFn: () => getStandingsByLeagueSlug(leagueSlug), initialData: initialStandings })
+  const teamsQuery = useQuery({ queryKey: ['teams', leagueSlug], queryFn: () => getTeamsByLeagueSlug(leagueSlug), initialData: initialTeams })
 
-  // Sample teams data
-  const teams = [
-    { 
-      position: 1, 
-      team: 'Saint George', 
-      played: 10, 
-      won: 8, 
-      drawn: 1, 
-      lost: 1, 
-      goalsFor: 22, 
-      goalsAgainst: 8, 
-      goalDifference: 14, 
-      points: 25,
-      form: ['W', 'W', 'D', 'W', 'W'],
-      trend: 'up'
-    },
-    { 
-      position: 2, 
-      team: 'Fasil Kenema', 
-      played: 10, 
-      won: 7, 
-      drawn: 2, 
-      lost: 1, 
-      goalsFor: 18, 
-      goalsAgainst: 9, 
-      goalDifference: 9, 
-      points: 23,
-      form: ['W', 'D', 'W', 'W', 'L'],
-      trend: 'up'
-    },
-    { 
-      position: 3, 
-      team: 'Mekelle 70 Enderta', 
-      played: 10, 
-      won: 6, 
-      drawn: 3, 
-      lost: 1, 
-      goalsFor: 16, 
-      goalsAgainst: 10, 
-      goalDifference: 6, 
-      points: 21,
-      form: ['W', 'W', 'D', 'D', 'W'],
-      trend: 'up'
-    },
-    { 
-      position: 4, 
-      team: 'Dire Dawa City', 
-      played: 10, 
-      won: 6, 
-      drawn: 1, 
-      lost: 3, 
-      goalsFor: 14, 
-      goalsAgainst: 11, 
-      goalDifference: 3, 
-      points: 19,
-      form: ['L', 'W', 'W', 'L', 'W'],
-      trend: 'down'
-    },
-    { 
-      position: 5, 
-      team: 'Hadiya Hossana', 
-      played: 10, 
-      won: 5, 
-      drawn: 2, 
-      lost: 3, 
-      goalsFor: 13, 
-      goalsAgainst: 12, 
-      goalDifference: 1, 
-      points: 17,
-      form: ['D', 'L', 'W', 'W', 'L'],
-      trend: 'down'
-    },
-    { 
-      position: 6, 
-      team: 'Bahir Dar Kenema', 
-      played: 10, 
-      won: 4, 
-      drawn: 3, 
-      lost: 3, 
-      goalsFor: 12, 
-      goalsAgainst: 11, 
-      goalDifference: 1, 
-      points: 15,
-      form: ['W', 'L', 'D', 'W', 'L'],
-      trend: 'up'
-    },
-    { 
-      position: 7, 
-      team: 'Wolaitta Dicha', 
-      played: 10, 
-      won: 4, 
-      drawn: 2, 
-      lost: 4, 
-      goalsFor: 11, 
-      goalsAgainst: 13, 
-      goalDifference: -2, 
-      points: 14,
-      form: ['L', 'D', 'L', 'W', 'D'],
-      trend: 'down'
-    },
-    { 
-      position: 8, 
-      team: 'Sebeta City', 
-      played: 10, 
-      won: 3, 
-      drawn: 3, 
-      lost: 4, 
-      goalsFor: 10, 
-      goalsAgainst: 14, 
-      goalDifference: -4, 
-      points: 12,
-      form: ['D', 'W', 'L', 'D', 'L'],
-      trend: 'down'
-    },
-    { 
-      position: 9, 
-      team: 'Ethiopia Bunna', 
-      played: 10, 
-      won: 3, 
-      drawn: 2, 
-      lost: 5, 
-      goalsFor: 9, 
-      goalsAgainst: 15, 
-      goalDifference: -6, 
-      points: 11,
-      form: ['L', 'L', 'W', 'D', 'W'],
-      trend: 'up'
-    },
-    { 
-      position: 10, 
-      team: 'Jimma Aba Jifar', 
-      played: 10, 
-      won: 2, 
-      drawn: 3, 
-      lost: 5, 
-      goalsFor: 8, 
-      goalsAgainst: 13, 
-      goalDifference: -5, 
-      points: 9,
-      form: ['L', 'D', 'W', 'L', 'L'],
-      trend: 'down'
+  const teams = (standingsQuery.data || []).map((s: any) => {
+    const t = (teamsQuery.data || []).find((tt: any) => tt.slug === s.team_slug)
+    return {
+      position: s.rank,
+      team: t?.name_en || s.team_slug,
+      played: s.played,
+      won: s.won,
+      drawn: s.drawn,
+      lost: s.lost,
+      goalsFor: s.goals_for,
+      goalsAgainst: s.goals_against,
+      goalDifference: s.gd,
+      points: s.points,
+      form: [],
+      trend: 'up',
     }
-  ];
+  })
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {

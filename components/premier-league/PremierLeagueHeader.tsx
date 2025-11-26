@@ -17,7 +17,16 @@ import LeagueTableTab from './LeagueTableTab';
 import StatsTab from './StatsTab';
 import TeamsTab from './TeamsTab'; // Import new TeamsTab component
 
-export default function PremierLeagueHeader() {
+type Props = {
+  initialMatches?: any[]
+  initialNews?: any[]
+  initialStandings?: any[]
+  initialTeams?: any[]
+  initialTopScorers?: any[]
+  initialPlayers?: any[]
+}
+
+export default function PremierLeagueHeader({ initialMatches = [], initialNews = [], initialStandings = [], initialTeams = [], initialTopScorers = [], initialPlayers = [] }: Props) {
   const [activeTab, setActiveTab] = useState("overview");
 
   // Sample league data
@@ -77,7 +86,7 @@ export default function PremierLeagueHeader() {
 
       {/* Tabs Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 bg-zinc-800/30 border-zinc-700/50 p-1 h-auto items-center flex">
+        <TabsList className="grid w-full grid-cols-5 bg-zinc-800/30 border-zinc-700/50 p-1 h-auto items-center">
           <TabsTrigger 
             value="overview" 
             className={cn(
@@ -133,13 +142,13 @@ export default function PremierLeagueHeader() {
         {/* Tab Contents */}
         <TabsContent value="overview" className="mt-6 space-y-6 items-center">
           {/* First Row: Matches Section */}
-          <MatchesSection />
+          <MatchesSection initialData={initialMatches} leagueSlug={"premier-league"} />
           
           {/* Second Row: Teams Table and Team of the Week */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Teams Table - Takes 2 columns (65%) */}
             <div className="lg:col-span-2">
-              <TeamsTable />
+              <TeamsTable initialStandings={initialStandings} initialTeams={initialTeams} leagueSlug={"premier-league"} />
             </div>
             
             {/* Team of the Week - Takes 1 column (35%) */}
@@ -149,23 +158,23 @@ export default function PremierLeagueHeader() {
           </div>
           
           {/* Third Row: News Section */}
-          <NewsSection />
+          <NewsSection initialData={initialNews} leagueSlug={"premier-league"} />
         </TabsContent>
         
         <TabsContent value="matches" className="mt-6">
-          <MatchesTab />
+          <MatchesTab initialData={initialMatches} leagueSlug={"premier-league"} />
         </TabsContent>
         
         <TabsContent value="table" className="mt-6">
-          <LeagueTableTab />
+          <LeagueTableTab initialStandings={initialStandings} initialTeams={initialTeams} leagueSlug={"premier-league"} />
         </TabsContent>
         
         <TabsContent value="teams" className="mt-6">
-          <TeamsTab />
+          <TeamsTab initialTeams={initialTeams} initialStandings={initialStandings} leagueSlug={"premier-league"} />
         </TabsContent>
         
         <TabsContent value="stats" className="mt-6">
-          <StatsTab />
+          <StatsTab initialTopScorers={initialTopScorers} initialPlayers={initialPlayers} leagueSlug={"premier-league"} />
         </TabsContent>
       </Tabs>
     </div>

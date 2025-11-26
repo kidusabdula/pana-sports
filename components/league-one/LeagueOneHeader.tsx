@@ -179,13 +179,13 @@ export default function LeagueOneHeader() {
         {/* Tab Contents */}
         <TabsContent value="overview" className="mt-6 space-y-6">
           {/* First Row: Matches Section */}
-          <MatchesSection />
+          <MatchesSection leagueSlug="league-one" />
 
           {/* Second Row: Teams Table and Team of the Week */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Teams Table - Takes 2 columns (65%) */}
             <div className="lg:col-span-2">
-              <TeamsTable />
+              <TeamsTable leagueSlug="league-one" />
             </div>
 
             {/* Team of the Week - Takes 1 column (35%) */}
@@ -195,15 +195,15 @@ export default function LeagueOneHeader() {
           </div>
 
           {/* Third Row: News Section */}
-          <NewsSection />
+          <NewsSection leagueSlug="league-one" />
         </TabsContent>
 
         <TabsContent value="matches" className="mt-6">
-          <MatchesTab />
+          <MatchesTab leagueSlug="league-one" />
         </TabsContent>
 
         <TabsContent value="table" className="mt-6">
-          <LeagueTableTab />
+          <LeagueTableTab leagueSlug="league-one" />
         </TabsContent>
 
         <TabsContent value="teams" className="mt-6">

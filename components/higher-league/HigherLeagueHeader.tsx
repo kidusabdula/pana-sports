@@ -137,13 +137,13 @@ export default function HigherLeagueHeader() {
 
         <TabsContent value="overview" className="mt-6 space-y-6">
           {/* First Row: Matches Section */}
-          <MatchesSection />
+          <MatchesSection leagueSlug="higher-league" />
 
           {/* Second Row: Teams Table and Team of the Week */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Teams Table - Takes 2 columns (65%) */}
             <div className="lg:col-span-2">
-              <TeamsTable />
+              <TeamsTable leagueSlug="higher-league" />
             </div>
 
             {/* Team of the Week - Takes 1 column (35%) */}
@@ -153,15 +153,15 @@ export default function HigherLeagueHeader() {
           </div>
 
           {/* Third Row: News Section */}
-          <NewsSection />
+          <NewsSection leagueSlug="higher-league" />
         </TabsContent>
 
         <TabsContent value="matches" className="mt-6">
-          <MatchesTab />
+          <MatchesTab leagueSlug="higher-league" />
         </TabsContent>
 
         <TabsContent value="table" className="mt-6">
-          <LeagueTableTab />
+          <LeagueTableTab leagueSlug="higher-league" />
         </TabsContent>
 
         <TabsContent value="stats" className="mt-6">
