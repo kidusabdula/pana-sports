@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    remotePatterns: [...],
+  
+  },
   dangerouslyAllowSVG: true,
 
   contentDispositionType: "attachment",
@@ -26,6 +30,7 @@ const nextConfig = {
         hostname: "img.sofascore.com",
       },
     ],
+    unoptimized: true,
 
     // Enable your custom loader
     loader: "custom",
