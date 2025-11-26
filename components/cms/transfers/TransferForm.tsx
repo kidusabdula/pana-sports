@@ -177,8 +177,8 @@ export default function TransferForm({ transfer, onSuccess, onCancel }: Transfer
                         From Team (Optional)
                       </FormLabel>
                       <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value || ""}
+                        onValueChange={(value) => field.onChange(value === "free-agent" ? "" : value)}
+                        defaultValue={field.value || "free-agent"}
                       >
                         <FormControl>
                           <SelectTrigger className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg">
@@ -186,7 +186,7 @@ export default function TransferForm({ transfer, onSuccess, onCancel }: Transfer
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">Free Agent</SelectItem>
+                          <SelectItem value="free-agent">Free Agent</SelectItem>
                           {teams?.map((team) => (
                             <SelectItem key={team.id} value={team.slug}>
                               {team.name_en}

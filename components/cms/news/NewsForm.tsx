@@ -293,8 +293,8 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
                         League (Optional)
                       </FormLabel>
                       <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value || ""}
+                        onValueChange={(value) => field.onChange(value === "none" ? "" : value)}
+                        defaultValue={field.value || "none"}
                       >
                         <FormControl>
                           <SelectTrigger className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg">
@@ -302,7 +302,7 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">None</SelectItem>
+                          <SelectItem value="none">None</SelectItem>
                           {leagues?.map((league) => (
                             <SelectItem key={league.id} value={league.slug}>
                               {league.name_en}
