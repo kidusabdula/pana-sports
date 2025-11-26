@@ -61,18 +61,19 @@ export default function TopScorerTable() {
   const { data: teams } = useTeams();
   const deleteTopScorerMutation = useDeleteTopScorer();
 
-  const filteredTopScorers = topScorers?.filter((scorer) => {
-    const player = players?.find(p => p.slug === scorer.player_slug);
-    const matchesSearch =
-      player?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      player?.name_am?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      scorer.player_slug?.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredTopScorers =
+    topScorers?.filter((scorer) => {
+      const player = players?.find((p) => p.slug === scorer.player_slug);
+      const matchesSearch =
+        player?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        player?.name_am?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        scorer.player_slug?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesLeague =
-      filterLeague === "all" || scorer.league_slug === filterLeague;
+      const matchesLeague =
+        filterLeague === "all" || scorer.league_slug === filterLeague;
 
-    return matchesSearch && matchesLeague;
-  }) || [];
+      return matchesSearch && matchesLeague;
+    }) || [];
 
   const handleDelete = async (id: string, playerName: string) => {
     const promise = deleteTopScorerMutation.mutateAsync(id);
@@ -165,8 +166,8 @@ export default function TopScorerTable() {
                   Top Scorer
                 </p>
                 <p className="text-3xl font-bold text-foreground mt-1">
-                  {topScorers?.length > 0 
-                    ? Math.max(...topScorers.map(s => s.goals)) 
+                  {topScorers?.length > 0
+                    ? Math.max(...topScorers.map((s) => s.goals))
                     : 0}
                 </p>
               </div>
@@ -262,16 +263,22 @@ export default function TopScorerTable() {
                   <TableCell colSpan={8} className="text-center py-12">
                     <div className="flex flex-col items-center space-y-3">
                       <Trophy className="h-12 w-12 text-muted-foreground/20" />
-                      <p className="text-muted-foreground">No top scorers found.</p>
+                      <p className="text-muted-foreground">
+                        No top scorers found.
+                      </p>
                     </div>
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredTopScorers.map((scorer, index) => {
-                  const player = players?.find(p => p.slug === scorer.player_slug);
-                  const team = teams?.find(t => t.slug === scorer.team_slug);
-                  const league = leagues?.find(l => l.slug === scorer.league_slug);
-                  
+                  const player = players?.find(
+                    (p) => p.slug === scorer.player_slug
+                  );
+                  const team = teams?.find((t) => t.slug === scorer.team_slug);
+                  const league = leagues?.find(
+                    (l) => l.slug === scorer.league_slug
+                  );
+
                   return (
                     <TableRow
                       key={scorer.id}
@@ -362,17 +369,22 @@ export default function TopScorerTable() {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Top Scorer</AlertDialogTitle>
+                                <AlertDialogTitle>
+                                  Delete Top Scorer
+                                </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete this top scorer record?
-                                  This action cannot be undone.
+                                  Are you sure you want to delete this top
+                                  scorer record? This action cannot be undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() =>
-                                    handleDelete(scorer.id, player?.name_en || "Unknown Player")
+                                    handleDelete(
+                                      scorer.id,
+                                      player?.name_en || "Unknown Player"
+                                    )
                                   }
                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 >
