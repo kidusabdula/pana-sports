@@ -49,7 +49,7 @@ export const createPlayerInputSchema = z.object({
     .min(1, "Jersey number must be at least 1")
     .max(99, "Jersey number must be less than 100")
     .optional(),
-  dob: z.string().datetime().optional(),
+  dob: z.string().optional(),
   bio_en: z
     .string()
     .max(1000, "Bio must be less than 1000 characters")
