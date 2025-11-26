@@ -1,141 +1,149 @@
-// components/shared/LeagueStandings.tsx
 "use client";
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, ChevronRight, Trophy, TrendingUp, TrendingDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Trophy, Minus, ChevronUp, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 export default function LeagueStandings() {
-  const [currentLeagueIndex, setCurrentLeagueIndex] = useState(0);
-  
-  const leagues = [
-    {
-      name: "Premier League",
-      icon: <Trophy className="h-4 w-4" />,
-      teams: [
-        { team: 'Saint George', played: 10, goalDiff: 12, points: 28, position: 1, trend: 'up' },
-        { team: 'Fasil Kenema', played: 10, goalDiff: 8, points: 25, position: 2, trend: 'up' },
-        { team: 'Mekelle 70 Enderta', played: 10, goalDiff: 5, points: 23, position: 3, trend: 'down' },
-        { team: 'Dire Dawa City', played: 10, goalDiff: 3, points: 20, position: 4, trend: 'up' },
-        { team: 'Hadiya Hossana', played: 10, goalDiff: 2, points: 18, position: 5, trend: 'down' },
-      ]
+  const teams = [
+    { 
+      name: 'Saint George', 
+      played: 10, 
+      won: 8, 
+      drawn: 2, 
+      lost: 0, 
+      gf: 22, 
+      ga: 5, 
+      gd: 17, 
+      points: 26, 
+      logo: "https://img.sofascore.com/api/v1/team/94787/image",
+      status: 'up' 
     },
-    {
-      name: "Higher League",
-      icon: <Trophy className="h-4 w-4" />,
-      teams: [
-        { team: 'Ethiopia Bunna', played: 10, goalDiff: 7, points: 22, position: 1, trend: 'up' },
-        { team: 'Jimma Aba Jifar', played: 10, goalDiff: 5, points: 20, position: 2, trend: 'up' },
-        { team: 'Welwalo Adigrat', played: 10, goalDiff: 3, points: 18, position: 3, trend: 'down' },
-        { team: 'Arba Minch Ketema', played: 10, goalDiff: 2, points: 16, position: 4, trend: 'up' },
-        { team: 'Shashemene City', played: 10, goalDiff: 1, points: 14, position: 5, trend: 'down' },
-      ]
+    { 
+      name: 'Fasil Kenema', 
+      played: 10, 
+      won: 7, 
+      drawn: 2, 
+      lost: 1, 
+      gf: 18, 
+      ga: 8, 
+      gd: 10, 
+      points: 23, 
+      logo: "https://img.sofascore.com/api/v1/team/273370/image",
+      status: 'up' 
     },
-    {
-      name: "League One",
-      icon: <Trophy className="h-4 w-4" />,
-      teams: [
-        { team: 'Wolkite Ketema', played: 10, goalDiff: 9, points: 24, position: 1, trend: 'up' },
-        { team: 'Bahir Dar Kenema', played: 10, goalDiff: 6, points: 21, position: 2, trend: 'up' },
-        { team: 'Wolaitta Dicha', played: 10, goalDiff: 4, points: 19, position: 3, trend: 'down' },
-        { team: 'Sebeta City', played: 10, goalDiff: 2, points: 17, position: 4, trend: 'up' },
-        { team: 'Mekelle 70 Enderta B', played: 10, goalDiff: 1, points: 15, position: 5, trend: 'down' },
-      ]
-    }
+    { 
+      name: 'Mekelle 70 Enderta', 
+      played: 10, 
+      won: 6, 
+      drawn: 3, 
+      lost: 1, 
+      gf: 16, 
+      ga: 9, 
+      gd: 7, 
+      points: 21, 
+      logo: "https://img.sofascore.com/api/v1/team/274479/image",
+      status: 'same' 
+    },
+    { 
+      name: 'Dire Dawa City', 
+      played: 10, 
+      won: 5, 
+      drawn: 3, 
+      lost: 2, 
+      gf: 14, 
+      ga: 10, 
+      gd: 4, 
+      points: 18, 
+      logo: "https://img.sofascore.com/api/v1/team/237728/image",
+      status: 'down' 
+    },
+    { 
+      name: 'Bahir Dar Kenema', 
+      played: 10, 
+      won: 4, 
+      drawn: 4, 
+      lost: 2, 
+      gf: 12, 
+      ga: 11, 
+      gd: 1, 
+      points: 16, 
+      logo: "https://img.sofascore.com/api/v1/team/317333/image",
+      status: 'up' 
+    },
   ];
 
-  const currentLeague = leagues[currentLeagueIndex];
-
-  const handlePreviousLeague = () => {
-    setCurrentLeagueIndex((prev) => (prev === 0 ? leagues.length - 1 : prev - 1));
-  };
-
-  const handleNextLeague = () => {
-    setCurrentLeagueIndex((prev) => (prev === leagues.length - 1 ? 0 : prev + 1));
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'up':
+        return <ChevronUp className="w-3 h-3 text-green-500" />;
+      case 'down':
+        return <ChevronDown className="w-3 h-3 text-red-500" />;
+      default:
+        return <Minus className="w-3 h-3 text-zinc-500" />;
+    }
   };
 
   return (
-    <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30 overflow-hidden group hover:shadow-xl hover:shadow-primary/10 transition-all duration-500">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg bg-gradient-to-r from-foreground via-foreground/90 to-foreground/80 bg-clip-text text-transparent flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-primary" />
-            League Standings
-          </CardTitle>
-          <div className="flex items-center gap-1">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-8 w-8 p-0 text-muted-foreground hover:text-primary hover:bg-zinc-800/40 transition-all duration-300" 
-              onClick={handlePreviousLeague}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-8 w-8 p-0 text-muted-foreground hover:text-primary hover:bg-zinc-800/40 transition-all duration-300" 
-              onClick={handleNextLeague}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+    <Card className="bg-zinc-900/40 backdrop-blur-xl border-white/5 overflow-hidden">
+      <CardHeader className="py-3 px-4 border-b border-white/5 flex flex-row items-center justify-between">
         <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="bg-zinc-700/50 text-zinc-300 border-zinc-600/50">
-            {currentLeague.icon}
-            <span className="ml-1">{currentLeague.name}</span>
-          </Badge>
+           <Trophy className="w-4 h-4 text-primary" />
+           <span className="text-sm font-bold text-zinc-200">Table</span>
         </div>
+        <Badge variant="secondary" className="bg-white/5 hover:bg-white/10 text-[10px] text-zinc-400">
+           Premier League
+        </Badge>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="bg-zinc-800/30 rounded-lg p-3">
-          <div className="grid grid-cols-4 gap-2 text-xs font-medium text-muted-foreground mb-2">
-            <div>Pos</div>
+      <CardContent className="p-0">
+         <div className="grid grid-cols-[2rem_1fr_2rem_2rem_2rem_2rem_2rem_2rem_2rem_3rem] gap-1 px-2 py-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider border-b border-white/5">
+            <div className="text-center">#</div>
             <div>Team</div>
+            <div className="text-center">P</div>
+            <div className="text-center">W</div>
+            <div className="text-center">D</div>
+            <div className="text-center">L</div>
+            <div className="text-center">GF</div>
+            <div className="text-center">GA</div>
             <div className="text-center">GD</div>
-            <div className="text-center">Pts</div>
-          </div>
-          
-          {currentLeague.teams.map((team) => (
-            <div key={team.position} className="grid grid-cols-4 gap-2 text-xs py-1.5 border-b border-zinc-700/30 last:border-0 hover:bg-zinc-800/20 transition-colors">
-              <div className="flex items-center gap-1">
-                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
-                  team.position === 1 ? 'bg-primary/30 text-primary' : 'bg-zinc-700/50'
-                }`}>
-                  {team.position}
-                </div>
-                {team.trend === 'up' ? (
-                  <TrendingUp className="h-3 w-3 text-green-500" />
-                ) : (
-                  <TrendingDown className="h-3 w-3 text-red-500" />
-                )}
-              </div>
-              <div className="truncate">{team.team}</div>
-              <div className="text-center">{team.goalDiff > 0 ? '+' : ''}{team.goalDiff}</div>
-              <div className="text-center font-medium">{team.points}</div>
+            <div className="text-center">PTS</div>
+         </div>
+         {teams.map((team, i) => (
+            <div key={i} className="grid grid-cols-[2rem_1fr_2rem_2rem_2rem_2rem_2rem_2rem_2rem_3rem] gap-1 px-2 py-2 text-xs border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
+               <div className="flex items-center justify-center text-zinc-500 font-mono">
+                  {i + 1}
+               </div>
+               <div className="flex items-center gap-2 font-medium text-zinc-200 truncate">
+                  <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0">
+                     <Image 
+                        src={team.logo} 
+                        alt={team.name} 
+                        width={20} 
+                        height={20} 
+                        className="object-cover" 
+                     />
+                  </div>
+                  <span className="truncate">{team.name}</span>
+               </div>
+               <div className="text-center text-zinc-400">{team.played}</div>
+               <div className="text-center text-zinc-400">{team.won}</div>
+               <div className="text-center text-zinc-400">{team.drawn}</div>
+               <div className="text-center text-zinc-400">{team.lost}</div>
+               <div className="text-center text-zinc-400">{team.gf}</div>
+               <div className="text-center text-zinc-400">{team.ga}</div>
+               <div className="text-center text-zinc-400">{team.gd}</div>
+               <div className="text-right font-bold text-white font-mono flex items-center justify-end gap-1">
+                  {team.points}
+                  {getStatusIcon(team.status)}
+               </div>
             </div>
-          ))}
-        </div>
-
-        <div className="flex justify-center gap-1 mt-2">
-          {leagues.map((_, index) => (
-            <div 
-              key={index}
-              className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${
-                index === currentLeagueIndex ? 'bg-primary w-4' : 'bg-zinc-700'
-              }`}
-            />
-          ))}
-        </div>
-
-        <Button variant="outline" className="w-full bg-zinc-800/30 border-zinc-700/30 hover:bg-zinc-800/50 group">
-          View Full Table
-          <ChevronRight className="ml-2 h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
-        </Button>
+         ))}
+         <Button variant="ghost" className="w-full py-3 text-xs text-zinc-500 hover:text-primary hover:bg-white/5 transition-colors rounded-none">
+            View Full Standings
+         </Button>
       </CardContent>
     </Card>
   );
