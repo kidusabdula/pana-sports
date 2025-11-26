@@ -1,4 +1,3 @@
-// components/premier-league/TeamsTable.tsx
 "use client";
 
 import { useState } from 'react';
@@ -6,18 +5,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Trophy, TrendingUp, TrendingDown, Eye } from 'lucide-react';
+import { Trophy, TrendingUp, TrendingDown, Eye, Star, Users, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 export default function TeamsTable() {
   const [sortColumn, setSortColumn] = useState('position');
   const [sortDirection, setSortDirection] = useState('asc');
 
-  // Sample teams data
+  // Enhanced teams data with team logos
   const teams = [
     { 
+      id: 94787,
       position: 1, 
       team: 'Saint George', 
+      logo: "https://img.sofascore.com/api/v1/team/94787/image",
       played: 10, 
       won: 8, 
       drawn: 1, 
@@ -30,8 +32,10 @@ export default function TeamsTable() {
       trend: 'up'
     },
     { 
+      id: 273370,
       position: 2, 
       team: 'Fasil Kenema', 
+      logo: "https://img.sofascore.com/api/v1/team/273370/image",
       played: 10, 
       won: 7, 
       drawn: 2, 
@@ -44,8 +48,10 @@ export default function TeamsTable() {
       trend: 'up'
     },
     { 
+      id: 274479,
       position: 3, 
       team: 'Mekelle 70 Enderta', 
+      logo: "https://img.sofascore.com/api/v1/team/274479/image",
       played: 10, 
       won: 6, 
       drawn: 3, 
@@ -58,8 +64,10 @@ export default function TeamsTable() {
       trend: 'up'
     },
     { 
+      id: 237728,
       position: 4, 
       team: 'Dire Dawa City', 
+      logo: "https://img.sofascore.com/api/v1/team/237728/image",
       played: 10, 
       won: 6, 
       drawn: 1, 
@@ -72,8 +80,10 @@ export default function TeamsTable() {
       trend: 'down'
     },
     { 
+      id: 315378,
       position: 5, 
-      team: 'Hadiya Hossana', 
+      team: 'Hawassa Kenema', 
+      logo: "https://img.sofascore.com/api/v1/team/315378/image",
       played: 10, 
       won: 5, 
       drawn: 2, 
@@ -86,8 +96,10 @@ export default function TeamsTable() {
       trend: 'down'
     },
     { 
+      id: 317333,
       position: 6, 
       team: 'Bahir Dar Kenema', 
+      logo: "https://img.sofascore.com/api/v1/team/317333/image",
       played: 10, 
       won: 4, 
       drawn: 3, 
@@ -100,8 +112,10 @@ export default function TeamsTable() {
       trend: 'up'
     },
     { 
+      id: 277540,
       position: 7, 
       team: 'Wolaitta Dicha', 
+      logo: "https://img.sofascore.com/api/v1/team/277540/image",
       played: 10, 
       won: 4, 
       drawn: 2, 
@@ -114,8 +128,10 @@ export default function TeamsTable() {
       trend: 'down'
     },
     { 
+      id: 258167,
       position: 8, 
       team: 'Sebeta City', 
+      logo: "https://img.sofascore.com/api/v1/team/258167/image",
       played: 10, 
       won: 3, 
       drawn: 3, 
@@ -128,8 +144,10 @@ export default function TeamsTable() {
       trend: 'down'
     },
     { 
+      id: 241957,
       position: 9, 
       team: 'Ethiopia Bunna', 
+      logo: "https://img.sofascore.com/api/v1/team/241957/image",
       played: 10, 
       won: 3, 
       drawn: 2, 
@@ -142,8 +160,10 @@ export default function TeamsTable() {
       trend: 'up'
     },
     { 
+      id: 1014936,
       position: 10, 
       team: 'Jimma Aba Jifar', 
+      logo: "https://img.sofascore.com/api/v1/team/1014936/image",
       played: 10, 
       won: 2, 
       drawn: 3, 
@@ -187,28 +207,34 @@ export default function TeamsTable() {
 
   const getFormColor = (result: string) => {
     switch (result) {
-      case 'W': return 'bg-green-500/20 text-green-400';
-      case 'D': return 'bg-yellow-500/20 text-yellow-400';
-      case 'L': return 'bg-red-500/20 text-red-400';
-      default: return 'bg-zinc-700/50 text-muted-foreground';
+      case 'W': return 'bg-green-500/20 text-green-400 border-green-500/30';
+      case 'D': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+      case 'L': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      default: return 'bg-zinc-800/50 text-zinc-400 border-zinc-700/50';
     }
   };
 
   const getPositionColor = (position: number) => {
     if (position <= 3) return 'text-primary font-bold';
     if (position >= 8) return 'text-red-400';
-    return 'text-foreground';
+    return 'text-white';
+  };
+
+  const getPositionBadgeColor = (position: number) => {
+    if (position <= 3) return 'bg-primary/20 text-primary border-primary/30';
+    if (position >= 8) return 'bg-red-900/20 text-red-400 border-red-800/30';
+    return 'bg-zinc-800/50 text-zinc-400 border-zinc-700/50';
   };
 
   return (
-    <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30 h-full p-6">
-      <CardHeader className="p-3">
+    <Card className="bg-zinc-900/40 backdrop-blur-xl border-white/5 overflow-hidden h-full">
+      <CardHeader className="pb-3 border-b border-white/5">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg text-foreground flex items-center gap-3">
+          <CardTitle className="text-lg text-white flex items-center gap-3">
             <Trophy className="h-5 w-5 text-primary" />
             League Table
           </CardTitle>
-          <Button variant="outline" className="bg-zinc-800/40 border-zinc-700/50 hover:bg-zinc-800/60">
+          <Button variant="outline" className="bg-zinc-800/40 border-white/5 hover:bg-zinc-800/60 text-zinc-300 hover:text-white">
             <Eye className="h-4 w-4 mr-2" />
             View Full Table
           </Button>
@@ -220,7 +246,7 @@ export default function TeamsTable() {
             <TableHeader className="bg-zinc-800/40">
               <TableRow>
                 <TableHead 
-                  className="cursor-pointer hover:bg-zinc-700/50 transition-colors"
+                  className="cursor-pointer hover:bg-zinc-700/50 transition-colors text-zinc-400"
                   onClick={() => handleSort('position')}
                 >
                   <div className="flex items-center gap-1">
@@ -231,7 +257,7 @@ export default function TeamsTable() {
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer hover:bg-zinc-700/50 transition-colors"
+                  className="cursor-pointer hover:bg-zinc-700/50 transition-colors text-zinc-400"
                   onClick={() => handleSort('team')}
                 >
                   <div className="flex items-center gap-1">
@@ -241,14 +267,14 @@ export default function TeamsTable() {
                     )}
                   </div>
                 </TableHead>
-                <TableHead className="text-center">P</TableHead>
-                <TableHead className="text-center">W</TableHead>
-                <TableHead className="text-center">D</TableHead>
-                <TableHead className="text-center">L</TableHead>
-                <TableHead className="text-center">GF</TableHead>
-                <TableHead className="text-center">GA</TableHead>
+                <TableHead className="text-center text-zinc-400">P</TableHead>
+                <TableHead className="text-center text-zinc-400">W</TableHead>
+                <TableHead className="text-center text-zinc-400">D</TableHead>
+                <TableHead className="text-center text-zinc-400">L</TableHead>
+                <TableHead className="text-center text-zinc-400">GF</TableHead>
+                <TableHead className="text-center text-zinc-400">GA</TableHead>
                 <TableHead 
-                  className="cursor-pointer hover:bg-zinc-700/50 transition-colors"
+                  className="cursor-pointer hover:bg-zinc-700/50 transition-colors text-center text-zinc-400"
                   onClick={() => handleSort('goalDifference')}
                 >
                   <div className="flex items-center justify-center gap-1">
@@ -259,7 +285,7 @@ export default function TeamsTable() {
                   </div>
                 </TableHead>
                 <TableHead 
-                  className="cursor-pointer hover:bg-zinc-700/50 transition-colors"
+                  className="cursor-pointer hover:bg-zinc-700/50 transition-colors text-center text-zinc-400"
                   onClick={() => handleSort('points')}
                 >
                   <div className="flex items-center justify-center gap-1">
@@ -269,17 +295,15 @@ export default function TeamsTable() {
                     )}
                   </div>
                 </TableHead>
-                <TableHead className="text-center">Form</TableHead>
+                <TableHead className="text-center text-zinc-400">Form</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {sortedTeams.map((team) => (
-                <TableRow key={team.position} className="hover:bg-zinc-800/30 transition-colors">
+                <TableRow key={team.position} className="hover:bg-zinc-800/30 transition-colors border-b border-white/5 last:border-0">
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                        team.position <= 3 ? 'bg-primary/30' : team.position >= 8 ? 'bg-red-900/20' : 'bg-zinc-700/50'
-                      }`}>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${getPositionBadgeColor(team.position)}`}>
                         {team.position}
                       </div>
                       {team.trend === 'up' ? (
@@ -289,13 +313,26 @@ export default function TeamsTable() {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium">{team.team}</TableCell>
-                  <TableCell className="text-center">{team.played}</TableCell>
-                  <TableCell className="text-center">{team.won}</TableCell>
-                  <TableCell className="text-center">{team.drawn}</TableCell>
-                  <TableCell className="text-center">{team.lost}</TableCell>
-                  <TableCell className="text-center">{team.goalsFor}</TableCell>
-                  <TableCell className="text-center">{team.goalsAgainst}</TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full overflow-hidden ring-2 ring-white/10">
+                        <Image
+                          src={team.logo}
+                          alt={team.team}
+                          width={24}
+                          height={24}
+                          className="object-cover"
+                        />
+                      </div>
+                      <span className="text-white">{team.team}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center text-zinc-300">{team.played}</TableCell>
+                  <TableCell className="text-center text-zinc-300">{team.won}</TableCell>
+                  <TableCell className="text-center text-zinc-300">{team.drawn}</TableCell>
+                  <TableCell className="text-center text-zinc-300">{team.lost}</TableCell>
+                  <TableCell className="text-center text-zinc-300">{team.goalsFor}</TableCell>
+                  <TableCell className="text-center text-zinc-300">{team.goalsAgainst}</TableCell>
                   <TableCell className={`text-center font-medium ${getPositionColor(team.position)}`}>
                     {team.goalDifference > 0 ? '+' : ''}{team.goalDifference}
                   </TableCell>
@@ -308,7 +345,7 @@ export default function TeamsTable() {
                         <Badge 
                           key={index} 
                           variant="secondary" 
-                          className={`w-6 h-6 p-0 flex items-center justify-center text-xs ${getFormColor(result)}`}
+                          className={`w-6 h-6 p-0 flex items-center justify-center text-xs border ${getFormColor(result)}`}
                         >
                           {result}
                         </Badge>

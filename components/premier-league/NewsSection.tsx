@@ -1,4 +1,3 @@
-// components/premier-league/NewsSection.tsx
 "use client";
 
 import { useState } from 'react';
@@ -24,7 +23,9 @@ import {
   X,
   ChevronRight,
   Eye,
-  Tag
+  Tag,
+  Activity,
+  Star
 } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -37,13 +38,13 @@ export default function NewsSection() {
   const [bookmarkedArticles, setBookmarkedArticles] = useState<number[]>([]);
   const [newComment, setNewComment] = useState("");
 
-  // Sample news data with more detailed content
+  // Enhanced news data with actual images
   const latestNews = [
     {
       id: 1,
       title: "Saint George Extends Lead at Top with Convincing Victory",
       excerpt: "Saint George secured a 3-0 victory against Fasil Kenema in a thrilling match that saw goals from Getaneh Kebede, Shimeles Bekele, and Abel Yalew.",
-      image: "/placeholder.svg",
+      image: "https://www.soccerethiopia.net/wp-content/uploads/2025/11/IMG_20251125_201644_361.jpg",
       date: "2 hours ago",
       source: "Ethiopian Football Federation",
       category: "Match Report",
@@ -51,7 +52,7 @@ export default function NewsSection() {
       trending: true,
       author: {
         name: "Samuel Tesfaye",
-        avatar: "/avatar1.jpg",
+        avatar: "https://img.sofascore.com/api/v1/player/1381823/image",
         bio: "Senior sports journalist with 10 years of experience covering Ethiopian football",
         social: {
           twitter: "@samueltesfaye",
@@ -60,7 +61,7 @@ export default function NewsSection() {
       },
       readTime: "3 min",
       content: `
-        <p>Saint George FC extended their lead at the top of the Ethiopian Premier League table with a convincing 3-0 victory over Fasil Kenema at the Addis Ababa Stadium on Saturday.</p>
+        <p>Saint George FC extended their lead at the top of the Ethiopian Premier League table with a convincing 3-0 victory over Fasil Kenema at Addis Ababa Stadium on Saturday.</p>
         
         <h3>Match Highlights</h3>
         <p>The home side started strongly and took the lead in the 18th minute when captain Getaneh Kebede converted from the penalty spot after a handball inside the box. The veteran striker doubled his team's advantage just before halftime with a well-placed header from a corner kick.</p>
@@ -68,7 +69,7 @@ export default function NewsSection() {
         <p>Fasil Kenema came out with more purpose in the second half but struggled to break down Saint George's organized defense. The home side sealed the victory in the 78th minute when substitute Abel Yalew capitalized on a defensive error to score his third goal of the season.</p>
         
         <h3>Post-Match Reactions</h3>
-        <p>"We're pleased with the performance and the result," said Saint George coach after the match. "The players executed our game plan perfectly and showed great character throughout the match."</p>
+        <p>"We're pleased with the performance and result," said Saint George coach after the match. "The players executed our game plan perfectly and showed great character throughout the match."</p>
         
         <p>Fasil Kenema's assistant coach acknowledged the better team on the day: "Saint George deserved the victory. We need to go back to the drawing board and address our defensive vulnerabilities."</p>
         
@@ -83,7 +84,7 @@ export default function NewsSection() {
         {
           id: 1,
           author: "Dawit Bekele",
-          avatar: "/commenter1.jpg",
+          avatar: "https://img.sofascore.com/api/v1/player/1481979/image",
           content: "Great performance by Saint George! Getaneh is still showing his class even at his age.",
           date: "1 hour ago",
           likes: 12
@@ -91,7 +92,7 @@ export default function NewsSection() {
         {
           id: 2,
           author: "Sofia Kassa",
-          avatar: "/commenter2.jpg",
+          avatar: "https://img.sofascore.com/api/v1/player/1014936/image",
           content: "Fasil Kenema needs to strengthen their defense if they want to challenge for the title.",
           date: "1 hour ago",
           likes: 8
@@ -99,7 +100,7 @@ export default function NewsSection() {
         {
           id: 3,
           author: "Mekonnen Tadesse",
-          avatar: "/commenter3.jpg",
+          avatar: "https://img.sofascore.com/api/v1/player/1064117/image",
           content: "The penalty decision was controversial in my opinion. Still, a good match overall.",
           date: "30 minutes ago",
           likes: 5
@@ -110,7 +111,7 @@ export default function NewsSection() {
       id: 2,
       title: "Mekelle 70 Enderta Announces New Signing Ahead of Second Half of Season",
       excerpt: "Mekelle 70 Enderta has confirmed the signing of midfielder Dawit Fekadu from Dire Dawa City on a two-and-a-half-year deal.",
-      image: "/placeholder.svg",
+      image: "https://www.soccerethiopia.net/wp-content/uploads/2025/11/IMG_20251125_201641_512-690x460.jpg",
       date: "5 hours ago",
       source: "Ethio Sports",
       category: "Transfer News",
@@ -118,7 +119,7 @@ export default function NewsSection() {
       trending: false,
       author: {
         name: "Kassahun Bekele",
-        avatar: "/avatar2.jpg",
+        avatar: "https://img.sofascore.com/api/v1/player/880606/image",
         bio: "Transfer expert and football analyst",
         social: {
           twitter: "@kassahunbekele",
@@ -148,7 +149,7 @@ export default function NewsSection() {
         {
           id: 4,
           author: "Tigist Haile",
-          avatar: "/commenter4.jpg",
+          avatar: "https://img.sofascore.com/api/v1/player/1099589/image",
           content: "Good signing for Mekelle. Fekadu is one of the most promising young midfielders in the league.",
           date: "3 hours ago",
           likes: 15
@@ -156,7 +157,7 @@ export default function NewsSection() {
         {
           id: 5,
           author: "Yonas Alemu",
-          avatar: "/commenter5.jpg",
+          avatar: "https://img.sofascore.com/api/v1/player/1139235/image",
           content: "Dire Dawa will miss him. He was one of their best players last season.",
           date: "2 hours ago",
           likes: 9
@@ -167,7 +168,7 @@ export default function NewsSection() {
       id: 3,
       title: "National Team Coach Announces Squad for Upcoming Qualifiers",
       excerpt: "The Ethiopian national team coach has announced a 25-man squad for the upcoming World Cup qualifiers against Kenya and Uganda.",
-      image: "/placeholder.svg",
+      image: "https://www.soccerethiopia.net/wp-content/uploads/2025/11/IMG_20251126_075516_964.jpg",
       date: "1 day ago",
       source: "Zehabesha Sports",
       category: "National Team",
@@ -175,7 +176,7 @@ export default function NewsSection() {
       trending: true,
       author: {
         name: "Yohannes Tadesse",
-        avatar: "/avatar3.jpg",
+        avatar: "https://img.sofascore.com/api/v1/player/1381823/image",
         bio: "National team reporter with exclusive access to the Walia Antelopes",
         social: {
           twitter: "@yohannestadesse",
@@ -197,10 +198,10 @@ export default function NewsSection() {
         <p>Midfielder Salhadin Seid is also missing due to a knee injury that will keep him out for at least three weeks.</p>
         
         <h3>Fixtures</h3>
-        <p>Ethiopia will travel to Nairobi to face Kenya on June 15 before hosting Uganda at the Addis Ababa Stadium five days later. Both matches are crucial for Ethiopia's hopes of qualifying for the World Cup.</p>
+        <p>Ethiopia will travel to Nairobi to face Kenya on June 15 before hosting Uganda at Addis Ababa Stadium five days later. Both matches are crucial for Ethiopia's hopes of qualifying for the World Cup.</p>
         
         <h3>Coach's Comments</h3>
-        <p>"We've selected a balanced squad with a mix of experience and youth," said the coach at the press conference. "The players are determined to get positive results in both matches as we continue our journey toward qualification."</p>
+        <p>"We've selected a balanced squad with a mix of experience and youth," said the coach at a press conference. "The players are determined to get positive results in both matches as we continue our journey toward qualification."</p>
       `,
       tags: ["National Team", "World Cup Qualifiers", "Getaneh Kebede", "Abel Yalew"],
       relatedArticles: [6, 1, 9],
@@ -210,7 +211,7 @@ export default function NewsSection() {
         {
           id: 6,
           author: "Fikre Alemu",
-          avatar: "/commenter6.jpg",
+          avatar: "https://img.sofascore.com/api/v1/player/1381823/image",
           content: "Good to see Getaneh back in the squad. His experience will be crucial.",
           date: "20 hours ago",
           likes: 23
@@ -218,7 +219,7 @@ export default function NewsSection() {
         {
           id: 7,
           author: "Helen Tesfaye",
-          avatar: "/commenter7.jpg",
+          avatar: "https://img.sofascore.com/api/v1/player/1014936/image",
           content: "Abel Yalew deserves his call-up. He's been outstanding this season.",
           date: "18 hours ago",
           likes: 18
@@ -226,7 +227,7 @@ export default function NewsSection() {
         {
           id: 8,
           author: "Bekele Gerba",
-          avatar: "/commenter8.jpg",
+          avatar: "https://img.sofascore.com/api/v1/player/1064117/image",
           content: "Surprised by Biruk's omission. He's been one of our most consistent defenders.",
           date: "15 hours ago",
           likes: 14
@@ -237,7 +238,7 @@ export default function NewsSection() {
       id: 4,
       title: "Ethiopian Premier League Season Halfway Review",
       excerpt: "As the Ethiopian Premier League reaches its midpoint, we take a look at the standout performers and surprises so far.",
-      image: "/placeholder.svg",
+      image: "https://www.soccerethiopia.net/wp-content/uploads/2025/11/IMG_20251125_201641_094-690x460.jpg",
       date: "2 days ago",
       source: "Soccer Ethiopia",
       category: "Analysis",
@@ -245,7 +246,7 @@ export default function NewsSection() {
       trending: false,
       author: {
         name: "Mekonnen Alemu",
-        avatar: "/avatar4.jpg",
+        avatar: "https://img.sofascore.com/api/v1/player/1381823/image",
         bio: "Football analyst and former player with deep knowledge of Ethiopian football",
         social: {
           twitter: "@mekonnenalemu",
@@ -284,7 +285,7 @@ export default function NewsSection() {
         {
           id: 9,
           author: "Abebech Wondimu",
-          avatar: "/commenter9.jpg",
+          avatar: "https://img.sofascore.com/api/v1/player/1481979/image",
           content: "Great analysis! Abel Yalew is definitely the player to watch this season.",
           date: "1 day ago",
           likes: 19
@@ -292,7 +293,7 @@ export default function NewsSection() {
         {
           id: 10,
           author: "Tilahun Bekele",
-          avatar: "/commenter10.jpg",
+          avatar: "https://img.sofascore.com/api/v1/player/1064117/image",
           content: "Ethiopia Bunna's poor form has been surprising. Hope they turn it around in the second half.",
           date: "1 day ago",
           likes: 11
@@ -306,7 +307,7 @@ export default function NewsSection() {
       id: 5,
       title: "Saint George Star Player Linked with European Move",
       excerpt: "Rumors are circulating about a potential move for one of Ethiopia's brightest talents to a European club.",
-      image: "/placeholder.svg",
+      image: "https://www.soccerethiopia.net/wp-content/uploads/2025/11/IMG_20251125_201641_094-690x460.jpg",
       date: "3 days ago",
       source: "Transfer Market",
       category: "Transfer News",
@@ -314,7 +315,7 @@ export default function NewsSection() {
       trending: true,
       author: {
         name: "Dawit Haile",
-        avatar: "/avatar5.jpg",
+        avatar: "https://www.soccerethiopia.net/wp-content/uploads/2025/11/IMG_20251125_212009_499-690x460.jpg",
         bio: "Transfer market specialist with connections across European football",
         social: {
           twitter: "@dawithaile",
@@ -347,7 +348,7 @@ export default function NewsSection() {
         {
           id: 11,
           author: "Kassahun Alemayehu",
-          avatar: "/commenter11.jpg",
+          avatar: "https://img.sofascore.com/api/v1/player/1381823/image",
           content: "Bekele deserves a move to Europe. He's too good for the Ethiopian league.",
           date: "2 days ago",
           likes: 31
@@ -355,7 +356,7 @@ export default function NewsSection() {
         {
           id: 12,
           author: "Tigist Mekonnen",
-          avatar: "/commenter12.jpg",
+          avatar: "https://img.sofascore.com/api/v1/player/1014936/image",
           content: "Hope he stays at least until the end of the season. We need him for the title race.",
           date: "2 days ago",
           likes: 27
@@ -366,7 +367,7 @@ export default function NewsSection() {
       id: 6,
       title: "Controversial Penalty Decision Sparks Debate in League",
       excerpt: "A controversial penalty decision in the match between Dire Dawa City and Hadiya Hossana has sparked widespread debate.",
-      image: "/placeholder.svg",
+      image: "https://www.soccerethiopia.net/wp-content/uploads/2025/11/IMG_20251125_212004_058-1-690x460.jpg",
       date: "4 days ago",
       source: "Ethiopian Football Federation",
       category: "Match Report",
@@ -374,7 +375,7 @@ export default function NewsSection() {
       trending: true,
       author: {
         name: "Tilahun Bekele",
-        avatar: "/avatar6.jpg",
+        avatar: "https://img.sofascore.com/api/v1/player/1064117/image",
         bio: "Referee analyst and former official with deep knowledge of the laws of the game",
         social: {
           twitter: "@tilahunbekele",
@@ -386,9 +387,7 @@ export default function NewsSection() {
         <p>A controversial penalty decision in the dying minutes of the match between Dire Dawa City and Hadiya Hossana has sparked widespread debate across Ethiopian football.</p>
         
         <h3>The Incident</h3>
-        <p>With the score level at 1-1 and just two minutes remaining, Hadiya Hossana's striker went down inside the penalty area under a challenge from Dire Dawa's goalkeeper.</p>
-        
-        <p>The referee immediately pointed to the spot, much to the dismay of the Dire Dawa players who claimed there was no contact. Replays showed minimal contact between the two players.</p>
+        <p>With the score level at 1-1 and just two minutes remaining, Hadiya Hossana's striker went down inside the penalty area under a challenge from Dire Dawa's goalkeeper. The referee immediately pointed to the spot, much to the dismay of the Dire Dawa players who claimed there was no contact. Replays showed minimal contact between the two players.</p>
         
         <h3>The Aftermath</h3>
         <p>Hadiya Hossana converted the penalty and went on to win the match 2-1, a result that has significant implications for both teams' league positions.</p>
@@ -411,7 +410,7 @@ export default function NewsSection() {
         {
           id: 13,
           author: "Mekonnen Haile",
-          avatar: "/commenter13.jpg",
+          avatar: "https://img.sofascore.com/api/v1/player/1481979/image",
           content: "That was definitely not a penalty. The referee cost Dire Dawa the match.",
           date: "3 days ago",
           likes: 42
@@ -419,7 +418,7 @@ export default function NewsSection() {
         {
           id: 14,
           author: "Senaayt Kassa",
-          avatar: "/commenter14.jpg",
+          avatar: "https://img.sofascore.com/api/v1/player/1014936/image",
           content: "Dire Dawa should have scored more goals earlier in the match instead of blaming the referee.",
           date: "3 days ago",
           likes: 28
@@ -430,7 +429,7 @@ export default function NewsSection() {
       id: 7,
       title: "Youth Development: Ethiopia's New Football Academy Shows Promise",
       excerpt: "A new state-of-the-art football academy launched in Addis Ababa is already showing promising results in nurturing young talent.",
-      image: "/placeholder.svg",
+      image: "https://www.soccerethiopia.net/wp-content/uploads/2025/11/IMG_20251126_075516_964.jpg",
       date: "5 days ago",
       source: "Ethiopian Football Federation",
       category: "Development",
@@ -438,7 +437,7 @@ export default function NewsSection() {
       trending: true,
       author: {
         name: "Abebech Wondimu",
-        avatar: "/avatar7.jpg",
+        avatar: "https://img.sofascore.com/api/v1/player/1381823/image",
         bio: "Youth development specialist and football education advocate",
         social: {
           twitter: "@abebechwondimu",
@@ -450,7 +449,7 @@ export default function NewsSection() {
         <p>A new state-of-the-art football academy launched in Addis Ababa six months ago is already showing promising results in nurturing young Ethiopian talent.</p>
         
         <h3>Facilities</h3>
-        <p>The Ethiopian Football Academy, located in the outskirts of Addis Ababa, boasts world-class facilities including three natural grass pitches, a gymnasium, classrooms, and accommodation for 60 students.</p>
+        <p>The Ethiopian Football Academy, located on the outskirts of Addis Ababa, boasts world-class facilities including three natural grass pitches, a gymnasium, classrooms, and accommodation for 60 students.</p>
         
         <p>The academy was funded through a partnership between the Ethiopian Football Federation and private investors, with additional support from FIFA's development program.</p>
         
@@ -475,7 +474,7 @@ export default function NewsSection() {
         {
           id: 15,
           author: "Yohannes Bekele",
-          avatar: "/commenter15.jpg",
+          avatar: "https://img.sofascore.com/api/v1/player/1064117/image",
           content: "This is exactly what Ethiopian football needs. Proper youth development is the key to long-term success.",
           date: "4 days ago",
           likes: 37
@@ -483,7 +482,7 @@ export default function NewsSection() {
         {
           id: 16,
           author: "Ruth Kassa",
-          avatar: "/commenter16.jpg",
+          avatar: "https://img.sofascore.com/api/v1/player/1014936/image",
           content: "Great to see investment in youth development. Hope we see more of these across the country.",
           date: "4 days ago",
           likes: 29
@@ -508,7 +507,7 @@ export default function NewsSection() {
       case "National Team": return "bg-green-500/20 text-green-400 border-green-500/30";
       case "Analysis": return "bg-orange-500/20 text-orange-400 border-orange-500/30";
       case "Development": return "bg-teal-500/20 text-teal-400 border-teal-500/30";
-      default: return "bg-zinc-700/30 text-zinc-300 border-zinc-600/50";
+      default: return "bg-zinc-800/50 text-zinc-400 border-zinc-700/50";
     }
   };
 
@@ -545,10 +544,10 @@ export default function NewsSection() {
 
   return (
     <>
-      <Card className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30 h-full">
-        <CardHeader className="pb-3">
+      <Card className="bg-zinc-900/40 backdrop-blur-xl border-white/5 overflow-hidden h-full">
+        <CardHeader className="pb-3 border-b border-white/5">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg text-foreground flex items-center gap-2">
+            <CardTitle className="text-lg text-white flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
               Premier League News
             </CardTitle>
@@ -557,19 +556,21 @@ export default function NewsSection() {
             </Button>
           </div>
           
-          {/* News Tabs */}
+          {/* Enhanced News Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-2">
-            <TabsList className="grid w-full grid-cols-2 bg-zinc-800/30 border-zinc-700/50 p-1 h-auto">
+            <TabsList className="grid w-full grid-cols-2 bg-zinc-800/40 border-white/5 p-1 h-auto rounded-xl">
               <TabsTrigger 
                 value="latest" 
-                className="data-[state=active]:bg-zinc-700/50"
+                className="data-[state=active]:bg-zinc-800 text-white data-[state=active]:shadow-lg"
               >
+                <Activity className="h-4 w-4 mr-2" />
                 Latest
               </TabsTrigger>
               <TabsTrigger 
                 value="trending" 
-                className="data-[state=active]:bg-zinc-700/50"
+                className="data-[state=active]:bg-zinc-800 text-white data-[state=active]:shadow-lg"
               >
+                <Star className="h-4 w-4 mr-2" />
                 Trending
               </TabsTrigger>
             </TabsList>
@@ -578,10 +579,10 @@ export default function NewsSection() {
         
         <CardContent className="p-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            {/* Filter Categories */}
+            {/* Enhanced Filter Categories */}
             <div className="px-4 pb-3">
               <div className="flex items-center gap-2 overflow-x-auto pb-2">
-                <Filter className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                <Filter className="h-4 w-4 text-zinc-500 flex-shrink-0" />
                 {categories.map((category) => (
                   <Button
                     key={category.value}
@@ -591,7 +592,7 @@ export default function NewsSection() {
                       "whitespace-nowrap flex-shrink-0",
                       filterCategory === category.value 
                         ? "bg-primary/20 text-primary border-primary/30" 
-                        : "bg-zinc-800/40 border-zinc-700/50 hover:bg-zinc-800/60"
+                        : "bg-zinc-800/40 border-white/5 hover:bg-zinc-800/60 text-zinc-300 hover:text-white"
                     )}
                     onClick={() => setFilterCategory(category.value)}
                   >
@@ -601,13 +602,13 @@ export default function NewsSection() {
               </div>
             </div>
             
-            {/* Latest News Tab */}
+            {/* Enhanced Latest News Tab */}
             <TabsContent value="latest" className="mt-0">
               <div className="space-y-4 p-4">
                 {filteredNews.map((item) => (
-                  <div key={item.id} className="border-b border-zinc-700/30 pb-4 last:border-0 cursor-pointer hover:bg-zinc-800/20 -mx-2 px-2 py-2 rounded-md transition-colors" onClick={() => setSelectedNews(item.id)}>
+                  <div key={item.id} className="border-b border-white/5 pb-4 last:border-0 cursor-pointer hover:bg-zinc-800/30 -mx-2 px-2 py-2 rounded-xl transition-colors" onClick={() => setSelectedNews(item.id)}>
                     <div className="flex gap-4">
-                      <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden">
+                      <div className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden">
                         <Image
                           src={item.image}
                           alt={item.title}
@@ -627,13 +628,13 @@ export default function NewsSection() {
                             {item.category}
                           </Badge>
                         </div>
-                        <h3 className="font-medium text-sm leading-tight hover:text-primary line-clamp-2">
+                        <h3 className="font-medium text-sm leading-tight hover:text-primary line-clamp-2 text-white">
                           {item.title}
                         </h3>
-                        <p className="text-xs text-muted-foreground line-clamp-2">
+                        <p className="text-xs text-zinc-400 line-clamp-2">
                           {item.excerpt}
                         </p>
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <div className="flex items-center justify-between text-xs text-zinc-500">
                           <div className="flex items-center gap-3">
                             <div className="flex items-center gap-1">
                               <User className="h-3 w-3" />
@@ -661,19 +662,19 @@ export default function NewsSection() {
                   </div>
                 ))}
                 
-                <Button variant="outline" className="w-full mt-2 bg-zinc-800/30 border-zinc-700/50 hover:bg-zinc-800/50">
+                <Button variant="outline" className="w-full mt-2 bg-zinc-800/40 border-white/5 hover:bg-zinc-800/60 text-zinc-300 hover:text-white">
                   Load More News
                 </Button>
               </div>
             </TabsContent>
             
-            {/* Trending News Tab */}
+            {/* Enhanced Trending News Tab */}
             <TabsContent value="trending" className="mt-0">
               <div className="space-y-4 p-4">
                 {filteredNews.map((item) => (
-                  <div key={item.id} className="border-b border-zinc-700/30 pb-4 last:border-0 cursor-pointer hover:bg-zinc-800/20 -mx-2 px-2 py-2 rounded-md transition-colors" onClick={() => setSelectedNews(item.id)}>
+                  <div key={item.id} className="border-b border-white/5 pb-4 last:border-0 cursor-pointer hover:bg-zinc-800/30 -mx-2 px-2 py-2 rounded-xl transition-colors" onClick={() => setSelectedNews(item.id)}>
                     <div className="flex gap-4">
-                      <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden">
+                      <div className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden">
                         <Image
                           src={item.image}
                           alt={item.title}
@@ -691,13 +692,13 @@ export default function NewsSection() {
                             {item.category}
                           </Badge>
                         </div>
-                        <h3 className="font-medium text-sm leading-tight hover:text-primary line-clamp-2">
+                        <h3 className="font-medium text-sm leading-tight hover:text-primary line-clamp-2 text-white">
                           {item.title}
                         </h3>
-                        <p className="text-xs text-muted-foreground line-clamp-2">
+                        <p className="text-xs text-zinc-400 line-clamp-2">
                           {item.excerpt}
                         </p>
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <div className="flex items-center justify-between text-xs text-zinc-500">
                           <div className="flex items-center gap-3">
                             <div className="flex items-center gap-1">
                               <User className="h-3 w-3" />
@@ -725,7 +726,7 @@ export default function NewsSection() {
                   </div>
                 ))}
                 
-                <Button variant="outline" className="w-full mt-2 bg-zinc-800/30 border-zinc-700/50 hover:bg-zinc-800/50">
+                <Button variant="outline" className="w-full mt-2 bg-zinc-800/40 border-white/5 hover:bg-zinc-800/60 text-zinc-300 hover:text-white">
                   Load More Trending News
                 </Button>
               </div>
@@ -734,16 +735,16 @@ export default function NewsSection() {
         </CardContent>
       </Card>
 
-      {/* News Detail Modal */}
+      {/* Enhanced News Detail Modal */}
       {selectedNews && (() => {
         const newsItem = [...latestNews, ...trendingNews].find(item => item.id === selectedNews);
         if (!newsItem) return null;
 
         return (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-            <div className="bg-zinc-900 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto my-8">
-              {/* Header */}
-              <div className="sticky top-0 bg-zinc-900 border-b border-zinc-800 p-4 flex items-center justify-between z-10">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-zinc-900 border-white/5 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto my-8">
+              {/* Enhanced Header */}
+              <div className="sticky top-0 bg-zinc-900 border-b border-white/5 p-4 flex items-center justify-between z-10">
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className={cn("text-xs", getCategoryColor(newsItem.category))}>
                     {newsItem.category}
@@ -759,13 +760,13 @@ export default function NewsSection() {
                   variant="ghost"
                   size="icon"
                   onClick={() => setSelectedNews(null)}
-                  className="text-muted-foreground hover:text-foreground"
+                  className="text-zinc-500 hover:text-white"
                 >
                   <X className="h-5 w-5" />
                 </Button>
               </div>
 
-              {/* Hero Image */}
+              {/* Enhanced Hero Image */}
               <div className="relative h-64 md:h-96 w-full">
                 <Image
                   src={newsItem.image}
@@ -793,44 +794,44 @@ export default function NewsSection() {
                 </div>
               </div>
 
-              {/* Article Content */}
+              {/* Enhanced Article Content */}
               <div className="p-6">
-                {/* Author Info */}
-                <div className="flex items-center gap-4 mb-6 pb-6 border-b border-zinc-800">
-                  <Avatar className="h-12 w-12">
+                {/* Enhanced Author Info */}
+                <div className="flex items-center gap-4 mb-6 pb-6 border-b border-white/5">
+                  <Avatar className="h-12 w-12 ring-2 ring-white/10">
                     <AvatarImage src={newsItem.author.avatar} alt={newsItem.author.name} />
                     <AvatarFallback>{newsItem.author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-medium">{newsItem.author.name}</h3>
-                      <span className="text-xs text-muted-foreground">@{newsItem.author.social.twitter}</span>
+                      <h3 className="font-medium text-white">{newsItem.author.name}</h3>
+                      <span className="text-xs text-zinc-500">@{newsItem.author.social.twitter}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">{newsItem.author.bio}</p>
-                    <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
+                    <p className="text-sm text-zinc-400">{newsItem.author.bio}</p>
+                    <div className="flex items-center gap-4 mt-1 text-xs text-zinc-500">
                       <span>{newsItem.author.social.followers.toLocaleString()} followers</span>
                       <span>{newsItem.source}</span>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" className="bg-zinc-800/40 border-zinc-700/50 hover:bg-zinc-800/60">
+                  <Button variant="outline" size="sm" className="bg-zinc-800/40 border-white/5 hover:bg-zinc-800/60 text-zinc-300 hover:text-white">
                     Follow
                   </Button>
                 </div>
 
-                {/* Article Stats */}
-                <div className="flex items-center justify-between mb-6 pb-6 border-b border-zinc-800">
+                {/* Enhanced Article Stats */}
+                <div className="flex items-center justify-between mb-6 pb-6 border-b border-white/5">
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1">
-                      <Eye className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{newsItem.views.toLocaleString()} views</span>
+                      <Eye className="h-4 w-4 text-zinc-500" />
+                      <span className="text-sm text-zinc-300">{newsItem.views.toLocaleString()} views</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <ThumbsUp className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{newsItem.likes} likes</span>
+                      <ThumbsUp className="h-4 w-4 text-zinc-500" />
+                      <span className="text-sm text-zinc-300">{newsItem.likes} likes</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <MessageCircle className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{newsItem.comments} comments</span>
+                      <MessageCircle className="h-4 w-4 text-zinc-500" />
+                      <span className="text-sm text-zinc-300">{newsItem.comments} comments</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -838,10 +839,10 @@ export default function NewsSection() {
                       variant="ghost"
                       size="icon"
                       className={cn(
-                        "h-8 w-8 rounded-lg",
+                        "h-8 w-8 rounded-xl",
                         bookmarkedArticles.includes(newsItem.id) 
                           ? "text-primary bg-primary/10" 
-                          : "text-muted-foreground hover:text-primary"
+                          : "text-zinc-500 hover:text-primary"
                       )}
                       onClick={() => toggleBookmark(newsItem.id)}
                     >
@@ -850,7 +851,7 @@ export default function NewsSection() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 rounded-lg text-muted-foreground hover:text-primary"
+                      className="h-8 w-8 rounded-xl text-zinc-500 hover:text-primary"
                       onClick={() => handleShare(newsItem.id)}
                     >
                       <Share2 className="h-4 w-4" />
@@ -858,18 +859,18 @@ export default function NewsSection() {
                   </div>
                 </div>
 
-                {/* Article Body */}
+                {/* Enhanced Article Body */}
                 <div 
-                  className="prose prose-invert max-w-none mb-8"
+                  className="prose prose-invert max-w-none mb-8 text-zinc-300"
                   dangerouslySetInnerHTML={{ __html: newsItem.content }}
                 />
 
-                {/* Tags */}
+                {/* Enhanced Tags */}
                 <div className="mb-8">
-                  <h3 className="text-lg font-medium mb-3">Tags</h3>
+                  <h3 className="text-lg font-medium text-zinc-400 mb-3">Tags</h3>
                   <div className="flex flex-wrap gap-2">
                     {newsItem.tags.map((tag, index) => (
-                      <Badge key={index} variant="outline" className="bg-zinc-800/40 border-zinc-700/50 hover:bg-zinc-800/60 cursor-pointer">
+                      <Badge key={index} variant="outline" className="bg-zinc-800/40 border-white/5 hover:bg-zinc-800/60 cursor-pointer text-zinc-300 hover:text-white">
                         <Tag className="h-3 w-3 mr-1" />
                         {tag}
                       </Badge>
@@ -877,11 +878,11 @@ export default function NewsSection() {
                   </div>
                 </div>
 
-                {/* Comments Section */}
+                {/* Enhanced Comments Section */}
                 <div className="mb-8">
-                  <h3 className="text-lg font-medium mb-4">Comments ({newsItem.comments})</h3>
+                  <h3 className="text-lg font-medium text-zinc-400 mb-4">Comments ({newsItem.comments})</h3>
                   
-                  {/* Add Comment */}
+                  {/* Enhanced Add Comment */}
                   <div className="mb-6">
                     <div className="flex gap-3">
                       <Avatar className="h-10 w-10">
@@ -892,13 +893,13 @@ export default function NewsSection() {
                           placeholder="Add a comment..."
                           value={newComment}
                           onChange={(e) => setNewComment(e.target.value)}
-                          className="w-full bg-zinc-800/40 border-zinc-700/50 rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
+                          className="w-full bg-zinc-800/40 border-white/5 rounded-xl p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 text-zinc-300"
                           rows={3}
                         />
                         <div className="flex justify-end mt-2">
                           <Button
                             onClick={handleAddComment}
-                            className="btn-pana"
+                            className="bg-primary hover:bg-primary/90 text-white disabled:opacity-50"
                             disabled={!newComment.trim()}
                           >
                             <Send className="h-4 w-4 mr-2" />
@@ -909,21 +910,21 @@ export default function NewsSection() {
                     </div>
                   </div>
 
-                  {/* Comments List */}
+                  {/* Enhanced Comments List */}
                   <div className="space-y-4">
                     {newsItem.commentsList.map((comment) => (
                       <div key={comment.id} className="flex gap-3">
-                        <Avatar className="h-10 w-10">
+                        <Avatar className="h-10 w-10 ring-2 ring-white/10">
                           <AvatarImage src={comment.avatar} alt={comment.author} />
                           <AvatarFallback>{comment.author.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <div className="bg-zinc-800/40 rounded-lg p-3">
+                          <div className="bg-zinc-800/40 rounded-xl p-3 border border-white/5">
                             <div className="flex items-center justify-between mb-2">
-                              <h4 className="font-medium text-sm">{comment.author}</h4>
-                              <span className="text-xs text-muted-foreground">{comment.date}</span>
+                              <h4 className="font-medium text-sm text-white">{comment.author}</h4>
+                              <span className="text-xs text-zinc-500">{comment.date}</span>
                             </div>
-                            <p className="text-sm">{comment.content}</p>
+                            <p className="text-sm text-zinc-300">{comment.content}</p>
                           </div>
                           <div className="flex items-center gap-4 mt-2 ml-3">
                             <Button
@@ -933,14 +934,14 @@ export default function NewsSection() {
                                 "h-8 px-2 text-xs",
                                 likedComments.includes(comment.id) 
                                   ? "text-primary" 
-                                  : "text-muted-foreground hover:text-primary"
+                                  : "text-zinc-500 hover:text-primary"
                               )}
                               onClick={() => toggleLikeComment(comment.id)}
                             >
                               <ThumbsUp className={cn("h-3 w-3 mr-1", likedComments.includes(comment.id) && "fill-current")} />
                               {comment.likes}
                             </Button>
-                            <Button variant="ghost" size="sm" className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground">
+                            <Button variant="ghost" size="sm" className="h-8 px-2 text-xs text-zinc-500 hover:text-white">
                               Reply
                             </Button>
                           </div>

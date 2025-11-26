@@ -1,4 +1,3 @@
-// components/premier-league/MatchesSection.tsx
 "use client";
 
 import { useState } from "react";
@@ -21,10 +20,14 @@ import {
   Heart,
   Filter,
   X,
+  Activity,
+  Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 type Team = {
+  id: number;
   name: string;
   logo: string;
   shortName: string;
@@ -77,19 +80,21 @@ export default function MatchesSection() {
 
   const currentView = matchViews[currentViewIndex];
 
-  // Sample match data
+  // Enhanced match data with real team logos
   const upcomingMatches: Match[] = [
     {
       id: 1,
       homeTeam: {
+        id: 94787,
         name: "Saint George",
-        logo: "/api/placeholder/100/100",
+        logo: "https://img.sofascore.com/api/v1/team/94787/image",
         shortName: "STG",
         form: "W-W-D-W-L",
       },
       awayTeam: {
+        id: 273370,
         name: "Fasil Kenema",
-        logo: "/api/placeholder/100/100",
+        logo: "https://img.sofascore.com/api/v1/team/273370/image",
         shortName: "FSK",
         form: "D-W-L-W-W",
       },
@@ -105,14 +110,16 @@ export default function MatchesSection() {
     {
       id: 2,
       homeTeam: {
+        id: 274479,
         name: "Mekelle 70 Enderta",
-        logo: "/api/placeholder/100/100",
+        logo: "https://img.sofascore.com/api/v1/team/274479/image",
         shortName: "MEK",
         form: "W-L-W-D-W",
       },
       awayTeam: {
+        id: 237728,
         name: "Dire Dawa City",
-        logo: "/api/placeholder/100/100",
+        logo: "https://img.sofascore.com/api/v1/team/237728/image",
         shortName: "DDC",
         form: "L-D-W-L-D",
       },
@@ -127,20 +134,22 @@ export default function MatchesSection() {
     {
       id: 3,
       homeTeam: {
-        name: "Hadiya Hossana",
-        logo: "/api/placeholder/100/100",
-        shortName: "HAD",
+        id: 315378,
+        name: "Hawassa Kenema",
+        logo: "https://img.sofascore.com/api/v1/team/315378/image",
+        shortName: "HAW",
         form: "D-D-W-L-W",
       },
       awayTeam: {
+        id: 317333,
         name: "Bahir Dar Kenema",
-        logo: "/api/placeholder/100/100",
+        logo: "https://img.sofascore.com/api/v1/team/317333/image",
         shortName: "BDK",
         form: "W-W-L-D-L",
       },
       date: "Oct 23, 2025",
       time: "2:00 PM",
-      venue: "Hossana Stadium",
+      venue: "Hawassa Stadium",
       league: "Premier League",
       isLive: false,
       isFeatured: false,
@@ -152,14 +161,16 @@ export default function MatchesSection() {
     {
       id: 4,
       homeTeam: {
+        id: 94787,
         name: "Saint George",
-        logo: "/api/placeholder/100/100",
+        logo: "https://img.sofascore.com/api/v1/team/94787/image",
         shortName: "STG",
         form: "W-W-D-W-L",
       },
       awayTeam: {
+        id: 277540,
         name: "Wolaitta Dicha",
-        logo: "/api/placeholder/100/100",
+        logo: "https://img.sofascore.com/api/v1/team/277540/image",
         shortName: "WOD",
         form: "L-D-W-L-W",
       },
@@ -173,23 +184,25 @@ export default function MatchesSection() {
       isFeatured: true,
       viewers: 14200,
       matchEvents: [
-        "⚽ 23' Saladin",
-        "🟨 45' Tekeste",
-        "⚽ 67' Getaneh",
-        "🟨 78' Abebe",
+        "⚽ 23' Getaneh Kebede",
+        "🟨 45' Shimeles Bekele",
+        "⚽ 67' Amanuel Assefa",
+        "🟨 78' Dawit Fekadu",
       ],
     },
     {
       id: 5,
       homeTeam: {
+        id: 273370,
         name: "Fasil Kenema",
-        logo: "/api/placeholder/100/100",
+        logo: "https://img.sofascore.com/api/v1/team/273370/image",
         shortName: "FSK",
         form: "D-W-L-W-W",
       },
       awayTeam: {
+        id: 258167,
         name: "Sebeta City",
-        logo: "/api/placeholder/100/100",
+        logo: "https://img.sofascore.com/api/v1/team/258167/image",
         shortName: "SEC",
         form: "W-L-D-L-D",
       },
@@ -209,13 +222,15 @@ export default function MatchesSection() {
     {
       id: 7,
       homeTeam: {
+        id: 94787,
         name: "Saint George",
-        logo: "/api/placeholder/100/100",
+        logo: "https://img.sofascore.com/api/v1/team/94787/image",
         shortName: "STG",
       },
       awayTeam: {
+        id: 273370,
         name: "Fasil Kenema",
-        logo: "/api/placeholder/100/100",
+        logo: "https://img.sofascore.com/api/v1/team/273370/image",
         shortName: "FSK",
       },
       date: "Oct 18, 2025",
@@ -233,13 +248,15 @@ export default function MatchesSection() {
     {
       id: 8,
       homeTeam: {
+        id: 274479,
         name: "Mekelle 70 Enderta",
-        logo: "/api/placeholder/100/100",
+        logo: "https://img.sofascore.com/api/v1/team/274479/image",
         shortName: "MEK",
       },
       awayTeam: {
+        id: 237728,
         name: "Dire Dawa City",
-        logo: "/api/placeholder/100/100",
+        logo: "https://img.sofascore.com/api/v1/team/237728/image",
         shortName: "DDC",
       },
       date: "Oct 15, 2025",
@@ -260,13 +277,15 @@ export default function MatchesSection() {
     {
       id: 9,
       homeTeam: {
+        id: 94787,
         name: "Saint George",
-        logo: "/api/placeholder/100/100",
+        logo: "https://img.sofascore.com/api/v1/team/94787/image",
         shortName: "STG",
       },
       awayTeam: {
+        id: 274479,
         name: "Mekelle 70 Enderta",
-        logo: "/api/placeholder/100/100",
+        logo: "https://img.sofascore.com/api/v1/team/274479/image",
         shortName: "MEK",
       },
       date: "Oct 22, 2025",
@@ -281,13 +300,15 @@ export default function MatchesSection() {
     {
       id: 10,
       homeTeam: {
+        id: 273370,
         name: "Fasil Kenema",
-        logo: "/api/placeholder/100/100",
+        logo: "https://img.sofascore.com/api/v1/team/273370/image",
         shortName: "FSK",
       },
       awayTeam: {
+        id: 237728,
         name: "Dire Dawa City",
-        logo: "/api/placeholder/100/100",
+        logo: "https://img.sofascore.com/api/v1/team/237728/image",
         shortName: "DDC",
       },
       date: "Oct 22, 2025",
@@ -354,17 +375,17 @@ export default function MatchesSection() {
       {/* Enhanced Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold bg-linear-to-r from-foreground via-foreground/90 to-foreground/80 bg-clip-text text-transparent">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white">
             Premier League Matches
           </h2>
-          <p className="text-muted-foreground mt-1 sm:mt-2">
+          <p className="text-zinc-400 mt-1 sm:mt-2">
             Stay updated with the latest Ethiopian Premier League action
           </p>
         </div>
 
         {/* Enhanced View Navigation - Mobile Optimized */}
         <div className="flex items-center gap-2 sm:gap-4">
-          <div className="hidden sm:flex items-center gap-2 bg-zinc-800/30 backdrop-blur-sm rounded-2xl p-1 border border-zinc-700/50">
+          <div className="hidden sm:flex items-center gap-2 bg-zinc-900/40 backdrop-blur-sm rounded-2xl p-1 border border-white/5">
             {matchViews.map((view, index) => {
               const Icon = view.icon;
               return (
@@ -374,8 +395,8 @@ export default function MatchesSection() {
                   className={cn(
                     "flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300",
                     index === currentViewIndex
-                      ? "bg-primary text-primary-foreground shadow-lg"
-                      : "text-muted-foreground hover:text-foreground hover:bg-zinc-700/50"
+                      ? "bg-zinc-800 text-white shadow-lg"
+                      : "text-zinc-500 hover:text-white hover:bg-zinc-800/50"
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -386,7 +407,7 @@ export default function MatchesSection() {
           </div>
 
           {/* Mobile View Selector */}
-          <div className="sm:hidden flex items-center bg-zinc-800/30 backdrop-blur-sm rounded-full p-1 border border-zinc-700/50">
+          <div className="sm:hidden flex items-center bg-zinc-900/40 backdrop-blur-sm rounded-full p-1 border border-white/5">
             <select
               value={currentView.id}
               onChange={(e) => {
@@ -395,7 +416,7 @@ export default function MatchesSection() {
                 );
                 if (index !== -1) setCurrentViewIndex(index);
               }}
-              className="bg-transparent text-sm font-medium outline-none appearance-none"
+              className="bg-transparent text-sm font-medium outline-none appearance-none text-white"
             >
               {matchViews.map((view) => (
                 <option key={view.id} value={view.id}>
@@ -407,18 +428,18 @@ export default function MatchesSection() {
 
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
-              className="h-10 w-10 rounded-xl bg-zinc-800/40 border-zinc-700/50 hover:bg-zinc-800/60 transition-all duration-300"
+              className="h-10 w-10 rounded-xl bg-zinc-900/40 border-white/5 hover:bg-zinc-800/60 transition-all duration-300"
               onClick={handlePreviousView}
             >
               <ChevronLeft className="h-5 w-5" />
             </Button>
 
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
-              className="h-10 w-10 rounded-xl bg-zinc-800/40 border-zinc-700/50 hover:bg-zinc-800/60 transition-all duration-300"
+              className="h-10 w-10 rounded-xl bg-zinc-900/40 border-white/5 hover:bg-zinc-800/60 transition-all duration-300"
               onClick={handleNextView}
             >
               <ChevronRight className="h-5 w-5" />
@@ -430,17 +451,17 @@ export default function MatchesSection() {
       {/* Enhanced Matches Grid - Mobile First */}
       <div className="space-y-4 sm:space-y-6">
         {getMatchesForView().map((match) => (
-          <div
+          <Card
             key={match.id}
-            className="bg-zinc-800/20 backdrop-blur-sm border-zinc-700/30 rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 group"
+            className="bg-zinc-900/40 backdrop-blur-xl border-white/5 overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 group"
           >
             {/* Match Card Header - Mobile Optimized */}
-            <div className="p-4 sm:p-6">
-              <div className="flex justify-between items-start mb-4">
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2">
                   <div
                     className={cn(
-                      "p-2 rounded-xl bg-linear-to-br from-secondary/30 to-secondary/10 border border-secondary/50",
+                      "p-2 rounded-xl bg-zinc-800/40 border border-white/5",
                       currentView.color
                     )}
                   >
@@ -450,7 +471,7 @@ export default function MatchesSection() {
                     })()}
                   </div>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                    <span className="text-sm font-semibold text-foreground/90">
+                    <span className="text-sm font-semibold text-white">
                       {currentView.label}
                     </span>
                     {match.importance && (
@@ -462,7 +483,7 @@ export default function MatchesSection() {
                       </Badge>
                     )}
                   </div>
-                  <div className="text-xs text-muted-foreground flex items-center gap-1">
+                  <div className="text-xs text-zinc-500 flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
                     <span>
                       {match.date}
@@ -473,7 +494,7 @@ export default function MatchesSection() {
 
                 <div className="flex items-center gap-2">
                   {match.isFeatured && (
-                    <Badge className="bg-linear-to-r from-primary to-primary/80 text-primary-foreground border-0 shadow-lg shadow-primary/20 text-xs">
+                    <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">
                       Featured
                     </Badge>
                   )}
@@ -484,7 +505,7 @@ export default function MatchesSection() {
                       "h-8 w-8 rounded-xl transition-all duration-300",
                       favorites.includes(match.id)
                         ? "text-red-500 bg-red-500/10 hover:bg-red-500/20"
-                        : "text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
+                        : "text-zinc-500 hover:text-red-500 hover:bg-red-500/10"
                     )}
                     onClick={() => toggleFavorite(match.id)}
                   >
@@ -497,7 +518,9 @@ export default function MatchesSection() {
                   </Button>
                 </div>
               </div>
+            </CardHeader>
 
+            <CardContent className="p-0">
               {/* Video Highlight Section - Mobile Optimized */}
               {currentView.id === "highlights" && match.highlightVideo && (
                 <div className="relative w-full h-48 sm:h-64 rounded-xl overflow-hidden mb-4 group/video">
@@ -506,7 +529,7 @@ export default function MatchesSection() {
                     alt="Match highlight"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover/video:scale-110"
                   />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
                     <div className="text-white text-sm font-medium">
                       Highlights • {match.videoDuration}
@@ -526,16 +549,20 @@ export default function MatchesSection() {
               )}
 
               {/* Teams & Score Section - Mobile Optimized */}
-              <div className="mb-4">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="px-4 pb-4">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
                   {/* Home Team */}
                   <div className="flex flex-col items-center gap-2 flex-1">
-                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-zinc-700/50 rounded-xl flex items-center justify-center shadow-lg">
-                      <span className="text-xs sm:text-sm font-bold">
-                        {match.homeTeam.shortName}
-                      </span>
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden ring-2 ring-white/10">
+                      <Image
+                        src={match.homeTeam.logo}
+                        alt={match.homeTeam.name}
+                        width={64}
+                        height={64}
+                        className="object-cover"
+                      />
                     </div>
-                    <span className="text-sm sm:text-base font-medium text-center">
+                    <span className="text-sm sm:text-base font-medium text-white text-center">
                       {match.homeTeam.name}
                     </span>
                     {match.homeTeam.form && (
@@ -559,19 +586,19 @@ export default function MatchesSection() {
                   <div className="flex flex-col items-center justify-center gap-2 px-4">
                     {match.homeScore !== undefined ? (
                       <>
-                        <div className="text-2xl sm:text-3xl font-bold bg-linear-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                        <div className="text-2xl sm:text-3xl font-bold text-white">
                           {match.homeScore} - {match.awayScore}
                         </div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-xs text-zinc-500">
                           Full Time
                         </div>
                       </>
                     ) : (
                       <>
-                        <div className="text-xl sm:text-2xl font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                        <div className="text-xl sm:text-2xl font-bold text-primary">
                           VS
                         </div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-xs text-zinc-500">
                           Upcoming
                         </div>
                       </>
@@ -588,12 +615,16 @@ export default function MatchesSection() {
 
                   {/* Away Team */}
                   <div className="flex flex-col items-center gap-2 flex-1">
-                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-zinc-700/50 rounded-xl flex items-center justify-center shadow-lg">
-                      <span className="text-xs sm:text-sm font-bold">
-                        {match.awayTeam.shortName}
-                      </span>
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden ring-2 ring-white/10">
+                      <Image
+                        src={match.awayTeam.logo}
+                        alt={match.awayTeam.name}
+                        width={64}
+                        height={64}
+                        className="object-cover"
+                      />
                     </div>
-                    <span className="text-sm sm:text-base font-medium text-center">
+                    <span className="text-sm sm:text-base font-medium text-white text-center">
                       {match.awayTeam.name}
                     </span>
                     {match.awayTeam.form && (
@@ -616,54 +647,54 @@ export default function MatchesSection() {
 
                 {/* Match Events - Mobile Optimized */}
                 {match.matchEvents && (
-                  <div className="bg-zinc-800/30 rounded-xl p-3 sm:p-4 mt-3">
-                    <div className="text-xs text-muted-foreground font-medium mb-2">
+                  <div className="bg-zinc-800/40 rounded-xl p-3 sm:p-4 mb-4 border border-white/5">
+                    <div className="text-xs text-zinc-500 font-medium mb-2">
                       Match Events
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-2">
                       {match.matchEvents.map((event: string, index: number) => (
-                        <div key={index} className="text-xs text-foreground/80">
+                        <div key={index} className="text-xs text-zinc-300">
                           {event}
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
-              </div>
 
-              {/* Footer Section - Mobile Optimized */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-4 border-t border-zinc-700/30 gap-3 sm:gap-0">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3" />
-                    <span>{match.venue}</span>
+                {/* Footer Section - Mobile Optimized */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-4 border-t border-white/5 gap-3 sm:gap-0">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-zinc-500">
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      <span>{match.venue}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Trophy className="h-3 w-3" />
+                      <span>{match.league}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Trophy className="h-3 w-3" />
-                    <span>{match.league}</span>
+
+                  <div className="flex items-center gap-3">
+                    {match.viewers && (
+                      <div className="flex items-center gap-1 text-xs text-zinc-500">
+                        <Users className="h-3 w-3" />
+                        <span>{match.viewers.toLocaleString()}</span>
+                      </div>
+                    )}
+
+                    {currentView.id === "popular" && match.popularity && (
+                      <div className="flex items-center gap-1 text-xs">
+                        <TrendingUp className="h-3 w-3 text-yellow-500" />
+                        <span className="text-yellow-500 font-semibold">
+                          {match.popularity}%
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
-
-                <div className="flex items-center gap-3">
-                  {match.viewers && (
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Users className="h-3 w-3" />
-                      <span>{match.viewers.toLocaleString()}</span>
-                    </div>
-                  )}
-
-                  {currentView.id === "popular" && match.popularity && (
-                    <div className="flex items-center gap-1 text-xs">
-                      <TrendingUp className="h-3 w-3 text-yellow-500" />
-                      <span className="text-yellow-500 font-semibold">
-                        {match.popularity}%
-                      </span>
-                    </div>
-                  )}
-                </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
@@ -671,7 +702,7 @@ export default function MatchesSection() {
       <div className="flex justify-center">
         <Button
           variant="outline"
-          className="bg-linear-to-r from-zinc-800/40 to-zinc-800/20 border-zinc-700/50 hover:border-primary/30 hover:bg-primary/10 hover:scale-105 transition-all duration-300 px-6 sm:px-8 py-3 rounded-2xl font-semibold group"
+          className="bg-zinc-900/40 border-white/5 hover:border-primary/30 hover:bg-primary/10 hover:scale-105 transition-all duration-300 px-6 sm:px-8 py-3 rounded-2xl font-semibold group"
         >
           View All Matches
           <ChevronRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -691,13 +722,13 @@ export default function MatchesSection() {
 
           return (
             <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-              <div className="bg-zinc-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <Card className="bg-zinc-900 border-white/5 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                 {/* Modal Header - Mobile Optimized */}
-                <div className="sticky top-0 bg-zinc-900 border-b border-zinc-800 p-4 flex items-center justify-between z-10">
+                <CardHeader className="sticky top-0 bg-zinc-900 border-b border-white/5 p-4 flex items-center justify-between z-10">
                   <div className="flex items-center gap-3">
                     <div
                       className={cn(
-                        "p-2 rounded-xl bg-linear-to-br from-secondary/30 to-secondary/10 border border-secondary/50",
+                        "p-2 rounded-xl bg-zinc-800/40 border border-white/5",
                         currentView.color
                       )}
                     >
@@ -706,37 +737,45 @@ export default function MatchesSection() {
                         return <IconComponent className="h-4 w-4" />;
                       })()}
                     </div>
-                    <h3 className="text-lg font-semibold">{`${currentView.label} Match Details`}</h3>
+                    <CardTitle className="text-lg font-semibold text-white">{`${currentView.label} Match Details`}</CardTitle>
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setSelectedMatch(null)}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="text-zinc-500 hover:text-white"
                   >
                     <X className="h-5 w-5" />
                   </Button>
-                </div>
+                </CardHeader>
 
                 {/* Modal Content - Mobile Optimized */}
-                <div className="p-4 sm:p-6">
+                <CardContent className="p-4 sm:p-6">
                   {/* Match Header */}
                   <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 bg-zinc-700/50 rounded-xl flex items-center justify-center shadow-lg">
-                        <span className="text-sm font-bold">
-                          {match.homeTeam.shortName}
-                        </span>
+                      <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-white/10">
+                        <Image
+                          src={match.homeTeam.logo}
+                          alt={match.homeTeam.name}
+                          width={64}
+                          height={64}
+                          className="object-cover"
+                        />
                       </div>
-                      <div className="text-2xl font-bold">
+                      <div className="text-2xl font-bold text-white">
                         {match.homeScore !== undefined
                           ? `${match.homeScore} - ${match.awayScore}`
                           : "VS"}
                       </div>
-                      <div className="w-16 h-16 bg-zinc-700/50 rounded-xl flex items-center justify-center shadow-lg">
-                        <span className="text-sm font-bold">
-                          {match.awayTeam.shortName}
-                        </span>
+                      <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-white/10">
+                        <Image
+                          src={match.awayTeam.logo}
+                          alt={match.awayTeam.name}
+                          width={64}
+                          height={64}
+                          className="object-cover"
+                        />
                       </div>
                     </div>
 
@@ -750,7 +789,7 @@ export default function MatchesSection() {
                         </Badge>
                       )}
                       {match.isFeatured && (
-                        <Badge className="bg-linear-to-r from-primary to-primary/80 text-primary-foreground border-0 shadow-lg">
+                        <Badge className="bg-primary/20 text-primary border-primary/30">
                           Featured
                         </Badge>
                       )}
@@ -760,39 +799,39 @@ export default function MatchesSection() {
                   {/* Match Info */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                     <div className="space-y-3">
-                      <h4 className="text-sm font-medium text-muted-foreground">
+                      <h4 className="text-sm font-medium text-zinc-500">
                         Match Details
                       </h4>
                       <div className="space-y-2">
                         <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-zinc-500">
                             Date
                           </span>
-                          <span className="text-sm font-medium">
+                          <span className="text-sm font-medium text-white">
                             {match.date}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-zinc-500">
                             Time
                           </span>
-                          <span className="text-sm font-medium">
+                          <span className="text-sm font-medium text-white">
                             {match.time ?? "-"}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-zinc-500">
                             Venue
                           </span>
-                          <span className="text-sm font-medium">
+                          <span className="text-sm font-medium text-white">
                             {match.venue}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-zinc-500">
                             League
                           </span>
-                          <span className="text-sm font-medium">
+                          <span className="text-sm font-medium text-white">
                             {match.league}
                           </span>
                         </div>
@@ -800,23 +839,27 @@ export default function MatchesSection() {
                     </div>
 
                     <div className="space-y-3">
-                      <h4 className="text-sm font-medium text-muted-foreground">
+                      <h4 className="text-sm font-medium text-zinc-500">
                         Teams
                       </h4>
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <div className="w-10 h-10 bg-zinc-700/50 rounded-xl flex items-center justify-center">
-                              <span className="text-xs font-bold">
-                                {match.homeTeam.shortName}
-                              </span>
+                            <div className="w-10 h-10 rounded-full overflow-hidden">
+                              <Image
+                                src={match.homeTeam.logo}
+                                alt={match.homeTeam.name}
+                                width={40}
+                                height={40}
+                                className="object-cover"
+                              />
                             </div>
-                            <span className="text-sm font-medium">
+                            <span className="text-sm font-medium text-white">
                               {match.homeTeam.name}
                             </span>
                           </div>
                           {match.homeScore !== undefined && (
-                            <span className="text-lg font-bold">
+                            <span className="text-lg font-bold text-white">
                               {match.homeScore}
                             </span>
                           )}
@@ -824,17 +867,21 @@ export default function MatchesSection() {
 
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <div className="w-10 h-10 bg-zinc-700/50 rounded-xl flex items-center justify-center">
-                              <span className="text-xs font-bold">
-                                {match.awayTeam.shortName}
-                              </span>
+                            <div className="w-10 h-10 rounded-full overflow-hidden">
+                              <Image
+                                src={match.awayTeam.logo}
+                                alt={match.awayTeam.name}
+                                width={40}
+                                height={40}
+                                className="object-cover"
+                              />
                             </div>
-                            <span className="text-sm font-medium">
+                            <span className="text-sm font-medium text-white">
                               {match.awayTeam.name}
                             </span>
                           </div>
                           {match.awayScore !== undefined && (
-                            <span className="text-lg font-bold">
+                            <span className="text-lg font-bold text-white">
                               {match.awayScore}
                             </span>
                           )}
@@ -846,16 +893,16 @@ export default function MatchesSection() {
                   {/* Match Events */}
                   {match.matchEvents && (
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-muted-foreground mb-3">
+                      <h4 className="text-sm font-medium text-zinc-500 mb-3">
                         Match Events
                       </h4>
-                      <div className="bg-zinc-800/30 rounded-xl p-4">
+                      <div className="bg-zinc-800/40 rounded-xl p-4 border border-white/5">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {match.matchEvents.map(
                             (event: string, index: number) => (
                               <div
                                 key={index}
-                                className="text-sm text-foreground/80"
+                                className="text-sm text-zinc-300"
                               >
                                 {event}
                               </div>
@@ -869,7 +916,7 @@ export default function MatchesSection() {
                   {/* Video Highlight */}
                   {currentView.id === "highlights" && match.highlightVideo && (
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-muted-foreground mb-3">
+                      <h4 className="text-sm font-medium text-zinc-500 mb-3">
                         Match Highlights
                       </h4>
                       <div className="relative w-full h-48 sm:h-64 rounded-xl overflow-hidden">
@@ -878,7 +925,7 @@ export default function MatchesSection() {
                           alt="Match highlight"
                           className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                         <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
                           <div className="text-white text-sm font-medium">
                             Duration: {match.videoDuration ?? "-"}
@@ -894,22 +941,22 @@ export default function MatchesSection() {
 
                   {/* Action Buttons */}
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <Button className="flex-1 btn-pana">
+                    <Button className="flex-1 bg-primary hover:bg-primary/90">
                       {match.homeScore !== undefined
                         ? "View Full Match Report"
                         : "Set Reminder"}
                     </Button>
                     <Button
                       variant="outline"
-                      className="flex-1 bg-zinc-800/40 border-zinc-700/50 hover:bg-zinc-800/60"
+                      className="flex-1 bg-zinc-800/40 border-white/5 hover:bg-zinc-800/60"
                     >
                       {match.homeScore !== undefined
                         ? "View Match Statistics"
                         : "Add to Calendar"}
                     </Button>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
           );
         })()}
