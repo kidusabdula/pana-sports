@@ -21,8 +21,20 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 
+// Type definition for news items
+type NewsItem = {
+  id: number;
+  title: string;
+  category: string;
+  image: string;
+  date: string;
+  author: string;
+  excerpt: string;
+  content: string;
+};
+
 // Mock news data
-const newsData = [
+const newsData: NewsItem[] = [
   {
     id: 1,
     title:
@@ -159,7 +171,7 @@ const newsData = [
 ];
 
 export default function NewsSection() {
-  const [selectedNews, setSelectedNews] = useState(null);
+  const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Use the first news item as featured news
@@ -168,7 +180,7 @@ export default function NewsSection() {
   // Use the next 4 news items as side news
   const sideNews = newsData.slice(1, 5);
 
-  const openNewsDetail = (news) => {
+  const openNewsDetail = (news: NewsItem) => {
     setSelectedNews(news);
     setIsModalOpen(true);
   };
@@ -194,10 +206,10 @@ export default function NewsSection() {
             priority
           />
           {/* Enhanced Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black via-black/60 to-transparent" />
 
           {/* Subtle vignette effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/30" />
+          <div className="absolute inset-0 bg-linear-to-br from-transparent via-transparent to-black/30" />
 
           <div className="absolute bottom-0 left-0 p-6 md:p-10 lg:p-12 w-full">
             <div className="flex items-center gap-3 mb-4">
@@ -253,7 +265,7 @@ export default function NewsSection() {
                       {news.title}
                     </h4>
                     <span className="text-[10px] text-zinc-500 mt-1 block">
-                      {news.time}
+                      {news.date}
                     </span>
                   </div>
                 </div>
@@ -276,7 +288,7 @@ export default function NewsSection() {
                     fill
                     className="object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-6 w-full">
                     <Badge className="bg-primary hover:bg-primary text-white border-none text-xs px-2 py-0.5 mb-2">
                       {selectedNews.category}

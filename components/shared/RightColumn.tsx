@@ -1,19 +1,18 @@
 // components/shared/RightColumn.tsx
-import NewsSection from './NewsSection';
-import LeagueStandings from './LeagueStandings';
-import PlayerSpotlight from './PlayerSpotlight';
+import LeftColumn from "./LeftColumn"; // This has the matches with tabs
+import LeagueStandings from "./LeagueStandings";
+import PlayerSpotlight from "./PlayerSpotlight";
 
 export default function RightColumn() {
-
   return (
     <div className="space-y-6">
-      {/* News Section - Takes natural height */}
-      <NewsSection />
-      
-      {/* League Standings - Takes natural height */}
+      {/* Matches Section with 3 Tabs */}
+      <LeftColumn />
+
+      {/* League Standings Table */}
       <LeagueStandings />
-      
-      {/* Player Spotlight - Takes natural height */}
+
+      {/* Player Spotlight */}
       <PlayerSpotlight />
     </div>
   );

@@ -120,6 +120,127 @@ export const newsData = [
       <p>As part of the deal, Ethio Telecom will also sponsor the annual awards ceremony and provide technological support for the implementation of VAR technology, which is currently under consideration.</p>
     `,
   },
+  // Additional 6 news items
+  {
+    id: 7,
+    title: "Hawassa Kenema Stuns Title Contenders with Dramatic Late Winner",
+    category: "Match Report",
+    image: "https://www.soccerethiopia.net/wp-content/uploads/2025/11/IMG_20251125_201641_512-690x460.jpg",
+    date: "5h ago",
+    author: "Berhanu Lemma",
+    excerpt: "The Lake Stars secured a dramatic 2-1 victory over Dire Dawa with a 93rd-minute strike from substitute striker...",
+    content: `
+      <p>Hawassa Kenema delivered a stunning performance against Dire Dawa, scoring a 93rd-minute winner to secure a 2-1 victory at Hawassa Stadium.</p>
+      
+      <p>Dire Dawa took the lead in the 34th minute through a well-executed counter-attack finished by their captain. Hawassa Kenema equalized in the 67th minute with a header from a corner kick.</p>
+      
+      <p>Just when it seemed the match would end in a draw, substitute striker Mulugeta Lemma, who came on in the 80th minute, scored a spectacular volley from outside the box in the third minute of added time.</p>
+      
+      <p>"This victory shows our team's character and never-say-die attitude," said Hawassa's coach after the match. "We fought until the very end and got our reward."</p>
+      
+      <p>The win moves Hawassa Kenema to 6th place in the table with 18 points, while Dire Dawa remains in 4th position with 22 points.</p>
+    `,
+  },
+  {
+    id: 8,
+    title: "Ethiopia U-20 Team Advances to CECAFA Championship Semi-Finals",
+    category: "National Team",
+    image: "https://www.soccerethiopia.net/wp-content/uploads/2025/11/IMG_20251125_212009_499-690x460.jpg",
+    date: "7h ago",
+    author: "Mekonnen Bekele",
+    excerpt: "The young Walias secured a 2-0 victory over Uganda in their final group match to advance to the semi-finals...",
+    content: `
+      <p>Ethiopia's U-20 national team has advanced to the semi-finals of the CECAFA U-20 Championship after a convincing 2-0 victory over Uganda in their final group match.</p>
+      
+      <p>Goals from striker Biniam Girma in the 23rd minute and midfielder Abel Tadesse in the 71st minute secured the win for Ethiopia, who finished second in their group behind hosts Kenya.</p>
+      
+      <p>Coach Tesfaye Alemu praised his players' performance: "The boys showed great discipline and tactical awareness. We've improved with every match, and I'm confident we can go all the way."</p>
+      
+      <p>Ethiopia will now face Tanzania in the semi-finals on Wednesday, with the winner advancing to the final to face either Kenya or Burundi.</p>
+      
+      <p>The tournament has been a platform for several young Ethiopian players to showcase their talents, with scouts from European clubs reportedly in attendance.</p>
+    `,
+  },
+  {
+    id: 9,
+    title: "Ethiopia Bunna Announces Stadium Renovation Plans",
+    category: "Club News",
+    image: "https://www.soccerethiopia.net/wp-content/uploads/2025/11/IMG_20251125_212004_058-1-690x460.jpg",
+    date: "1d ago",
+    author: "Tigist Haile",
+    excerpt: "The Coffee Club has unveiled ambitious plans to renovate their home stadium with a capacity increase to 25,000 seats...",
+    content: `
+      <p>Ethiopia Bunna has announced ambitious plans to renovate their home stadium, with construction set to begin at the end of the current season.</p>
+      
+      <p>The renovation project, estimated to cost 50 million birr, will increase the stadium capacity from 15,000 to 25,000 seats and include modern facilities including VIP boxes, media centers, and improved lighting.</p>
+      
+      <p>"This is a significant investment in our club's future," said Ethiopia Bunna's chairman during the announcement ceremony. "We want to create a modern stadium that our fans can be proud of and that meets international standards."</p>
+      
+      <p>The club has secured funding from several sponsors and will seek additional support from the Addis Ababa City Administration. Construction is expected to take 18 months to complete.</p>
+      
+      <p>During the renovation period, Ethiopia Bunna will play their home games at the nearby Mekane Yesus Stadium.</p>
+    `,
+  },
+  {
+    id: 10,
+    title: "Former Ethiopian International Returns as Youth Coach",
+    category: "Exclusive",
+    image: "https://www.soccerethiopia.net/wp-content/uploads/2025/11/IMG_20251125_201644_361.jpg",
+    date: "2d ago",
+    author: "Samuel Tesfaye",
+    excerpt: "Legendary striker Shimeles Bekele has returned to Ethiopian football as the new U-17 national team coach, Pana Sports can exclusively reveal...",
+    content: `
+      <p>Former Ethiopian international striker Shimeles Bekele has returned to Ethiopian football as the new head coach of the U-17 national team, Pana Sports can exclusively reveal.</p>
+      
+      <p>Bekele, who retired from professional football last year after a successful career in Ethiopia and abroad, has been working with youth teams in Europe for the past six months.</p>
+      
+      <p>The Ethiopian Football Federation confirmed the appointment, with EFF president stating: "We're delighted to have someone of Shimeles' caliber working with our young players. His experience both as a player and coach will be invaluable."</p>
+      
+      <p>Bekele's first task will be to prepare the team for the upcoming U-17 African Cup of Nations qualifiers. He has already named his first squad, which includes several players from the recently concluded U-15 national tournament.</p>
+      
+      <p>"I'm excited to give back to Ethiopian football," said Bekele in his first press conference. "We have a lot of talented young players, and I believe we can build a strong foundation for the future of our national teams."</p>
+    `,
+  },
+  {
+    id: 11,
+    title: "Bahir Dar Kenema Signs Three International Players",
+    category: "Transfer",
+    image: "https://www.soccerethiopia.net/wp-content/uploads/2025/11/IMG_20251125_201641_094-690x460.jpg",
+    date: "3d ago",
+    author: "Dawit Alemu",
+    excerpt: "The Sea Stars have completed the signing of three international players from Kenya, Uganda, and Tanzania in a move to strengthen their squad for the second half of the season...",
+    content: `
+      <p>Bahir Dar Kenema has completed the signing of three international players as part of their ambitious plans to challenge for the title this season.</p>
+      
+      <p>The club has announced the arrival of Kenyan midfielder Michael Olunga, Ugandan defender Joseph Mpande, and Tanzanian striker Ramadhan Singano on six-month contracts with an option to extend.</p>
+      
+      <p>Coach Fikru Tefera expressed his excitement about the new signings: "These players bring international experience and quality that will elevate our team. They've already settled in well and shown their quality in training sessions."</p>
+      
+      <p>Olunga, who previously played for Gor Mahia in Kenya, is expected to add creativity to the midfield, while Mpande brings defensive solidity from his time with Vipers SC in Uganda. Singano was the top scorer in the Tanzanian Premier League last season with 15 goals.</p>
+      
+      <p>The three players are eligible to play immediately and could make their debut in this weekend's crucial match against Saint George.</p>
+    `,
+  },
+  {
+    id: 12,
+    title: "Ethiopian Football Federation Launches Women's Football Development Program",
+    category: "Business",
+    image: "https://www.soccerethiopia.net/wp-content/uploads/2025/11/IMG_20251125_201641_512-690x460.jpg",
+    date: "4d ago",
+    author: "Sofia Teklu",
+    excerpt: "The EFF has announced a comprehensive five-year plan to develop women's football across the country, with funding from FIFA and the African Football Confederation...",
+    content: `
+      <p>The Ethiopian Football Federation has launched a comprehensive five-year development program aimed at promoting and developing women's football across the country.</p>
+      
+      <p>The program, funded by FIFA and the African Football Confederation, will focus on establishing women's leagues in all regions, training female coaches and referees, and developing youth structures for girls' football.</p>
+      
+      <p>"Women's football has been neglected for too long in our country," said EFF president during the launch ceremony. "This program will create equal opportunities for girls and women to participate in football at all levels."</p>
+      
+      <p>The initiative includes the establishment of a national women's league, regional competitions, and school programs. The EFF has also announced plans to build dedicated training facilities for women's teams in major cities.</p>
+      
+      <p>Former national team captain Almaz Teshome has been appointed as the program's ambassador. "This is a historic moment for women's football in Ethiopia," she said. "I'm excited to see the next generation of female players getting the support they deserve."</p>
+    `,
+  },
 ];
 
 // Get unique categories from news data
