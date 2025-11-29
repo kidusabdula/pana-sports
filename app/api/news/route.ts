@@ -3,15 +3,25 @@ import { createNewsInputSchema } from '@/lib/schemas/news'
 import { requireAdmin } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url)
+    const limit = searchParams.get('limit')
+    
     const supabase = await createClient()
     
     // Fetch news first
-    const { data: newsData, error: newsError } = await supabase
+    let query = supabase
       .from('news')
       .select('*')
       .order('published_at', { ascending: false })
+    
+    // Apply limit if provided
+    if (limit) {
+      query = query.limit(parseInt(limit))
+    }
+    
+    const { data: newsData, error: newsError } = await query
     
     if (newsError) {
       console.error('Supabase error fetching news:', newsError)
