@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useNews, useDeleteNews } from "@/lib/hooks/useNews";
+import { useNews, useDeleteNews } from "@/lib/hooks/cms/useNews";
 import {
   Edit,
   Trash2,
@@ -73,9 +73,7 @@ export default function NewsTable() {
       loading: `Deleting "${title}"...`,
       success: `News "${title}" deleted successfully`,
       error: (error) => {
-        return error instanceof Error
-          ? error.message
-          : "Failed to delete news";
+        return error instanceof Error ? error.message : "Failed to delete news";
       },
     });
 
@@ -340,15 +338,20 @@ export default function NewsTable() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Article</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                Delete Article
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete "{item.title_en}"? This action cannot be undone.
+                                Are you sure you want to delete "{item.title_en}
+                                "? This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={() => handleDelete(item.id, item.title_en)}
+                                onClick={() =>
+                                  handleDelete(item.id, item.title_en)
+                                }
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
                                 Delete

@@ -38,9 +38,12 @@ import {
   CreateTransfer,
   UpdateTransfer,
 } from "@/lib/schemas/transfer";
-import { useCreateTransfer, useUpdateTransfer } from "@/lib/hooks/useTransfers";
-import { useTeams } from "@/lib/hooks/useTeams";
-import { usePlayers } from "@/lib/hooks/usePlayers";
+import {
+  useCreateTransfer,
+  useUpdateTransfer,
+} from "@/lib/hooks/cms/useTransfers";
+import { useTeams } from "@/lib/hooks/cms/useTeams";
+import { usePlayers } from "@/lib/hooks/cms/usePlayers";
 import {
   ArrowRightLeft,
   Globe,
@@ -57,7 +60,11 @@ interface TransferFormProps {
   onCancel?: () => void;
 }
 
-export default function TransferForm({ transfer, onSuccess, onCancel }: TransferFormProps) {
+export default function TransferForm({
+  transfer,
+  onSuccess,
+  onCancel,
+}: TransferFormProps) {
   const isEditing = !!transfer;
   const { data: teams } = useTeams();
   const { data: players } = usePlayers();
@@ -70,7 +77,7 @@ export default function TransferForm({ transfer, onSuccess, onCancel }: Transfer
       player_slug: transfer?.player_slug || "",
       from_team_slug: transfer?.from_team_slug || "",
       to_team_slug: transfer?.to_team_slug || "",
-      date: transfer?.date || new Date().toISOString().split('T')[0],
+      date: transfer?.date || new Date().toISOString().split("T")[0],
       fee: transfer?.fee || "",
       notes_en: transfer?.notes_en || "",
       notes_am: transfer?.notes_am || "",
@@ -175,7 +182,9 @@ export default function TransferForm({ transfer, onSuccess, onCancel }: Transfer
                         From Team (Optional)
                       </FormLabel>
                       <Select
-                        onValueChange={(value) => field.onChange(value === "free-agent" ? "" : value)}
+                        onValueChange={(value) =>
+                          field.onChange(value === "free-agent" ? "" : value)
+                        }
                         defaultValue={field.value || "free-agent"}
                       >
                         <FormControl>

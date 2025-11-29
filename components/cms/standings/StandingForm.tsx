@@ -6,7 +6,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -17,7 +24,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   createStandingInputSchema,
   updateStandingInputSchema,
@@ -25,7 +38,10 @@ import {
   CreateStanding,
   UpdateStanding,
 } from "@/lib/schemas/standing";
-import { useCreateStanding, useUpdateStanding } from "@/lib/hooks/useStandings";
+import {
+  useCreateStanding,
+  useUpdateStanding,
+} from "@/lib/hooks/cms/useStandings";
 import {
   Trophy,
   Shield,
@@ -35,8 +51,8 @@ import {
   Save,
   X,
 } from "lucide-react";
-import { useLeagues } from "@/lib/hooks/useLeagues";
-import { useTeams } from "@/lib/hooks/useTeams";
+import { useLeagues } from "@/lib/hooks/cms/useLeagues";
+import { useTeams } from "@/lib/hooks/cms/useTeams";
 
 interface StandingFormProps {
   standing?: Standing;
@@ -44,15 +60,21 @@ interface StandingFormProps {
   onCancel?: () => void;
 }
 
-export default function StandingForm({ standing, onSuccess, onCancel }: StandingFormProps) {
+export default function StandingForm({
+  standing,
+  onSuccess,
+  onCancel,
+}: StandingFormProps) {
   const isEditing = !!standing;
-  
+
   // Fetch leagues and teams for dropdowns
   const { data: leagues } = useLeagues();
   const { data: teams } = useTeams();
 
   const form = useForm<CreateStanding | UpdateStanding>({
-    resolver: zodResolver(isEditing ? updateStandingInputSchema : createStandingInputSchema),
+    resolver: zodResolver(
+      isEditing ? updateStandingInputSchema : createStandingInputSchema
+    ),
     defaultValues: {
       league_slug: standing?.league_slug || "",
       team_slug: standing?.team_slug || "",
@@ -214,7 +236,13 @@ export default function StandingForm({ standing, onSuccess, onCancel }: Standing
                           type="number"
                           placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined
+                            )
+                          }
                           className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                         />
                       </FormControl>
@@ -239,13 +267,17 @@ export default function StandingForm({ standing, onSuccess, onCancel }: Standing
                           type="number"
                           placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined
+                            )
+                          }
                           className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                         />
                       </FormControl>
-                      <FormDescription>
-                        Number of matches won
-                      </FormDescription>
+                      <FormDescription>Number of matches won</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -264,13 +296,17 @@ export default function StandingForm({ standing, onSuccess, onCancel }: Standing
                           type="number"
                           placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined
+                            )
+                          }
                           className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                         />
                       </FormControl>
-                      <FormDescription>
-                        Number of matches drawn
-                      </FormDescription>
+                      <FormDescription>Number of matches drawn</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -289,13 +325,17 @@ export default function StandingForm({ standing, onSuccess, onCancel }: Standing
                           type="number"
                           placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined
+                            )
+                          }
                           className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                         />
                       </FormControl>
-                      <FormDescription>
-                        Number of matches lost
-                      </FormDescription>
+                      <FormDescription>Number of matches lost</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -316,13 +356,17 @@ export default function StandingForm({ standing, onSuccess, onCancel }: Standing
                           type="number"
                           placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined
+                            )
+                          }
                           className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                         />
                       </FormControl>
-                      <FormDescription>
-                        Number of goals scored
-                      </FormDescription>
+                      <FormDescription>Number of goals scored</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -341,7 +385,13 @@ export default function StandingForm({ standing, onSuccess, onCancel }: Standing
                           type="number"
                           placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined
+                            )
+                          }
                           className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                         />
                       </FormControl>
@@ -366,7 +416,13 @@ export default function StandingForm({ standing, onSuccess, onCancel }: Standing
                           type="number"
                           placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined
+                            )
+                          }
                           className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                         />
                       </FormControl>
@@ -391,7 +447,13 @@ export default function StandingForm({ standing, onSuccess, onCancel }: Standing
                           type="number"
                           placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined
+                            )
+                          }
                           className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                         />
                       </FormControl>
@@ -416,7 +478,13 @@ export default function StandingForm({ standing, onSuccess, onCancel }: Standing
                           type="number"
                           placeholder="1"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined
+                            )
+                          }
                           className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                         />
                       </FormControl>

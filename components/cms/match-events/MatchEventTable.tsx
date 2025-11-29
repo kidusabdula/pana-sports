@@ -18,10 +18,10 @@ import { Input } from "@/components/ui/input";
 import {
   useMatchEvents,
   useDeleteMatchEvent,
-} from "@/lib/hooks/useMatchEvents";
-import { useMatches } from "@/lib/hooks/useMatches";
-import { usePlayers } from "@/lib/hooks/usePlayers";
-import { useTeams } from "@/lib/hooks/useTeams";
+} from "@/lib/hooks/cms/useMatchEvents";
+import { useMatches } from "@/lib/hooks/cms/useMatches";
+import { usePlayers } from "@/lib/hooks/cms/usePlayers";
+import { useTeams } from "@/lib/hooks/cms/useTeams";
 import {
   Edit,
   Trash2,

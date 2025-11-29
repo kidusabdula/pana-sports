@@ -1,3 +1,4 @@
+// lib/hooks/useNews.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { News, CreateNews, UpdateNews } from '@/lib/schemas/news'
 
@@ -68,6 +69,10 @@ export function useNews() {
   return useQuery({
     queryKey: ['news'],
     queryFn: fetchNews,
+    gcTime: 1000 * 60 * 60,        // 1hr garbage collection
+    staleTime: 1000 * 60 * 5,      // 5min stale cache
+    refetchOnWindowFocus: false, 
+    retry: 1,
   })
 }
 
@@ -76,6 +81,10 @@ export function useNewsItem(id: string) {
     queryKey: ['news', id],
     queryFn: () => fetchNewsItem(id),
     enabled: !!id,
+    gcTime: 1000 * 60 * 60,        // 1hr garbage collection
+    staleTime: 1000 * 60 * 5,      // 5min stale cache
+    refetchOnWindowFocus: false, 
+    retry: 1,
   })
 }
 

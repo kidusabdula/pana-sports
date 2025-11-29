@@ -1,6 +1,9 @@
+// app/page.tsx
 import AdBanner from "@/components/shared/AdBanner";
-import HomeNewsSection from "@/components/shared/HomeNewsSection";
+import HomeNewsSection from "@/components/news/HomeNewsSection";
 import RightColumn from "@/components/shared/RightColumn";
+import HomeNewsSectionSkeleton from "@/components/shared/Skeletons/HomeNewsSectionSkeleton";
+import { Suspense } from "react";
 
 export default function Home() {
   return (
@@ -14,7 +17,9 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Column - News Section (8 columns on desktop) */}
             <div className="lg:col-span-8">
-              <HomeNewsSection />
+              <Suspense fallback={<HomeNewsSectionSkeleton />}>
+                <HomeNewsSection />
+              </Suspense>
             </div>
 
             {/* Right Column - Matches, Standings, Player Spotlight (4 columns on desktop) */}

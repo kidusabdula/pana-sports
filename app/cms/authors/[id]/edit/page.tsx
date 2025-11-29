@@ -3,7 +3,7 @@
 import { use } from "react";
 import { useRouter } from "next/navigation";
 import AuthorForm from "@/components/cms/authors/AuthorForm";
-import { useAuthor } from "@/lib/hooks/useAuthors";
+import { useAuthor } from "@/lib/hooks/cms/useAuthors";
 import { Card, CardContent } from "@/components/ui/card";
 import { User } from "lucide-react";
 

@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useTransfers, useDeleteTransfer } from "@/lib/hooks/useTransfers";
+import { useTransfers, useDeleteTransfer } from "@/lib/hooks/cms/useTransfers";
 import {
   Edit,
   Trash2,
@@ -46,9 +46,15 @@ export default function TransferTable() {
   const filteredTransfers =
     transfers?.filter((transfer) => {
       const matchesSearch =
-        transfer.player?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        transfer.from_team?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        transfer.to_team?.name_en.toLowerCase().includes(searchTerm.toLowerCase());
+        transfer.player?.name_en
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        transfer.from_team?.name_en
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        transfer.to_team?.name_en
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
 
       return matchesSearch;
     }) || [];
@@ -174,7 +180,9 @@ export default function TransferTable() {
                   <TableCell colSpan={5} className="text-center py-12">
                     <div className="flex flex-col items-center space-y-3">
                       <ArrowRightLeft className="h-12 w-12 text-muted-foreground/20" />
-                      <p className="text-muted-foreground">No transfers found.</p>
+                      <p className="text-muted-foreground">
+                        No transfers found.
+                      </p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -242,15 +250,23 @@ export default function TransferTable() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Transfer</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                Delete Transfer
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete this transfer record? This action cannot be undone.
+                                Are you sure you want to delete this transfer
+                                record? This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={() => handleDelete(transfer.id, transfer.player?.name_en || "Unknown")}
+                                onClick={() =>
+                                  handleDelete(
+                                    transfer.id,
+                                    transfer.player?.name_en || "Unknown"
+                                  )
+                                }
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
                                 Delete

@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useTeams, useDeleteTeam } from "@/lib/hooks/useTeams";
+import { useTeams, useDeleteTeam } from "@/lib/hooks/cms/useTeams";
 import {
   Edit,
   Trash2,

@@ -14,14 +14,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useUsers, useUpdateUserMetadata } from "@/lib/hooks/useUsers";
-import {
-  Search,
-  User,
-  Calendar,
-  Shield,
-  ShieldCheck,
-} from "lucide-react";
+import { useUsers, useUpdateUserMetadata } from "@/lib/hooks/cms/useUsers";
+import { Search, User, Calendar, Shield, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import {
   Select,
@@ -39,16 +33,20 @@ export default function UserTable() {
 
   const filteredUsers =
     users?.filter((user) => {
-      const matchesSearch =
-        user.email?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = user.email
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase());
 
-      const matchesRole =
-        filterRole === "all" || user.role === filterRole;
+      const matchesRole = filterRole === "all" || user.role === filterRole;
 
       return matchesSearch && matchesRole;
     }) || [];
 
-  const handleRoleChange = async (userId: string, newRole: "user" | "admin", email: string) => {
+  const handleRoleChange = async (
+    userId: string,
+    newRole: "user" | "admin",
+    email: string
+  ) => {
     const promise = updateUserMetadataMutation.mutateAsync({
       id: userId,
       updates: { role: newRole },
@@ -58,9 +56,7 @@ export default function UserTable() {
       loading: `Updating role for ${email}...`,
       success: `Role updated to ${newRole}`,
       error: (error) => {
-        return error instanceof Error
-          ? error.message
-          : "Failed to update role";
+        return error instanceof Error ? error.message : "Failed to update role";
       },
     });
 
@@ -123,7 +119,7 @@ export default function UserTable() {
                   Regular Users
                 </p>
                 <p className="text-3xl font-bold text-foreground mt-1">
-                  {users?.filter(u => u.role === 'user').length || 0}
+                  {users?.filter((u) => u.role === "user").length || 0}
                 </p>
               </div>
               <div className="p-3 bg-blue-500/10 rounded-full">
@@ -141,7 +137,7 @@ export default function UserTable() {
                   Administrators
                 </p>
                 <p className="text-3xl font-bold text-foreground mt-1">
-                  {users?.filter(u => u.role === 'admin').length || 0}
+                  {users?.filter((u) => u.role === "admin").length || 0}
                 </p>
               </div>
               <div className="p-3 bg-purple-500/10 rounded-full">
@@ -249,7 +245,10 @@ export default function UserTable() {
                     <TableCell>
                       <span className="text-sm text-muted-foreground">
                         {user.last_sign_in_at
-                          ? format(new Date(user.last_sign_in_at), "MMM dd, yyyy")
+                          ? format(
+                              new Date(user.last_sign_in_at),
+                              "MMM dd, yyyy"
+                            )
                           : "Never"}
                       </span>
                     </TableCell>
@@ -257,7 +256,11 @@ export default function UserTable() {
                       <Select
                         value={user.role || "user"}
                         onValueChange={(value) =>
-                          handleRoleChange(user.id, value as "user" | "admin", user.email || "")
+                          handleRoleChange(
+                            user.id,
+                            value as "user" | "admin",
+                            user.email || ""
+                          )
                         }
                       >
                         <SelectTrigger className="w-[110px] h-8">

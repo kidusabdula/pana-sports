@@ -31,7 +31,7 @@ import {
   CreateLeague,
   UpdateLeague,
 } from "@/lib/schemas/league";
-import { useCreateLeague, useUpdateLeague } from "@/lib/hooks/useLeagues";
+import { useCreateLeague, useUpdateLeague } from "@/lib/hooks/cms/useLeagues";
 import { Trophy, Globe, Hash, Tag, Save, X } from "lucide-react";
 
 // Utility function to generate slug from text

@@ -2,20 +2,19 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { getCategories } from "@/lib/newsData";
 import { cn } from "@/lib/utils";
 
 interface NewsFilterProps {
   activeCategory: string;
   setActiveCategory: (category: string) => void;
+  categories: string[];
 }
 
 export default function NewsFilter({
   activeCategory,
   setActiveCategory,
+  categories,
 }: NewsFilterProps) {
-  const categories = ["All", ...getCategories()];
-
   return (
     <div className="mb-10 overflow-x-auto pb-4 scrollbar-hide">
       <div className="flex items-center gap-2 min-w-max">

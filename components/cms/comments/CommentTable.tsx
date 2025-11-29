@@ -14,7 +14,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useComments, useDeleteComment, useUpdateComment } from "@/lib/hooks/useComments";
+import {
+  useComments,
+  useDeleteComment,
+  useUpdateComment,
+} from "@/lib/hooks/cms/useComments";
 import {
   Trash2,
   Search,
@@ -161,7 +165,8 @@ export default function CommentTable() {
                   Active
                 </p>
                 <p className="text-3xl font-bold text-foreground mt-1">
-                  {comments?.filter(c => !c.flagged && !c.deleted).length || 0}
+                  {comments?.filter((c) => !c.flagged && !c.deleted).length ||
+                    0}
                 </p>
               </div>
               <div className="p-3 bg-green-500/10 rounded-full">
@@ -179,7 +184,7 @@ export default function CommentTable() {
                   Flagged
                 </p>
                 <p className="text-3xl font-bold text-foreground mt-1">
-                  {comments?.filter(c => c.flagged).length || 0}
+                  {comments?.filter((c) => c.flagged).length || 0}
                 </p>
               </div>
               <div className="p-3 bg-yellow-500/10 rounded-full">
@@ -197,7 +202,7 @@ export default function CommentTable() {
                   Deleted
                 </p>
                 <p className="text-3xl font-bold text-foreground mt-1">
-                  {comments?.filter(c => c.deleted).length || 0}
+                  {comments?.filter((c) => c.deleted).length || 0}
                 </p>
               </div>
               <div className="p-3 bg-red-500/10 rounded-full">
@@ -269,7 +274,9 @@ export default function CommentTable() {
                   <TableCell colSpan={5} className="text-center py-12">
                     <div className="flex flex-col items-center space-y-3">
                       <MessageSquare className="h-12 w-12 text-muted-foreground/20" />
-                      <p className="text-muted-foreground">No comments found.</p>
+                      <p className="text-muted-foreground">
+                        No comments found.
+                      </p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -308,12 +315,18 @@ export default function CommentTable() {
                           <Badge variant="destructive">Deleted</Badge>
                         )}
                         {comment.flagged && (
-                          <Badge variant="outline" className="border-yellow-500 text-yellow-600">
+                          <Badge
+                            variant="outline"
+                            className="border-yellow-500 text-yellow-600"
+                          >
                             Flagged
                           </Badge>
                         )}
                         {!comment.deleted && !comment.flagged && (
-                          <Badge variant="outline" className="border-green-500 text-green-600">
+                          <Badge
+                            variant="outline"
+                            className="border-green-500 text-green-600"
+                          >
                             Active
                           </Badge>
                         )}
@@ -324,7 +337,9 @@ export default function CommentTable() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleToggleFlag(comment.id, comment.flagged)}
+                          onClick={() =>
+                            handleToggleFlag(comment.id, comment.flagged)
+                          }
                           className={`h-8 w-8 rounded-full ${
                             comment.flagged
                               ? "text-yellow-600 hover:text-yellow-700 hover:bg-yellow-100"
@@ -346,9 +361,12 @@ export default function CommentTable() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Comment</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                Delete Comment
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete this comment? This action cannot be undone.
+                                Are you sure you want to delete this comment?
+                                This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

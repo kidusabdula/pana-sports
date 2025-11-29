@@ -31,14 +31,8 @@ import {
   CreateAuthor,
   UpdateAuthor,
 } from "@/lib/schemas/author";
-import { useCreateAuthor, useUpdateAuthor } from "@/lib/hooks/useAuthors";
-import {
-  User,
-  Globe,
-  Save,
-  X,
-  Image as ImageIcon,
-} from "lucide-react";
+import { useCreateAuthor, useUpdateAuthor } from "@/lib/hooks/cms/useAuthors";
+import { User, Globe, Save, X, Image as ImageIcon } from "lucide-react";
 
 interface AuthorFormProps {
   author?: Author;
@@ -46,7 +40,11 @@ interface AuthorFormProps {
   onCancel?: () => void;
 }
 
-export default function AuthorForm({ author, onSuccess, onCancel }: AuthorFormProps) {
+export default function AuthorForm({
+  author,
+  onSuccess,
+  onCancel,
+}: AuthorFormProps) {
   const isEditing = !!author;
 
   const form = useForm<CreateAuthor | UpdateAuthor>({

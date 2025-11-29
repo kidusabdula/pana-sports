@@ -1,4 +1,4 @@
-// components/news/NewsCard.tsx
+// components/client/NewsCard.tsx
 "use client";
 
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 
 interface NewsCardProps {
   news: {
-    id: number;
+    id: string;
     title: string;
     category: string;
     image: string;

@@ -15,8 +15,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { usePlayers, useDeletePlayer} from "@/lib/hooks/usePlayers";
-import { useTeams } from "@/lib/hooks/useTeams";
+import { usePlayers, useDeletePlayer } from "@/lib/hooks/cms/usePlayers";
+import { useTeams } from "@/lib/hooks/cms/useTeams";
 import { Player } from "@/lib/schemas/player";
 import {
   Edit,
@@ -56,19 +56,20 @@ export default function PlayerTable() {
   const { data: teams } = useTeams();
   const deletePlayerMutation = useDeletePlayer();
 
-  const filteredPlayers = players?.filter((player) => {
-    const matchesSearch =
-      player.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (player.name_am?.toLowerCase() ?? "").includes(
-        searchTerm.toLowerCase()
-      ) ||
-      player.slug.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredPlayers =
+    players?.filter((player) => {
+      const matchesSearch =
+        player.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (player.name_am?.toLowerCase() ?? "").includes(
+          searchTerm.toLowerCase()
+        ) ||
+        player.slug.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesTeam =
-      filterTeam === "all" || player.team_slug === filterTeam;
+      const matchesTeam =
+        filterTeam === "all" || player.team_slug === filterTeam;
 
-    return matchesSearch && matchesTeam;
-  }) || [];
+      return matchesSearch && matchesTeam;
+    }) || [];
 
   const handleDelete = async (id: string, name: string) => {
     const promise = deletePlayerMutation.mutateAsync(id);
@@ -300,7 +301,8 @@ export default function PlayerTable() {
                     </TableCell>
                     <TableCell>
                       <span className="text-sm text-foreground">
-                        {teams?.find(t => t.slug === player.team_slug)?.name_en || "Unassigned"}
+                        {teams?.find((t) => t.slug === player.team_slug)
+                          ?.name_en || "Unassigned"}
                       </span>
                     </TableCell>
                     <TableCell>
@@ -345,7 +347,8 @@ export default function PlayerTable() {
                               <AlertDialogTitle>Delete Player</AlertDialogTitle>
                               <AlertDialogDescription>
                                 Are you sure you want to delete &quot;
-                                {player.name_en}&quot;? This action cannot be undone.
+                                {player.name_en}&quot;? This action cannot be
+                                undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

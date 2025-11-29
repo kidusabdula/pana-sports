@@ -6,7 +6,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -17,7 +24,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   createTopScorerInputSchema,
   updateTopScorerInputSchema,
@@ -25,7 +38,10 @@ import {
   CreateTopScorer,
   UpdateTopScorer,
 } from "@/lib/schemas/topScorer";
-import { useCreateTopScorer, useUpdateTopScorer } from "@/lib/hooks/useTopScorers";
+import {
+  useCreateTopScorer,
+  useUpdateTopScorer,
+} from "@/lib/hooks/cms/useTopScorers";
 import {
   Trophy,
   Shield,
@@ -35,9 +51,9 @@ import {
   Target,
   TrendingUp,
 } from "lucide-react";
-import { useLeagues } from "@/lib/hooks/useLeagues";
-import { usePlayers } from "@/lib/hooks/usePlayers";
-import { useTeams } from "@/lib/hooks/useTeams";
+import { useLeagues } from "@/lib/hooks/cms/useLeagues";
+import { usePlayers } from "@/lib/hooks/cms/usePlayers";
+import { useTeams } from "@/lib/hooks/cms/useTeams";
 
 interface TopScorerFormProps {
   topScorer?: TopScorer;
@@ -45,16 +61,22 @@ interface TopScorerFormProps {
   onCancel?: () => void;
 }
 
-export default function TopScorerForm({ topScorer, onSuccess, onCancel }: TopScorerFormProps) {
+export default function TopScorerForm({
+  topScorer,
+  onSuccess,
+  onCancel,
+}: TopScorerFormProps) {
   const isEditing = !!topScorer;
-  
+
   // Fetch leagues and players for dropdowns
   const { data: leagues } = useLeagues();
   const { data: players } = usePlayers();
   const { data: teams } = useTeams();
 
   const form = useForm<CreateTopScorer | UpdateTopScorer>({
-    resolver: zodResolver(isEditing ? updateTopScorerInputSchema : createTopScorerInputSchema),
+    resolver: zodResolver(
+      isEditing ? updateTopScorerInputSchema : createTopScorerInputSchema
+    ),
     defaultValues: {
       league_slug: topScorer?.league_slug || "",
       player_slug: topScorer?.player_slug || "",
@@ -245,13 +267,17 @@ export default function TopScorerForm({ topScorer, onSuccess, onCancel }: TopSco
                           type="number"
                           placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined
+                            )
+                          }
                           className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                         />
                       </FormControl>
-                      <FormDescription>
-                        Number of goals scored
-                      </FormDescription>
+                      <FormDescription>Number of goals scored</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -271,7 +297,13 @@ export default function TopScorerForm({ topScorer, onSuccess, onCancel }: TopSco
                           type="number"
                           placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined
+                            )
+                          }
                           className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                         />
                       </FormControl>

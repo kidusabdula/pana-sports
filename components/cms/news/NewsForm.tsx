@@ -38,8 +38,8 @@ import {
   CreateNews,
   UpdateNews,
 } from "@/lib/schemas/news";
-import { useCreateNews, useUpdateNews } from "@/lib/hooks/useNews";
-import { useLeagues } from "@/lib/hooks/useLeagues";
+import { useCreateNews, useUpdateNews } from "@/lib/hooks/cms/useNews";
+import { useLeagues } from "@/lib/hooks/cms/useLeagues";
 import {
   Newspaper,
   Globe,
@@ -293,7 +293,9 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
                         League (Optional)
                       </FormLabel>
                       <Select
-                        onValueChange={(value) => field.onChange(value === "none" ? "" : value)}
+                        onValueChange={(value) =>
+                          field.onChange(value === "none" ? "" : value)
+                        }
                         defaultValue={field.value || "none"}
                       >
                         <FormControl>
@@ -352,8 +354,16 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
                         <Input
                           type="datetime-local"
                           {...field}
-                          value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ""}
-                          onChange={(e) => field.onChange(new Date(e.target.value).toISOString())}
+                          value={
+                            field.value
+                              ? new Date(field.value).toISOString().slice(0, 16)
+                              : ""
+                          }
+                          onChange={(e) =>
+                            field.onChange(
+                              new Date(e.target.value).toISOString()
+                            )
+                          }
                           className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                         />
                       </FormControl>

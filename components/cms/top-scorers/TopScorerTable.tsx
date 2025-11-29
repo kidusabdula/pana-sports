@@ -15,7 +15,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useTopScorers, useDeleteTopScorer } from "@/lib/hooks/useTopScorers";
+import {
+  useTopScorers,
+  useDeleteTopScorer,
+} from "@/lib/hooks/cms/useTopScorers";
 import { TopScorer } from "@/lib/schemas/topScorer";
 import {
   Edit,
@@ -48,9 +51,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useLeagues } from "@/lib/hooks/useLeagues";
-import { usePlayers } from "@/lib/hooks/usePlayers";
-import { useTeams } from "@/lib/hooks/useTeams";
+import { useLeagues } from "@/lib/hooks/cms/useLeagues";
+import { usePlayers } from "@/lib/hooks/cms/usePlayers";
+import { useTeams } from "@/lib/hooks/cms/useTeams";
 
 export default function TopScorerTable() {
   const [searchTerm, setSearchTerm] = useState("");

@@ -39,9 +39,9 @@ import {
   CreatePlayer,
   UpdatePlayer,
 } from "@/lib/schemas/player";
-import { useCreatePlayer, useUpdatePlayer } from "@/lib/hooks/usePlayers";
-import { useTeams } from "@/lib/hooks/useTeams";
-import { useLeagues } from "@/lib/hooks/useLeagues";
+import { useCreatePlayer, useUpdatePlayer } from "@/lib/hooks/cms/usePlayers";
+import { useTeams } from "@/lib/hooks/cms/useTeams";
+import { useLeagues } from "@/lib/hooks/cms/useLeagues";
 import {
   User,
   Globe,

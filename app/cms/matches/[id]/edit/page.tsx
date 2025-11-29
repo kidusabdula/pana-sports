@@ -3,7 +3,7 @@
 import { use, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import MatchForm from "@/components/cms/matches/MatchForm";
-import { useMatch } from "@/lib/hooks/useMatches";
+import { useMatch } from "@/lib/hooks/cms/useMatches";
 import { Card, CardContent } from "@/components/ui/card";
 import { Trophy } from "lucide-react";
 

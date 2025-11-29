@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useMatches, useDeleteMatch } from "@/lib/hooks/useMatches";
+import { useMatches, useDeleteMatch } from "@/lib/hooks/cms/useMatches";
 import {
   Edit,
   Trash2,
@@ -56,8 +56,12 @@ export default function MatchTable() {
   const filteredMatches =
     matches?.filter((match) => {
       const matchesSearch =
-        match.home_team?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        match.away_team?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        match.home_team?.name_en
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        match.away_team?.name_en
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
         match.league?.name_en.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesStatus =
@@ -155,7 +159,7 @@ export default function MatchTable() {
                   Live Matches
                 </p>
                 <p className="text-3xl font-bold text-foreground mt-1">
-                  {matches?.filter(m => m.status === 'live').length || 0}
+                  {matches?.filter((m) => m.status === "live").length || 0}
                 </p>
               </div>
               <div className="p-3 bg-blue-500/10 rounded-full">
@@ -294,7 +298,11 @@ export default function MatchTable() {
                       <div className="flex items-center gap-2">
                         {match.home_team?.logo_url && (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={match.home_team.logo_url} alt="" className="h-6 w-6 object-contain" />
+                          <img
+                            src={match.home_team.logo_url}
+                            alt=""
+                            className="h-6 w-6 object-contain"
+                          />
                         )}
                         <span className="font-medium text-sm">
                           {match.home_team?.name_en || "Unknown"}
@@ -310,7 +318,11 @@ export default function MatchTable() {
                       <div className="flex items-center gap-2">
                         {match.away_team?.logo_url && (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={match.away_team.logo_url} alt="" className="h-6 w-6 object-contain" />
+                          <img
+                            src={match.away_team.logo_url}
+                            alt=""
+                            className="h-6 w-6 object-contain"
+                          />
                         )}
                         <span className="font-medium text-sm">
                           {match.away_team?.name_en || "Unknown"}
@@ -324,7 +336,11 @@ export default function MatchTable() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <span className={`h-2 w-2 rounded-full ${getStatusColor(match.status)}`}></span>
+                        <span
+                          className={`h-2 w-2 rounded-full ${getStatusColor(
+                            match.status
+                          )}`}
+                        ></span>
                         <span className="text-sm font-medium capitalize">
                           {match.status}
                         </span>
@@ -356,7 +372,8 @@ export default function MatchTable() {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete Match</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete this match? This action cannot be undone.
+                                Are you sure you want to delete this match? This
+                                action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

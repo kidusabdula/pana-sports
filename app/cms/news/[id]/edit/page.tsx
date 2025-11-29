@@ -3,7 +3,7 @@
 import { use } from "react";
 import { useRouter } from "next/navigation";
 import NewsForm from "@/components/cms/news/NewsForm";
-import { useNewsItem } from "@/lib/hooks/useNews";
+import { useNewsItem } from "@/lib/hooks/cms/useNews";
 import { Card, CardContent } from "@/components/ui/card";
 import { Newspaper } from "lucide-react";
 

@@ -6,7 +6,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -16,7 +23,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   createMatchEventInputSchema,
@@ -25,10 +38,13 @@ import {
   CreateMatchEvent,
   UpdateMatchEvent,
 } from "@/lib/schemas/matchEvent";
-import { useCreateMatchEvent, useUpdateMatchEvent } from "@/lib/hooks/useMatchEvents";
-import { usePlayers } from "@/lib/hooks/usePlayers";
-import { useTeams } from "@/lib/hooks/useTeams";
-import { useMatches } from "@/lib/hooks/useMatches";
+import {
+  useCreateMatchEvent,
+  useUpdateMatchEvent,
+} from "@/lib/hooks/cms/useMatchEvents";
+import { usePlayers } from "@/lib/hooks/cms/usePlayers";
+import { useTeams } from "@/lib/hooks/cms/useTeams";
+import { useMatches } from "@/lib/hooks/cms/useMatches";
 import {
   Calendar,
   Hash,
@@ -46,16 +62,22 @@ interface MatchEventFormProps {
   onCancel?: () => void;
 }
 
-export default function MatchEventForm({ matchEvent, onSuccess, onCancel }: MatchEventFormProps) {
+export default function MatchEventForm({
+  matchEvent,
+  onSuccess,
+  onCancel,
+}: MatchEventFormProps) {
   const isEditing = !!matchEvent;
-  
+
   // Fetch matches and players for dropdowns
   const { data: matches } = useMatches();
   const { data: players } = usePlayers();
   const { data: teams } = useTeams();
 
   const form = useForm<CreateMatchEvent | UpdateMatchEvent>({
-    resolver: zodResolver(isEditing ? updateMatchEventInputSchema : createMatchEventInputSchema),
+    resolver: zodResolver(
+      isEditing ? updateMatchEventInputSchema : createMatchEventInputSchema
+    ),
     defaultValues: {
       match_id: matchEvent?.match_id || "",
       minute: matchEvent?.minute || 0,
@@ -80,7 +102,9 @@ export default function MatchEventForm({ matchEvent, onSuccess, onCancel }: Matc
         : createMatchEventMutation.mutateAsync(data as CreateMatchEvent);
 
     toast.promise(promise, {
-      loading: isEditing ? "Updating match event..." : "Creating match event...",
+      loading: isEditing
+        ? "Updating match event..."
+        : "Creating match event...",
       success: (data) => {
         return isEditing
           ? `Match event updated successfully`
@@ -188,7 +212,13 @@ export default function MatchEventForm({ matchEvent, onSuccess, onCancel }: Matc
                           type="number"
                           placeholder="45"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value
+                                ? parseInt(e.target.value)
+                                : undefined
+                            )
+                          }
                           className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                         />
                       </FormControl>
@@ -231,9 +261,7 @@ export default function MatchEventForm({ matchEvent, onSuccess, onCancel }: Matc
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormDescription>
-                        The type of match event
-                      </FormDescription>
+                      <FormDescription>The type of match event</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -338,25 +366,25 @@ export default function MatchEventForm({ matchEvent, onSuccess, onCancel }: Matc
                 control={form.control}
                 name="description_am"
                 render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2 font-medium text-foreground">
-                        <FileText className="h-4 w-4 text-primary" />
-                        Description (Amharic)
-                      </FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="ተንት የቡዣንት መግለጫ..."
-                          {...field}
-                          className="bg-background border-input focus:border-primary transition-colors rounded-lg min-h-[120px]"
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        A brief description of the event in Amharic
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2 font-medium text-foreground">
+                      <FileText className="h-4 w-4 text-primary" />
+                      Description (Amharic)
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="ተንት የቡዣንት መግለጫ..."
+                        {...field}
+                        className="bg-background border-input focus:border-primary transition-colors rounded-lg min-h-[120px]"
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      A brief description of the event in Amharic
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </CardContent>
 
             <CardFooter className="bg-muted/20 px-8 py-6 border-t border-border/50">

@@ -37,18 +37,10 @@ import {
   UpdateMatch,
   matchStatusEnum,
 } from "@/lib/schemas/match";
-import { useCreateMatch, useUpdateMatch } from "@/lib/hooks/useMatches";
-import { useLeagues } from "@/lib/hooks/useLeagues";
-import { useTeams } from "@/lib/hooks/useTeams";
-import {
-  Calendar,
-  Save,
-  X,
-  Trophy,
-  MapPin,
-  Clock,
-  Hash,
-} from "lucide-react";
+import { useCreateMatch, useUpdateMatch } from "@/lib/hooks/cms/useMatches";
+import { useLeagues } from "@/lib/hooks/cms/useLeagues";
+import { useTeams } from "@/lib/hooks/cms/useTeams";
+import { Calendar, Save, X, Trophy, MapPin, Clock, Hash } from "lucide-react";
 
 interface MatchFormProps {
   match?: Match;
@@ -56,7 +48,11 @@ interface MatchFormProps {
   onCancel?: () => void;
 }
 
-export default function MatchForm({ match, onSuccess, onCancel }: MatchFormProps) {
+export default function MatchForm({
+  match,
+  onSuccess,
+  onCancel,
+}: MatchFormProps) {
   const isEditing = !!match;
   const { data: leagues } = useLeagues();
   const { data: teams } = useTeams();
@@ -180,8 +176,16 @@ export default function MatchForm({ match, onSuccess, onCancel }: MatchFormProps
                         <Input
                           type="datetime-local"
                           {...field}
-                          value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ""}
-                          onChange={(e) => field.onChange(new Date(e.target.value).toISOString())}
+                          value={
+                            field.value
+                              ? new Date(field.value).toISOString().slice(0, 16)
+                              : ""
+                          }
+                          onChange={(e) =>
+                            field.onChange(
+                              new Date(e.target.value).toISOString()
+                            )
+                          }
                           className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                         />
                       </FormControl>
@@ -276,7 +280,11 @@ export default function MatchForm({ match, onSuccess, onCancel }: MatchFormProps
                         </FormControl>
                         <SelectContent>
                           {matchStatusEnum.options.map((status) => (
-                            <SelectItem key={status} value={status} className="capitalize">
+                            <SelectItem
+                              key={status}
+                              value={status}
+                              className="capitalize"
+                            >
                               {status}
                             </SelectItem>
                           ))}

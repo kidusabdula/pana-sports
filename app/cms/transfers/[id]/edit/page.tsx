@@ -3,7 +3,7 @@
 import { use } from "react";
 import { useRouter } from "next/navigation";
 import TransferForm from "@/components/cms/transfers/TransferForm";
-import { useTransfer } from "@/lib/hooks/useTransfers";
+import { useTransfer } from "@/lib/hooks/cms/useTransfers";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRightLeft } from "lucide-react";
 

@@ -39,7 +39,7 @@ import {
   CreateTeam,
   UpdateTeam,
 } from "@/lib/schemas/team";
-import { useCreateTeam, useUpdateTeam } from "@/lib/hooks/useTeams";
+import { useCreateTeam, useUpdateTeam } from "@/lib/hooks/cms/useTeams";
 import {
   Shield,
   Globe,

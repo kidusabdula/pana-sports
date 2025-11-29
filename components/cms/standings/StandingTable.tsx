@@ -15,9 +15,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useStandings, useDeleteStanding } from "@/lib/hooks/useStandings";
-import { useLeagues } from "@/lib/hooks/useLeagues";
-import { useTeams } from "@/lib/hooks/useTeams";
+import { useStandings, useDeleteStanding } from "@/lib/hooks/cms/useStandings";
+import { useLeagues } from "@/lib/hooks/cms/useLeagues";
+import { useTeams } from "@/lib/hooks/cms/useTeams";
 import { Standing } from "@/lib/schemas/standing";
 import {
   Edit,
@@ -59,17 +59,18 @@ export default function StandingTable() {
   const { data: teams } = useTeams();
   const deleteStandingMutation = useDeleteStanding();
 
-  const filteredStandings = standings?.filter((standing) => {
-    const team = teams?.find(t => t.slug === standing.team_slug);
-    const matchesSearch =
-      team?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      team?.name_am?.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredStandings =
+    standings?.filter((standing) => {
+      const team = teams?.find((t) => t.slug === standing.team_slug);
+      const matchesSearch =
+        team?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        team?.name_am?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesLeague =
-      filterLeague === "all" || standing.league_slug === filterLeague;
+      const matchesLeague =
+        filterLeague === "all" || standing.league_slug === filterLeague;
 
-    return matchesSearch && matchesLeague;
-  }) || [];
+      return matchesSearch && matchesLeague;
+    }) || [];
 
   const handleDelete = async (id: string, teamName: string) => {
     const promise = deleteStandingMutation.mutateAsync(id);
@@ -169,7 +170,7 @@ export default function StandingTable() {
                   Leagues
                 </p>
                 <p className="text-3xl font-bold text-foreground mt-1">
-                  {new Set(standings?.map(s => s.league_slug)).size || 0}
+                  {new Set(standings?.map((s) => s.league_slug)).size || 0}
                 </p>
               </div>
               <div className="p-3 bg-green-500/10 rounded-full">
@@ -273,13 +274,17 @@ export default function StandingTable() {
                   <TableCell colSpan={11} className="text-center py-12">
                     <div className="flex flex-col items-center space-y-3">
                       <Trophy className="h-12 w-12 text-muted-foreground/20" />
-                      <p className="text-muted-foreground">No standings found.</p>
+                      <p className="text-muted-foreground">
+                        No standings found.
+                      </p>
                     </div>
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredStandings.map((standing) => {
-                  const team = teams?.find(t => t.slug === standing.team_slug);
+                  const team = teams?.find(
+                    (t) => t.slug === standing.team_slug
+                  );
                   return (
                     <TableRow
                       key={standing.id}
@@ -348,8 +353,17 @@ export default function StandingTable() {
                         {standing.goals_against}
                       </TableCell>
                       <TableCell className="text-center font-bold text-foreground">
-                        <span className={standing.gd > 0 ? 'text-green-600' : standing.gd < 0 ? 'text-red-600' : ''}>
-                          {standing.gd > 0 ? '+' : ''}{standing.gd}
+                        <span
+                          className={
+                            standing.gd > 0
+                              ? "text-green-600"
+                              : standing.gd < 0
+                              ? "text-red-600"
+                              : ""
+                          }
+                        >
+                          {standing.gd > 0 ? "+" : ""}
+                          {standing.gd}
                         </span>
                       </TableCell>
                       <TableCell className="text-center font-bold text-lg text-primary">
@@ -379,17 +393,24 @@ export default function StandingTable() {
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Standing</AlertDialogTitle>
+                                <AlertDialogTitle>
+                                  Delete Standing
+                                </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete the standing for &quot;
-                                  {team?.name_en}&quot;? This action cannot be undone.
+                                  Are you sure you want to delete the standing
+                                  for &quot;
+                                  {team?.name_en}&quot;? This action cannot be
+                                  undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() =>
-                                    handleDelete(standing.id, team?.name_en || "Unknown Team")
+                                    handleDelete(
+                                      standing.id,
+                                      team?.name_en || "Unknown Team"
+                                    )
                                   }
                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 >

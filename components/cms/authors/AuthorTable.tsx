@@ -14,15 +14,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useAuthors, useDeleteAuthor } from "@/lib/hooks/useAuthors";
-import {
-  Edit,
-  Trash2,
-  Plus,
-  Search,
-  User,
-  Calendar,
-} from "lucide-react";
+import { useAuthors, useDeleteAuthor } from "@/lib/hooks/cms/useAuthors";
+import { Edit, Trash2, Plus, Search, User, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -182,7 +175,10 @@ export default function AuthorTable() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage src={author.avatar_url || undefined} alt={author.name} />
+                          <AvatarImage
+                            src={author.avatar_url || undefined}
+                            alt={author.name}
+                          />
                           <AvatarFallback>
                             {author.name.substring(0, 2).toUpperCase()}
                           </AvatarFallback>
@@ -229,13 +225,16 @@ export default function AuthorTable() {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete Author</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete "{author.name}"? This action cannot be undone.
+                                Are you sure you want to delete "{author.name}"?
+                                This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={() => handleDelete(author.id, author.name)}
+                                onClick={() =>
+                                  handleDelete(author.id, author.name)
+                                }
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
                                 Delete
