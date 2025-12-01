@@ -14,7 +14,7 @@ export default function MatchesPage() {
           Matches
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Manage match schedules, scores, and results.
+          Manage your football matches and fixtures.
         </p>
       </div>
 

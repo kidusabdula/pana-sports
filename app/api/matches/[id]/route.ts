@@ -9,11 +9,36 @@ export async function GET(
 ) {
   try {
     const { id } = await params
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Match ID is required' },
+        { status: 400 }
+      )
+    }
+    
     const supabase = await createClient()
     
-    const { data: match, error } = await supabase
+    const { data, error } = await supabase
       .from('matches')
-      .select('*')
+      .select(`
+        *,
+        home_team:teams!matches_home_team_id_fkey(id, name_en, name_am, slug, logo_url),
+        away_team:teams!matches_away_team_id_fkey(id, name_en, name_am, slug, logo_url),
+        league:leagues(id, name_en, name_am, slug, category),
+        venue:venues(id, name_en, name_am, city, capacity),
+        match_events(
+          id,
+          minute,
+          type,
+          description_en,
+          description_am,
+          player_id,
+          team_id,
+          players(id, name_en, name_am, slug),
+          teams(id, name_en, name_am, slug)
+        )
+      `)
       .eq('id', id)
       .single()
     
@@ -28,40 +53,14 @@ export async function GET(
       )
     }
     
-    if (!match) {
+    if (!data) {
       return NextResponse.json(
         { error: 'Match not found' },
         { status: 404 }
       )
     }
-
-    // Fetch related data
-    const { data: league } = await supabase
-      .from('leagues')
-      .select('*')
-      .eq('slug', match.league_slug)
-      .single()
-
-    const { data: home_team } = await supabase
-      .from('teams')
-      .select('*')
-      .eq('slug', match.home_team_slug)
-      .single()
-
-    const { data: away_team } = await supabase
-      .from('teams')
-      .select('*')
-      .eq('slug', match.away_team_slug)
-      .single()
-
-    const enrichedMatch = {
-      ...match,
-      league,
-      home_team,
-      away_team,
-    }
     
-    return NextResponse.json(enrichedMatch)
+    return NextResponse.json(data)
   } catch (error) {
     console.error('Unexpected error fetching match:', error)
     return NextResponse.json(
@@ -80,10 +79,20 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Match ID is required' },
+        { status: 400 }
+      )
+    }
+    
     // Verify admin authentication
+    let user;
     try {
-      await requireAdmin()
+      user = await requireAdmin()
     } catch (authError) {
+      console.error('Authentication error:', authError);
       return NextResponse.json(
         { 
           error: 'Authentication failed', 
@@ -98,6 +107,7 @@ export async function PATCH(
     try {
       body = await request.json()
     } catch (parseError) {
+      console.error('JSON parsing error:', parseError)
       return NextResponse.json(
         { 
           error: 'Invalid JSON in request body', 
@@ -111,6 +121,7 @@ export async function PATCH(
     try {
       validatedData = updateMatchInputSchema.parse(body)
     } catch (validationError) {
+      console.error('Validation error:', validationError);
       return NextResponse.json(
         { 
           error: 'Invalid input data', 
@@ -129,11 +140,29 @@ export async function PATCH(
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
-      .select()
+      .select(`
+        *,
+        home_team:teams!matches_home_team_id_fkey(id, name_en, name_am, slug, logo_url),
+        away_team:teams!matches_away_team_id_fkey(id, name_en, name_am, slug, logo_url),
+        league:leagues(id, name_en, name_am, slug, category),
+        venue:venues(id, name_en, name_am, city, capacity)
+      `)
       .single()
     
     if (error) {
-      console.error('Supabase error updating match:', error)
+      console.error('Supabase error updating match:', error);
+      
+      // Handle specific error codes
+      if (error.code === '23514') {
+        return NextResponse.json(
+          { 
+            error: 'Invalid match configuration', 
+            details: 'Home and away teams must be different' 
+          },
+          { status: 400 }
+        )
+      }
+      
       return NextResponse.json(
         { 
           error: 'Failed to update match', 
@@ -143,9 +172,16 @@ export async function PATCH(
       )
     }
     
+    if (!data) {
+      return NextResponse.json(
+        { error: 'Match not found' },
+        { status: 404 }
+      )
+    }
+    
     return NextResponse.json(data)
   } catch (error) {
-    console.error('Unexpected error updating match:', error)
+    console.error('Unexpected error updating match:', error);
     return NextResponse.json(
       { 
         error: 'Failed to update match', 
@@ -162,10 +198,20 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Match ID is required' },
+        { status: 400 }
+      )
+    }
+    
     // Verify admin authentication
+    let user;
     try {
-      await requireAdmin()
+      user = await requireAdmin()
     } catch (authError) {
+      console.error('Authentication error:', authError);
       return NextResponse.json(
         { 
           error: 'Authentication failed', 
@@ -177,17 +223,43 @@ export async function DELETE(
     
     const supabase = await createClient()
     
-    const { error } = await supabase
+    // Check if match exists
+    const { data: match, error: matchError } = await supabase
+      .from('matches')
+      .select('id')
+      .eq('id', id)
+      .single()
+    
+    if (matchError) {
+      console.error('Supabase error checking match existence:', matchError)
+      return NextResponse.json(
+        { 
+          error: 'Failed to check match existence', 
+          details: matchError.message 
+        },
+        { status: 500 }
+      )
+    }
+    
+    if (!match) {
+      return NextResponse.json(
+        { error: 'Match not found' },
+        { status: 404 }
+      )
+    }
+    
+    // Delete the match (match_events will be deleted automatically due to CASCADE)
+    const { error: deleteError } = await supabase
       .from('matches')
       .delete()
       .eq('id', id)
     
-    if (error) {
-      console.error('Supabase error deleting match:', error)
+    if (deleteError) {
+      console.error('Supabase error deleting match:', deleteError)
       return NextResponse.json(
         { 
           error: 'Failed to delete match', 
-          details: error.message 
+          details: deleteError.message 
         },
         { status: 500 }
       )
@@ -195,7 +267,7 @@ export async function DELETE(
     
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Unexpected error deleting match:', error)
+    console.error('Unexpected error deleting match:', error);
     return NextResponse.json(
       { 
         error: 'Failed to delete match', 

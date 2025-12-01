@@ -1,88 +1,113 @@
 import { z } from "zod";
 
-export const matchStatusEnum = z.enum([
-  "scheduled",
-  "live",
-  "finished",
-  "postponed",
-  "cancelled",
-]);
-
 // Database entity schema (includes all fields)
 export const matchEntitySchema = z.object({
   id: z.string().uuid(),
-  league_slug: z.string(),
-  home_team_slug: z.string(),
-  away_team_slug: z.string(),
-  date: z.string().datetime(),
-  status: matchStatusEnum,
-  score_home: z.number().int().nullable(),
-  score_away: z.number().int().nullable(),
-  score_detail: z.record(z.string(), z.any()).nullable(),
-  minute: z.number().int().nullable(),
-  venue_en: z.string().nullable(),
-  venue_am: z.string().nullable(),
-  attendance: z.number().int().nullable(),
+  league_id: z.string().uuid(),
+  home_team_id: z.string().uuid(),
+  away_team_id: z.string().uuid(),
+  date: z.string(),
+  status: z.enum(['scheduled', 'live', 'completed', 'postponed', 'cancelled']),
+  score_home: z.number().default(0),
+  score_away: z.number().default(0),
+  score_detail: z.record(z.any()).optional(),
+  minute: z.number().default(0),
+  venue_id: z.string().uuid().nullable(),
+  attendance: z.number().nullable(),
   referee: z.string().nullable(),
-  meta: z.record(z.string(), z.any()).nullable(),
+  match_day: z.number().nullable(),
+  season: z.string().nullable(),
+  is_featured: z.boolean().default(false),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
   created_by: z.string().uuid().nullable(),
 });
 
-// API input schema for creating a match
+// API input schema for creating matches
 export const createMatchInputSchema = z.object({
-  league_slug: z.string().min(1, "League is required"),
-  home_team_slug: z.string().min(1, "Home team is required"),
-  away_team_slug: z.string().min(1, "Away team is required"),
-  date: z.string().datetime().or(z.date().transform((date) => date.toISOString())),
-  status: matchStatusEnum.default("scheduled"),
-  score_home: z.number().int().min(0).nullable().optional(),
-  score_away: z.number().int().min(0).nullable().optional(),
-  venue_en: z.string().max(100).nullable().optional(),
-  venue_am: z.string().max(100).nullable().optional(),
-  minute: z.number().int().min(0).nullable().optional(),
-  referee: z.string().max(100).nullable().optional(),
-  attendance: z.number().int().min(0).nullable().optional(),
-  meta: z.record(z.string(), z.any()).nullable().optional(),
-}).refine((data) => data.home_team_slug !== data.away_team_slug, {
+  league_id: z.string().uuid("League is required"),
+  home_team_id: z.string().uuid("Home team is required"),
+  away_team_id: z.string().uuid("Away team is required"),
+  date: z.string().optional(),
+  status: z.enum(['scheduled', 'live', 'completed', 'postponed', 'cancelled']).default('scheduled'),
+  score_home: z.number().default(0),
+  score_away: z.number().default(0),
+  score_detail: z.record(z.any()).optional(),
+  minute: z.number().default(0),
+  venue_id: z.string().uuid().optional(),
+  attendance: z.number().optional(),
+  referee: z.string().optional(),
+  match_day: z.number().optional(),
+  season: z.string().optional(),
+  is_featured: z.boolean().default(false),
+}).refine((data) => data.home_team_id !== data.away_team_id, {
   message: "Home and away teams must be different",
-  path: ["away_team_slug"],
+  path: ["away_team_id"],
 });
 
-// API input schema for updating a match
+// API input schema for updating matches
 export const updateMatchInputSchema = createMatchInputSchema.partial();
 
-// Schema for match with joined relations
+// Schema for match events
+export const matchEventSchema = z.object({
+  id: z.string().uuid(),
+  match_id: z.string().uuid(),
+  player_id: z.string().uuid().nullable(),
+  team_id: z.string().uuid().nullable(),
+  minute: z.number(),
+  type: z.enum(['goal', 'yellow', 'red', 'sub', 'assist', 'own_goal', 'penalty']),
+  description_en: z.string().nullable(),
+  description_am: z.string().nullable(),
+  created_at: z.string().datetime(),
+});
+
+// Schema for matches with joined relations
 export const matchWithRelationsSchema = matchEntitySchema.extend({
-  league: z.object({
-    id: z.string(),
-    name_en: z.string(),
-    name_am: z.string(),
-    slug: z.string(),
-  }).optional(),
-  home_team: z.object({
-    id: z.string(),
-    name_en: z.string(),
-    name_am: z.string(),
-    slug: z.string(),
-    logo_url: z.string().nullable(),
-  }).optional(),
-  away_team: z.object({
-    id: z.string(),
-    name_en: z.string(),
-    name_am: z.string(),
-    slug: z.string(),
-    logo_url: z.string().nullable(),
-  }).optional(),
+  home_team: z
+    .object({
+      id: z.string().uuid(),
+      name_en: z.string(),
+      name_am: z.string(),
+      slug: z.string(),
+      logo_url: z.string().nullable(),
+    })
+    .optional(),
+  away_team: z
+    .object({
+      id: z.string().uuid(),
+      name_en: z.string(),
+      name_am: z.string(),
+      slug: z.string(),
+      logo_url: z.string().nullable(),
+    })
+    .optional(),
+  league: z
+    .object({
+      id: z.string().uuid(),
+      name_en: z.string(),
+      name_am: z.string(),
+      slug: z.string(),
+      category: z.string(),
+    })
+    .optional(),
+  venue: z
+    .object({
+      id: z.string().uuid(),
+      name_en: z.string(),
+      name_am: z.string(),
+      city: z.string(),
+      capacity: z.number().nullable(),
+    })
+    .optional(),
+  match_events: z.array(matchEventSchema).optional(),
 });
 
 // Type exports
 export type MatchEntity = z.infer<typeof matchEntitySchema>;
 export type CreateMatchInput = z.infer<typeof createMatchInputSchema>;
 export type UpdateMatchInput = z.infer<typeof updateMatchInputSchema>;
+export type MatchEvent = z.infer<typeof matchEventSchema>;
 export type MatchResponse = z.infer<typeof matchWithRelationsSchema>;
-export type MatchStatus = z.infer<typeof matchStatusEnum>;
 
 // For backward compatibility
 export type Match = MatchResponse;

@@ -1,75 +1,44 @@
-// app/api/matches/route.ts
-import { requireAdmin } from '@/lib/auth'
-import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { createClient } from "@/lib/supabase/server";
+import { createMatchInputSchema } from "@/lib/schemas/match";
+import { requireAdmin } from "@/lib/auth";
+import { NextResponse } from "next/server";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url)
-    const status = searchParams.get('status')
-    const date = searchParams.get('date')
-    const limit = searchParams.get('limit')
-    
-    console.log(`Fetching matches with params: status=${status}, date=${date}, limit=${limit}`)
-    
-    const supabase = await createClient()
-    
-    let query = supabase
-      .from('matches')
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("matches")
       .select(`
         *,
-        home_team:teams!home_team_slug(*),
-        away_team:teams!away_team_slug(*),
-        league:leagues!league_slug(*)
+        home_team:teams!matches_home_team_id_fkey(id, name_en, name_am, slug, logo_url),
+        away_team:teams!matches_away_team_id_fkey(id, name_en, name_am, slug, logo_url),
+        league:leagues(id, name_en, name_am, slug, category),
+        venue:venues(id, name_en, name_am, city, capacity)
       `)
-    
-    // Apply status filter if provided
-    if (status) {
-      query = query.eq('status', status)
-    }
-    
-    // Apply date filter if provided
-    if (date === 'today') {
-      const today = new Date()
-      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0)
-      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59)
-      
-      query = query
-        .gte('date', startOfDay.toISOString())
-        .lt('date', endOfDay.toISOString())
-    }
-    
-    // Apply limit if provided
-    if (limit) {
-      query = query.limit(parseInt(limit))
-    }
-    
-    const { data: matchesData, error: matchesError } = await query
-      .order('date', { ascending: true })
-    
-    if (matchesError) {
-      console.error('Supabase error fetching matches:', matchesError)
+      .order("date", { ascending: false });
+
+    if (error) {
+      console.error("Supabase error fetching matches:", error);
       return NextResponse.json(
-        { 
-          error: 'Failed to fetch matches', 
-          details: matchesError.message 
+        {
+          error: "Failed to fetch matches",
+          details: error.message,
         },
         { status: 500 }
-      )
+      );
     }
-    
-    console.log(`Successfully fetched ${matchesData?.length || 0} matches`)
-    
-    return NextResponse.json(matchesData)
+
+    return NextResponse.json(data);
   } catch (error) {
-    console.error('Unexpected error fetching matches:', error)
+    console.error("Unexpected error fetching matches:", error);
     return NextResponse.json(
-      { 
-        error: 'Failed to fetch matches', 
-        details: error instanceof Error ? error.message : 'Unknown error' 
+      {
+        error: "Failed to fetch matches",
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -78,69 +47,126 @@ export async function POST(request: Request) {
     // Verify admin authentication
     let user;
     try {
-      user = await requireAdmin()
+      user = await requireAdmin();
     } catch (authError) {
-      console.error('Authentication error:', authError);
+      console.error("Authentication error:", authError);
       return NextResponse.json(
-        { 
-          error: 'Authentication failed', 
-          details: authError instanceof Error ? authError.message : 'Unknown auth error' 
+        {
+          error: "Authentication failed",
+          details:
+            authError instanceof Error
+              ? authError.message
+              : "Unknown auth error",
         },
         { status: 401 }
-      )
+      );
     }
-    
+
     // Parse and validate request body
     let body;
     try {
-      body = await request.json()
+      body = await request.json();
     } catch (parseError) {
-      console.error('JSON parsing error:', parseError)
+      console.error("JSON parsing error:", parseError);
       return NextResponse.json(
-        { 
-          error: 'Invalid JSON in request body', 
-          details: parseError instanceof Error ? parseError.message : 'Unknown parsing error' 
+        {
+          error: "Invalid JSON in request body",
+          details:
+            parseError instanceof Error
+              ? parseError.message
+              : "Unknown parsing error",
         },
         { status: 400 }
-      )
+      );
     }
-    
-    console.log('Creating match with data:', body)
-    
-    const supabase = await createClient()
-    
-    // Create match with current user as creator
+
+    let validatedData;
+    try {
+      validatedData = createMatchInputSchema.parse(body);
+    } catch (validationError) {
+      console.error("Validation error:", validationError);
+      return NextResponse.json(
+        {
+          error: "Invalid input data",
+          details:
+            validationError instanceof Error
+              ? validationError.message
+              : "Unknown validation error",
+        },
+        { status: 400 }
+      );
+    }
+
+    const supabase = await createClient();
+
+    // Create the match with the current user as creator
     const { data, error } = await supabase
-      .from('matches')
+      .from("matches")
       .insert({
-        ...body,
+        ...validatedData,
         created_by: user.id,
       })
-      .select()
-      .single()
-    
+      .select(`
+        *,
+        home_team:teams!matches_home_team_id_fkey(id, name_en, name_am, slug, logo_url),
+        away_team:teams!matches_away_team_id_fkey(id, name_en, name_am, slug, logo_url),
+        league:leagues(id, name_en, name_am, slug, category),
+        venue:venues(id, name_en, name_am, city, capacity)
+      `)
+      .single();
+
     if (error) {
-      console.error('Supabase error creating match:', error)
+      console.error("Supabase error creating match:", error);
+
+      // Handle specific error codes
+      if (error.code === "23505") {
+        return NextResponse.json(
+          {
+            error: "Match with these teams already exists at this time",
+            details: "This match may already be scheduled",
+          },
+          { status: 409 }
+        );
+      }
+
+      if (error.code === "23514") {
+        return NextResponse.json(
+          {
+            error: "Invalid match configuration",
+            details: "Home and away teams must be different",
+          },
+          { status: 400 }
+        );
+      }
+
+      if (error.code === "23502") {
+        return NextResponse.json(
+          {
+            error: "Required field is missing",
+            details: error.details || "Please check all required fields",
+          },
+          { status: 400 }
+        );
+      }
+
       return NextResponse.json(
-        { 
-          error: 'Failed to create match', 
-          details: error.message 
+        {
+          error: "Failed to create match",
+          details: error.message,
         },
         { status: 500 }
-      )
+      );
     }
-    
-    console.log('Successfully created match:', data)
-    
-    return NextResponse.json(data, { status: 201 })
+
+    return NextResponse.json(data, { status: 201 });
   } catch (error) {
-    console.error('Unexpected error creating match:', error)
+    console.error("Unexpected error creating match:", error);
     return NextResponse.json(
-      { 
-        error: 'Failed to create match', 
-        details: error instanceof Error ? error.message : 'Unknown error' 
+      {
+        error: "Failed to create match",
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
-    )
+    );
   }
 }
