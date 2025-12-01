@@ -62,7 +62,7 @@ export default function TeamTable() {
         team.slug.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesLeague =
-        filterLeague === "all" || team.league_slug === filterLeague;
+        filterLeague === "all" || team.league?.slug === filterLeague;
 
       return matchesSearch && matchesLeague;
     }) || [];
@@ -276,14 +276,14 @@ export default function TeamTable() {
                         className="rounded border-muted-foreground/30 text-primary focus:ring-primary"
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="pl-6">
                       <div className="flex items-center gap-3">
                         <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
                           {team.logo_url ? (
                             <img
                               src={team.logo_url}
                               alt={team.name_en}
-                              className="h-6 w-6 rounded-full object-cover"
+                              className="w-full h-full object-contain"
                             />
                           ) : (
                             <span className="text-primary font-bold text-xs">
@@ -296,14 +296,14 @@ export default function TeamTable() {
                             {team.name_en}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            {team.name_am || team.slug}
+                            {team.league?.name_en || "No League"}
                           </span>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="bg-muted/20">
-                        {team.league_slug || "Unassigned"}
+                        {team.league?.slug || "Unassigned"}
                       </Badge>
                     </TableCell>
                     <TableCell>

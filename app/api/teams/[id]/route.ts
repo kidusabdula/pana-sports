@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { updateTeamInputSchema } from '@/lib/schemas/team'
 import { requireAdmin } from '@/lib/auth'
 import { NextResponse } from 'next/server'
+import { type NextRequest } from 'next/server'
 
 export async function GET(
   request: Request,
@@ -225,7 +226,36 @@ export async function DELETE(
       )
     }
     
-    // Delete team without checking for associated players or matches
+    // Check if there are players in this team
+    const { data: players, error: playersError } = await supabase
+      .from('players')
+      .select('id')
+      .eq('team_id', id)
+      .limit(1)
+    
+    if (playersError) {
+      console.error('Supabase error checking players:', playersError)
+      return NextResponse.json(
+        { 
+          error: 'Failed to check players', 
+          details: playersError.message 
+        },
+        { status: 500 }
+      )
+    }
+    
+    // Only allow deletion if there are no players in the team
+    if (players && players.length > 0) {
+      return NextResponse.json(
+        { 
+          error: 'Cannot delete team with associated players', 
+          details: 'Please delete or reassign all players in this team first' 
+        },
+        { status: 400 }
+      )
+    }
+    
+    // Delete the team without checking for associated players
     const { error: deleteError } = await supabase
       .from('teams')
       .delete()

@@ -14,7 +14,7 @@ export default function TeamsPage() {
           Teams
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Manage football teams and their information.
+          Manage your football teams and their information.
         </p>
       </div>
 

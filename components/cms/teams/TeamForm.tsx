@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -40,6 +40,7 @@ import {
   UpdateTeam,
 } from "@/lib/schemas/team";
 import { useCreateTeam, useUpdateTeam } from "@/lib/hooks/cms/useTeams";
+import { useLeagues } from "@/lib/hooks/cms/useLeagues";
 import {
   Shield,
   Globe,
@@ -49,6 +50,8 @@ import {
   FileText,
   Save,
   X,
+  Upload,
+  Image as ImageIcon,
 } from "lucide-react";
 
 // Utility function to generate slug from text
@@ -72,6 +75,9 @@ interface TeamFormProps {
 
 export default function TeamForm({ team, onSuccess, onCancel }: TeamFormProps) {
   const isEditing = !!team;
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<CreateTeam | UpdateTeam>({
     resolver: zodResolver(
@@ -83,18 +89,19 @@ export default function TeamForm({ team, onSuccess, onCancel }: TeamFormProps) {
       name_am: team?.name_am || "",
       short_name_en: team?.short_name_en || "",
       short_name_am: team?.short_name_am || "",
-      logo_url: team?.logo_url || "",
-      description_en: team?.description_en || "",
-      description_am: team?.description_am || "",
+      league_id: team?.league_id || "",
+      logo_url: team?.logo_url ?? "",
+      description_en: team?.description_en ?? "",
+      description_am: team?.description_am ?? "",
       stadium_en: team?.stadium_en || "",
       stadium_am: team?.stadium_am || "",
-      founded: team?.founded || undefined,
-      league_slug: team?.league_slug || "",
+      founded: team?.founded ? Number(team.founded) : undefined,
+      is_active: team?.is_active ?? true,
     },
   });
 
   // Watch name_en to auto-generate slug when creating
-  const nameEnValue = useWatch({ control: form.control, name: "name_en" });
+  const nameEnValue = form.watch("name_en");
 
   useEffect(() => {
     if (!isEditing && nameEnValue) {
@@ -103,8 +110,56 @@ export default function TeamForm({ team, onSuccess, onCancel }: TeamFormProps) {
     }
   }, [nameEnValue, isEditing, form]);
 
+  const { data: leagues } = useLeagues();
+
   const createTeamMutation = useCreateTeam();
   const updateTeamMutation = useUpdateTeam();
+
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Only image files are allowed");
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("bucket", "team-logos");
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setUploadedImageUrl(result.publicUrl);
+        form.setValue("logo_url", result.publicUrl);
+        toast.success("Image uploaded successfully");
+      } else {
+        toast.error("Failed to upload image");
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error("Failed to upload image");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const onSubmit = async (data: CreateTeam | UpdateTeam) => {
     const promise =
@@ -132,6 +187,7 @@ export default function TeamForm({ team, onSuccess, onCancel }: TeamFormProps) {
     try {
       await promise;
       // Small delay to ensure the toast is visible before redirecting
+      // Although Sonner persists, this feels smoother
       setTimeout(() => {
         onSuccess?.();
       }, 500);
@@ -260,7 +316,7 @@ export default function TeamForm({ team, onSuccess, onCancel }: TeamFormProps) {
 
                     <FormField
                       control={form.control}
-                      name="league_slug"
+                      name="league_id"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="flex items-center gap-2 font-medium text-foreground">
@@ -270,22 +326,17 @@ export default function TeamForm({ team, onSuccess, onCancel }: TeamFormProps) {
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
+                            value={field.value}
                           >
-                            <FormControl>
-                              <SelectTrigger className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg">
-                                <SelectValue placeholder="Select a league" />
-                              </SelectTrigger>
-                            </FormControl>
+                            <SelectTrigger className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg">
+                              <SelectValue placeholder="Select a league" />
+                            </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="premier">
-                                Premier League
-                              </SelectItem>
-                              <SelectItem value="womens">
-                                Women$apos;s League
-                              </SelectItem>
-                              <SelectItem value="walias">Walias</SelectItem>
-                              <SelectItem value="u20">U-20</SelectItem>
-                              <SelectItem value="cup">Ethiopian Cup</SelectItem>
+                              {leagues?.map((league) => (
+                                <SelectItem key={league.id} value={league.id}>
+                                  {league.name_en}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                           <FormDescription>
@@ -300,6 +351,131 @@ export default function TeamForm({ team, onSuccess, onCancel }: TeamFormProps) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
                       control={form.control}
+                      name="logo_url"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-medium text-foreground">
+                            Logo URL
+                          </FormLabel>
+                          <div className="space-y-2">
+                            <FormControl>
+                              <Input
+                                placeholder="https://example.com/logo.png"
+                                {...field}
+                                value={field.value ?? ""}
+                                onChange={(e) => {
+                                  field.onChange(e.target.value);
+                                  // Reset uploaded image URL if URL is manually changed
+                                  if (
+                                    e.target.value !== (uploadedImageUrl || "")
+                                  ) {
+                                    setUploadedImageUrl("");
+                                  }
+                                }}
+                                className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              URL to the team&apos;s logo image
+                            </FormDescription>
+                            <FormMessage />
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <div className="text-sm text-muted-foreground">
+                              OR
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => fileInputRef.current?.click()}
+                              disabled={isUploading}
+                              className="flex items-center gap-2"
+                            >
+                              {isUploading ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                                  Uploading...
+                                </>
+                              ) : (
+                                <>
+                                  <Upload className="h-4 w-4" />
+                                  Upload Image
+                                </>
+                              )}
+                            </Button>
+                            <input
+                              ref={fileInputRef}
+                              type="file"
+                              accept="image/*"
+                              onChange={handleFileUpload}
+                              className="hidden"
+                            />
+                          </div>
+
+                          {uploadedImageUrl && (
+                            <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                              <div className="flex items-center gap-2">
+                                <ImageIcon className="h-4 w-4 text-green-600" />
+                                <span className="text-sm text-green-800">
+                                  Image uploaded successfully
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="description_en"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-medium text-foreground">
+                            Description (English)
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Brief description of the team..."
+                              {...field}
+                              className="bg-background border-input focus:border-primary transition-colors rounded-lg min-h-[120px]"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            A brief description of the team in English
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="stadium_en"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 font-medium text-foreground">
+                            <MapPin className="h-4 w-4 text-primary" />
+                            Stadium Name (English)
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Addis Ababa Stadium"
+                              {...field}
+                              className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            The name of the team&apos;s home stadium in English
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
                       name="founded"
                       render={({ field }) => (
                         <FormItem>
@@ -311,15 +487,13 @@ export default function TeamForm({ team, onSuccess, onCancel }: TeamFormProps) {
                             <Input
                               type="number"
                               placeholder="1935"
-                              {...field}
-                              value={field.value ?? ""}
-                              onChange={(e) =>
+                              value={field.value || ""}
+                              onChange={(e) => {
+                                const value = e.target.value;
                                 field.onChange(
-                                  e.target.value
-                                    ? parseInt(e.target.value)
-                                    : undefined
-                                )
-                              }
+                                  value === "" ? undefined : Number(value)
+                                );
+                              }}
                               className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                             />
                           </FormControl>
@@ -330,75 +504,26 @@ export default function TeamForm({ team, onSuccess, onCancel }: TeamFormProps) {
                         </FormItem>
                       )}
                     />
-
-                    <FormField
-                      control={form.control}
-                      name="logo_url"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="flex items-center gap-2 font-medium text-foreground">
-                            <Shield className="h-4 w-4 text-primary" />
-                            Logo URL
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="https://example.com/logo.png"
-                              {...field}
-                              value={field.value ?? ""}
-                              className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            URL to the team&apos;s logo image
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                   </div>
 
                   <FormField
                     control={form.control}
-                    name="description_en"
+                    name="is_active"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 font-medium text-foreground">
-                          <FileText className="h-4 w-4 text-primary" />
-                          Description (English)
-                        </FormLabel>
+                      <FormItem className="flex flex-row items-center space-x-3 rounded-lg border p-4">
                         <FormControl>
-                          <Textarea
-                            placeholder="Brief description of the team..."
-                            {...field}
-                            className="bg-background border-input focus:border-primary transition-colors rounded-lg min-h-[120px]"
+                          <input
+                            type="checkbox"
+                            checked={field.value}
+                            onChange={field.onChange}
+                            className="h-4 w-4 rounded border-muted-foreground/30 text-primary focus:ring-primary"
                           />
                         </FormControl>
-                        <FormDescription>
-                          A brief description of the team in English
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="stadium_en"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 font-medium text-foreground">
-                          <MapPin className="h-4 w-4 text-primary" />
-                          Stadium Name (English)
+                        <FormLabel className="font-medium text-foreground">
+                          Active
                         </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Addis Ababa Stadium"
-                            {...field}
-                            className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
-                          />
-                        </FormControl>
                         <FormDescription>
-                          The name of the team&apos;s home stadium in English
+                          Whether this team is currently active
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -455,50 +580,130 @@ export default function TeamForm({ team, onSuccess, onCancel }: TeamFormProps) {
                         </FormItem>
                       )}
                     />
+
+                    <FormField
+                      control={form.control}
+                      name="slug"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 font-medium text-foreground">
+                            <Hash className="h-4 w-4 text-primary" />
+                            Slug
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="team-slug"
+                              {...field}
+                              className="h-11 bg-muted/50 border-input focus:border-primary transition-colors font-mono text-sm rounded-lg"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Unique identifier for the team (auto-generated from
+                            name)
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="description_am"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-medium text-foreground">
+                            <FileText className="h-4 w-4 text-primary" />
+                            Description (Amharic)
+                          </FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="ቡምርቱውንት መግለጫ..."
+                              {...field}
+                              className="bg-background border-input focus:border-primary transition-colors rounded-lg min-h-[120px]"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            A brief description of the team in Amharic
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="stadium_am"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 font-medium text-foreground">
+                            <MapPin className="h-4 w-4 text-primary" />
+                            Stadium Name (Amharic)
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="አዲስ በማባ ስቲየም"
+                              {...field}
+                              className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            The name of the team&apos;s home stadium in Amharic
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="founded"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 font-medium text-foreground">
+                            <Calendar className="h-4 w-4 text-primary" />
+                            Founded Year
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="1935"
+                              value={field.value || ""}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                field.onChange(
+                                  value === "" ? undefined : Number(value)
+                                );
+                              }}
+                              className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            The year the team was founded
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
                   <FormField
                     control={form.control}
-                    name="description_am"
+                    name="is_active"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 font-medium text-foreground">
-                          <FileText className="h-4 w-4 text-primary" />
-                          Description (Amharic)
-                        </FormLabel>
+                      <FormItem className="flex flex-row items-center space-x-3 rounded-lg border p-4">
                         <FormControl>
-                          <Textarea
-                            placeholder="ቡምርቱውንት የቡዣንት መግለጫ..."
-                            {...field}
-                            className="bg-background border-input focus:border-primary transition-colors rounded-lg min-h-[120px]"
+                          <input
+                            type="checkbox"
+                            checked={field.value}
+                            onChange={field.onChange}
+                            className="h-4 w-4 rounded border-muted-foreground/30 text-primary focus:ring-primary"
                           />
                         </FormControl>
-                        <FormDescription>
-                          A brief description of the team in Amharic
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="stadium_am"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2 font-medium text-foreground">
-                          <MapPin className="h-4 w-4 text-primary" />
-                          Stadium Name (Amharic)
+                        <FormLabel className="font-medium text-foreground">
+                          Active
                         </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="አዲስ በበማባ ስቲዲየም"
-                            {...field}
-                            className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
-                          />
-                        </FormControl>
                         <FormDescription>
-                          The name of the team&apos;s home stadium in Amharic
+                          Whether this team is currently active
                         </FormDescription>
                         <FormMessage />
                       </FormItem>

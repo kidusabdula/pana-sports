@@ -7,7 +7,7 @@ interface EditTeamPageProps {
   params: Promise<{ id: string }>;
 }
 
-// --- Helper Function ---
+// Helper Function
 async function getTeam(id: string) {
   if (!id) {
     console.error("getTeam called without an ID");
@@ -39,7 +39,7 @@ async function getTeam(id: string) {
   }
 }
 
-// --- generateMetadata ---
+// Generate metadata
 export async function generateMetadata({
   params,
 }: EditTeamPageProps): Promise<Metadata> {
@@ -59,7 +59,7 @@ export async function generateMetadata({
   }
 }
 
-// --- Page Component ---
+// Page Component
 export default async function EditTeamPage({ params }: EditTeamPageProps) {
   const { id } = await params;
   const team = await getTeam(id);
