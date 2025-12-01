@@ -1,31 +1,57 @@
 // app/news/[id]/page.tsx
 import { notFound } from "next/navigation";
-import { newsData } from "@/lib/newsData";
+import { useNewsItem } from "@/lib/hooks/public/useNews";
+import { transformNewsToUINews, transformNewsList } from "@/lib/utils/transformers";
 import NewsDetail from "@/components/news/NewsDetail";
 import NewsCard from "@/components/news/NewsCard";
+import ErrorState from "@/components/shared/ErrorState";
+import NewsDetailSkeleton from "@/components/shared/Skeletons/NewsDetailSkeleton";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 
-export default async function NewsDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const newsId = parseInt(id);
-  const news = newsData.find((item) => item.id === newsId);
+// app/news/[id]/page.tsx (update the NewsDetailPageContent function)
+function NewsDetailPageContent({ id }: { id: string }) {
+  const { 
+    data: newsData, 
+    isLoading, 
+    isError, 
+    refetch 
+  } = useNewsItem(id, true); // Fetch with related news
 
-  if (!news) {
+  // Handle error state
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-black text-white pt-24 pb-20">
+        <div className="container mx-auto px-4 md:px-6">
+          <ErrorState 
+            message="Failed to load news article. Please try again later." 
+            onRetry={refetch} 
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Handle loading state
+  if (isLoading) {
+    return <NewsDetailSkeleton />;
+  }
+
+  if (!newsData) {
     notFound();
   }
 
-  // Get related news (exclude current one, take 3)
-  const relatedNews = newsData.filter((item) => item.id !== newsId).slice(0, 3);
+  // Transform news data to UI format
+  const transformedNews = transformNewsToUINews(newsData);
+  
+  // Transform related news to UI format
+  const relatedNews = newsData.relatedNews ? transformNewsList(newsData.relatedNews) : [];
 
   return (
     <div className="min-h-screen bg-black text-white pt-24 pb-20">
       <div className="container mx-auto px-4 md:px-6">
-        <NewsDetail news={news} />
+        <NewsDetail news={transformedNews} />
 
         {/* Related News Section */}
         {relatedNews.length > 0 && (

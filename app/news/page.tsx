@@ -2,26 +2,91 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { newsData } from "@/lib/newsData";
+import { useAllNews, useFilteredNews } from "@/lib/hooks/public/useNews";
+import { transformNewsList } from "@/lib/utils/transformers";
 import NewsCard from "@/components/news/NewsCard";
 import NewsFilter from "@/components/news/NewsFilter";
+import ErrorState from "@/components/shared/ErrorState";
+import NewsPageSkeleton from "@/components/shared/Skeletons/NewsPageSkeleton";
 import { motion } from "framer-motion";
 import { TrendingUp, Zap } from "lucide-react";
 import AdBanner from "@/components/shared/AdBanner";
+import { Suspense } from "react";
 
-export default function NewsPage() {
+function NewsPageContent() {
   const [activeCategory, setActiveCategory] = useState("All");
 
-  const filteredNews = useMemo(() => {
-    if (activeCategory === "All") {
-      return newsData;
-    }
-    return newsData.filter((news) => news.category === activeCategory);
-  }, [activeCategory]);
+  // Fetch all news
+  const { 
+    data: allNews, 
+    isLoading: isLoadingAll, 
+    isError: isErrorAll, 
+    refetch: refetchAll 
+  } = useAllNews();
 
-  const featuredNews = filteredNews[0];
-  const trendingNews = newsData.slice(0, 4); // Simulate trending
-  const latestNews = filteredNews.slice(1);
+  // Fetch filtered news if a category is selected
+  const { 
+    data: filteredNewsData, 
+    isLoading: isLoadingFiltered, 
+    isError: isErrorFiltered, 
+    refetch: refetchFiltered 
+  } = useFilteredNews(activeCategory);
+
+  // Determine which data to use based on active category
+  const isLoading = activeCategory === "All" ? isLoadingAll : isLoadingFiltered;
+  const isError = activeCategory === "All" ? isErrorAll : isErrorFiltered;
+  const refetch = activeCategory === "All" ? refetchAll : refetchFiltered;
+  
+  // Transform data to UI format
+  const transformedNews = useMemo(() => {
+    const newsData = activeCategory === "All" ? allNews : filteredNewsData;
+    if (!newsData) return [];
+    
+    return transformNewsList(newsData);
+  }, [allNews, filteredNewsData, activeCategory]);
+
+  // Extract categories from all news for the filter
+  const categories = useMemo(() => {
+    if (!allNews) return ["All"];
+    
+    const uniqueCategories = new Set(allNews.map(news => news.category).filter((cat): cat is string => cat !== null && cat !== undefined));
+    return ["All", ...Array.from(uniqueCategories)];
+  }, [allNews]);
+
+  // Handle error state
+  if (isError) {
+    return (
+      <>
+        <AdBanner />
+        <div className="min-h-screen bg-black text-white pt-24 pb-20">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="mb-12">
+              <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-4 bg-linear-to-r from-white via-zinc-400 to-zinc-600 bg-clip-text text-transparent">
+                THE FEED
+              </h1>
+              <p className="text-zinc-400 text-lg md:text-xl max-w-2xl">
+                Stay ahead of the game with the latest updates, match reports,
+                and exclusive insights from the world of Ethiopian football.
+              </p>
+            </div>
+            <ErrorState 
+              message="Failed to load news. Please try again later." 
+              onRetry={refetch} 
+            />
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Handle loading state
+  if (isLoading) {
+    return <NewsPageSkeleton />;
+  }
+
+  const featuredNews = transformedNews[0];
+  const trendingNews = transformedNews.slice(0, 4); // Simulate trending
+  const latestNews = transformedNews.slice(1);
 
   return (
     <>
@@ -48,6 +113,7 @@ export default function NewsPage() {
           <NewsFilter
             activeCategory={activeCategory}
             setActiveCategory={setActiveCategory}
+            categories={categories}
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -83,7 +149,7 @@ export default function NewsPage() {
                 </section>
               )}
 
-              {filteredNews.length === 0 && (
+              {transformedNews.length === 0 && (
                 <div className="text-center py-20 border border-dashed border-zinc-800 rounded-3xl">
                   <p className="text-zinc-500 text-lg">
                     No news found in this category.
@@ -119,13 +185,7 @@ export default function NewsPage() {
                     Categories
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {[
-                      "Match Report",
-                      "Transfer",
-                      "Interview",
-                      "Opinion",
-                      "Analysis",
-                    ].map((tag) => (
+                    {categories.slice(1).map((tag) => (
                       <span
                         key={tag}
                         className="text-xs px-3 py-1.5 rounded-full bg-white/5 text-zinc-400 hover:bg-primary/20 hover:text-primary transition-colors cursor-pointer border border-white/5"
@@ -141,5 +201,13 @@ export default function NewsPage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function NewsPage() {
+  return (
+    <Suspense fallback={<NewsPageSkeleton />}>
+      <NewsPageContent />
+    </Suspense>
   );
 }

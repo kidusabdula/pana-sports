@@ -12,14 +12,16 @@ async function fetchNews() {
   return res.json() as Promise<News[]>
 }
 
-async function fetchNewsItem(id: string) {
-  const res = await fetch(`/api/news/${id}`)
+async function fetchNewsItem(id: string, includeRelated = false) {
+  const url = includeRelated ? `/api/news/${id}?includeRelated=true` : `/api/news/${id}`
+  const res = await fetch(url)
   if (!res.ok) {
     const error = await res.json()
     throw new Error(error.error || 'Failed to fetch news')
   }
-  return res.json() as Promise<News>
+  return res.json() as Promise<News & { relatedNews?: News[] }>
 }
+
 
 async function createNews(newNews: CreateNews) {
   const res = await fetch('/api/news', {
@@ -76,18 +78,17 @@ export function useNews() {
   })
 }
 
-export function useNewsItem(id: string) {
+export function useNewsItem(id: string, includeRelated = false) {
   return useQuery({
-    queryKey: ['news', id],
-    queryFn: () => fetchNewsItem(id),
-    enabled: !!id,
+    queryKey: ['news', 'item', id, { includeRelated }],
+    queryFn: () => fetchNewsItem(id, includeRelated),
     gcTime: 1000 * 60 * 60,        // 1hr garbage collection
     staleTime: 1000 * 60 * 5,      // 5min stale cache
     refetchOnWindowFocus: false, 
     retry: 1,
+    enabled: !!id,
   })
 }
-
 export function useCreateNews() {
   const queryClient = useQueryClient()
   
