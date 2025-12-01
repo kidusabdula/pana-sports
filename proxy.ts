@@ -1,6 +1,9 @@
-import { createClient } from './lib/supabase/server'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+// proxy.ts
+// This is unconventional - Next.js expects 'middleware.ts' or 'middleware.js'
+// But here's how you would structure it if you want proxy.ts
+
+import { createClient } from '@/lib/supabase/server'
+import { NextResponse, NextRequest } from 'next/server'
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -36,11 +39,11 @@ export async function proxy(request: NextRequest) {
     }
   }
   
-  // Handle locale detection if needed
-  // This can be extended for internationalization
-  
   return NextResponse.next()
 }
+
+// Export as middleware for Next.js to recognize
+export const middleware = proxy
 
 export const config = {
   matcher: [
@@ -50,7 +53,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public (public files)
+     * - images, fonts, etc.
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|css|js)$).*)',
   ],
 }

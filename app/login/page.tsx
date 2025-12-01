@@ -1,3 +1,4 @@
+// app/login/page.tsx
 "use client";
 
 import { useState, Suspense } from "react";
@@ -62,7 +63,7 @@ function LoginForm() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}${redirectTo}`,
+          redirectTo: `${window.location.origin}/api/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
         },
       });
 
@@ -79,9 +80,9 @@ function LoginForm() {
   return (
     <Card>
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-center">Sign in</CardTitle>
+        <CardTitle className="text-2xl text-center">Admin Sign In</CardTitle>
         <CardDescription className="text-center">
-          Enter your credentials to access the Pana Sports CMS
+          Enter your admin credentials to access the Pana Sports CMS
         </CardDescription>
       </CardHeader>
       <CardContent>
