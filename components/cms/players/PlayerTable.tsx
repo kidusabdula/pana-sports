@@ -16,8 +16,6 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { usePlayers, useDeletePlayer } from "@/lib/hooks/cms/usePlayers";
-import { useTeams } from "@/lib/hooks/cms/useTeams";
-import { Player } from "@/lib/schemas/player";
 import {
   Edit,
   Trash2,
@@ -25,9 +23,8 @@ import {
   Search,
   User,
   Calendar,
-  Filter,
   ChevronDown,
-  Shirt,
+  Hash,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -52,8 +49,8 @@ import {
 export default function PlayerTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterTeam, setFilterTeam] = useState("all");
+  const [filterPosition, setFilterPosition] = useState("all");
   const { data: players, isLoading, error } = usePlayers();
-  const { data: teams } = useTeams();
   const deletePlayerMutation = useDeletePlayer();
 
   const filteredPlayers =
@@ -66,9 +63,12 @@ export default function PlayerTable() {
         player.slug.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesTeam =
-        filterTeam === "all" || player.team_slug === filterTeam;
+        filterTeam === "all" || player.teams?.id === filterTeam;
 
-      return matchesSearch && matchesTeam;
+      const matchesPosition =
+        filterPosition === "all" || player.position_en === filterPosition;
+
+      return matchesSearch && matchesTeam && matchesPosition;
     }) || [];
 
   const handleDelete = async (id: string, name: string) => {
@@ -78,9 +78,7 @@ export default function PlayerTable() {
       loading: `Deleting "${name}"...`,
       success: `Player "${name}" deleted successfully`,
       error: (error) => {
-        return error instanceof Error
-          ? error.message
-          : "Failed to delete player";
+        return error instanceof Error ? error.message : "Failed to delete player";
       },
     });
 
@@ -114,11 +112,29 @@ export default function PlayerTable() {
       </Card>
     );
 
+  // Extract unique teams for filter
+  const teams = [
+    { value: "all", label: "All Teams" },
+    ...(players?.map((player) => ({
+      value: player.teams?.id || "",
+      label: player.teams?.name_en || "No Team",
+    })) || []),
+  ];
+
+  // Extract unique positions for filter
+  const positions = [
+    { value: "all", label: "All Positions" },
+    { value: "Goalkeeper", label: "Goalkeeper" },
+    { value: "Defender", label: "Defender" },
+    { value: "Midfielder", label: "Midfielder" },
+    { value: "Forward", label: "Forward" },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+        <Card className="bg-linear-to-br from-primary/5 to-primary/10 border-primary/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -136,7 +152,7 @@ export default function PlayerTable() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
+        <Card className="bg-linear-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -161,19 +177,19 @@ export default function PlayerTable() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
+        <Card className="bg-linear-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  With Teams
+                  With Photos
                 </p>
                 <p className="text-3xl font-bold text-foreground mt-1">
-                  {players?.filter((p) => p.team_slug).length || 0}
+                  {players?.filter((p) => p.photo_url).length || 0}
                 </p>
               </div>
               <div className="p-3 bg-green-500/10 rounded-full">
-                <Shirt className="h-6 w-6 text-green-500" />
+                <User className="h-6 w-6 text-green-500" />
               </div>
             </div>
           </CardContent>
@@ -204,10 +220,21 @@ export default function PlayerTable() {
                   <SelectValue placeholder="Filter by team" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Teams</SelectItem>
-                  {teams?.map((team) => (
-                    <SelectItem key={team.slug} value={team.slug}>
-                      {team.name_en}
+                  {teams.map((team) => (
+                    <SelectItem key={team.value} value={team.value}>
+                      {team.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={filterPosition} onValueChange={setFilterPosition}>
+                <SelectTrigger className="h-9 w-40">
+                  <SelectValue placeholder="Filter by position" />
+                </SelectTrigger>
+                <SelectContent>
+                  {positions.map((position) => (
+                    <SelectItem key={position.value} value={position.value}>
+                      {position.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -233,7 +260,7 @@ export default function PlayerTable() {
                   />
                 </TableHead>
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  Name
+                  Player
                 </TableHead>
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
                   Team
@@ -245,7 +272,7 @@ export default function PlayerTable() {
                   Jersey
                 </TableHead>
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  Created Date
+                  Nationality
                 </TableHead>
                 <TableHead className="text-right font-medium text-muted-foreground text-xs uppercase tracking-wider pr-6">
                   Action
@@ -274,14 +301,14 @@ export default function PlayerTable() {
                         className="rounded border-muted-foreground/30 text-primary focus:ring-primary"
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="pl-6">
                       <div className="flex items-center gap-3">
                         <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
                           {player.photo_url ? (
                             <img
                               src={player.photo_url}
                               alt={player.name_en}
-                              className="h-6 w-6 rounded-full object-cover"
+                              className="w-full h-full object-contain"
                             />
                           ) : (
                             <span className="text-primary font-bold text-xs">
@@ -294,21 +321,29 @@ export default function PlayerTable() {
                             {player.name_en}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            {player.name_am || player.slug}
+                            {player.teams?.name_en || "No Team"}
                           </span>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm text-foreground">
-                        {teams?.find((t) => t.slug === player.team_slug)
-                          ?.name_en || "Unassigned"}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {player.teams?.logo_url && (
+                          <img
+                            src={player.teams.logo_url}
+                            alt={player.teams.name_en}
+                            className="h-5 w-5 object-contain"
+                          />
+                        )}
+                        <span className="text-sm text-foreground">
+                          {player.teams?.name_en || "No Team"}
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm text-foreground">
+                      <Badge variant="outline" className="bg-muted/20">
                         {player.position_en || "N/A"}
-                      </span>
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <span className="text-sm text-foreground">
@@ -316,8 +351,8 @@ export default function PlayerTable() {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm text-muted-foreground">
-                        {format(new Date(player.created_at), "MMM dd, yyyy")}
+                      <span className="text-sm text-foreground">
+                        {player.nationality || "N/A"}
                       </span>
                     </TableCell>
                     <TableCell className="text-right pr-6">

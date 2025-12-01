@@ -21,7 +21,10 @@ export async function GET(
     
     const { data, error } = await supabase
       .from('players')
-      .select('*')
+      .select(`
+        *,
+        teams(id, name_en, name_am, slug, logo_url)
+      `)
       .eq('id', id)
       .single()
     
@@ -225,7 +228,36 @@ export async function DELETE(
       )
     }
     
-    // Delete player without checking for associated teams or matches
+    // Check if there are match events for this player
+    const { data: events, error: eventsError } = await supabase
+      .from('match_events')
+      .select('id')
+      .eq('player_id', id)
+      .limit(1)
+    
+    if (eventsError) {
+      console.error('Supabase error checking match events:', eventsError)
+      return NextResponse.json(
+        { 
+          error: 'Failed to check match events', 
+          details: eventsError.message 
+        },
+        { status: 500 }
+      )
+    }
+    
+    // Only allow deletion if there are no match events for this player
+    if (events && events.length > 0) {
+      return NextResponse.json(
+        { 
+          error: 'Cannot delete player with associated match events', 
+          details: 'Please remove all match events for this player first' 
+        },
+        { status: 400 }
+      )
+    }
+    
+    // Delete the player
     const { error: deleteError } = await supabase
       .from('players')
       .delete()

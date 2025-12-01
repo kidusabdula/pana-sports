@@ -14,7 +14,7 @@ export default function PlayersPage() {
           Players
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Manage football players and their information.
+          Manage your football players and their information.
         </p>
       </div>
 

@@ -7,7 +7,7 @@ interface EditPlayerPageProps {
   params: Promise<{ id: string }>;
 }
 
-// --- Helper Function ---
+// Helper Function
 async function getPlayer(id: string) {
   if (!id) {
     console.error("getPlayer called without an ID");
@@ -18,7 +18,10 @@ async function getPlayer(id: string) {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("players")
-      .select("*")
+      .select(`
+        *,
+        teams(id, name_en, name_am, slug, logo_url)
+      `)
       .eq("id", id)
       .single();
 
@@ -39,7 +42,7 @@ async function getPlayer(id: string) {
   }
 }
 
-// --- generateMetadata ---
+// Generate metadata
 export async function generateMetadata({
   params,
 }: EditPlayerPageProps): Promise<Metadata> {
@@ -59,7 +62,7 @@ export async function generateMetadata({
   }
 }
 
-// --- Page Component ---
+// Page Component
 export default async function EditPlayerPage({ params }: EditPlayerPageProps) {
   const { id } = await params;
   const player = await getPlayer(id);
