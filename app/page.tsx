@@ -3,6 +3,7 @@ import AdBanner from "@/components/shared/AdBanner";
 import HomeNewsSection from "@/components/news/HomeNewsSection";
 import RightColumn from "@/components/shared/RightColumn";
 import HomeNewsSectionSkeleton from "@/components/shared/Skeletons/HomeNewsSectionSkeleton";
+import RightColumnSkeleton from "@/components/shared/Skeletons/RightColumnSkeleton";
 import { Suspense } from "react";
 
 export default function Home() {
@@ -24,7 +25,9 @@ export default function Home() {
 
             {/* Right Column - Matches, Standings, Player Spotlight (4 columns on desktop) */}
             <div className="lg:col-span-4">
-              <RightColumn />
+              <Suspense fallback={<RightColumnSkeleton />}>
+                <RightColumn />
+              </Suspense>
             </div>
           </div>
         </div>

@@ -1,16 +1,50 @@
-import { createClient } from '@/lib/supabase/server'
-import { createMatchInputSchema } from '@/lib/schemas/match'
+// app/api/matches/route.ts
 import { requireAdmin } from '@/lib/auth'
+import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url)
+    const status = searchParams.get('status')
+    const date = searchParams.get('date')
+    const limit = searchParams.get('limit')
+    
+    console.log(`Fetching matches with params: status=${status}, date=${date}, limit=${limit}`)
+    
     const supabase = await createClient()
     
-    // Fetch matches first
-    const { data: matchesData, error: matchesError } = await supabase
+    let query = supabase
       .from('matches')
-      .select('*')
+      .select(`
+        *,
+        home_team:teams!home_team_slug(*),
+        away_team:teams!away_team_slug(*),
+        league:leagues!league_slug(*)
+      `)
+    
+    // Apply status filter if provided
+    if (status) {
+      query = query.eq('status', status)
+    }
+    
+    // Apply date filter if provided
+    if (date === 'today') {
+      const today = new Date()
+      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0)
+      const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59)
+      
+      query = query
+        .gte('date', startOfDay.toISOString())
+        .lt('date', endOfDay.toISOString())
+    }
+    
+    // Apply limit if provided
+    if (limit) {
+      query = query.limit(parseInt(limit))
+    }
+    
+    const { data: matchesData, error: matchesError } = await query
       .order('date', { ascending: true })
     
     if (matchesError) {
@@ -23,20 +57,10 @@ export async function GET() {
         { status: 500 }
       )
     }
-
-    // Fetch all leagues and teams for joining
-    const { data: leagues } = await supabase.from('leagues').select('*')
-    const { data: teams } = await supabase.from('teams').select('*')
-
-    // Manually join the data
-    const enrichedMatches = matchesData?.map(match => ({
-      ...match,
-      league: leagues?.find(l => l.slug === match.league_slug),
-      home_team: teams?.find(t => t.slug === match.home_team_slug),
-      away_team: teams?.find(t => t.slug === match.away_team_slug),
-    }))
     
-    return NextResponse.json(enrichedMatches)
+    console.log(`Successfully fetched ${matchesData?.length || 0} matches`)
+    
+    return NextResponse.json(matchesData)
   } catch (error) {
     console.error('Unexpected error fetching matches:', error)
     return NextResponse.json(
@@ -81,34 +105,22 @@ export async function POST(request: Request) {
       )
     }
     
-    let validatedData;
-    try {
-      validatedData = createMatchInputSchema.parse(body)
-    } catch (validationError) {
-      console.error('Validation error:', validationError);
-      return NextResponse.json(
-        { 
-          error: 'Invalid input data', 
-          details: validationError instanceof Error ? validationError.message : 'Unknown validation error' 
-        },
-        { status: 400 }
-      )
-    }
+    console.log('Creating match with data:', body)
     
     const supabase = await createClient()
     
-    // Create the match with the current user as creator
+    // Create match with current user as creator
     const { data, error } = await supabase
       .from('matches')
       .insert({
-        ...validatedData,
+        ...body,
         created_by: user.id,
       })
       .select()
       .single()
     
     if (error) {
-      console.error('Supabase error creating match:', error);
+      console.error('Supabase error creating match:', error)
       return NextResponse.json(
         { 
           error: 'Failed to create match', 
@@ -118,9 +130,11 @@ export async function POST(request: Request) {
       )
     }
     
+    console.log('Successfully created match:', data)
+    
     return NextResponse.json(data, { status: 201 })
   } catch (error) {
-    console.error('Unexpected error creating match:', error);
+    console.error('Unexpected error creating match:', error)
     return NextResponse.json(
       { 
         error: 'Failed to create match', 
