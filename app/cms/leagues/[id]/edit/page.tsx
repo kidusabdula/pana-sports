@@ -7,7 +7,7 @@ interface EditLeaguePageProps {
   params: Promise<{ id: string }>;
 }
 
-// --- Helper Function ---
+// Helper Function
 async function getLeague(id: string) {
   if (!id) {
     console.error("getLeague called without an ID");
@@ -39,7 +39,7 @@ async function getLeague(id: string) {
   }
 }
 
-// --- generateMetadata ---
+// Generate metadata
 export async function generateMetadata({
   params,
 }: EditLeaguePageProps): Promise<Metadata> {
@@ -59,7 +59,7 @@ export async function generateMetadata({
   }
 }
 
-// --- Page Component ---
+// Page Component
 export default async function EditLeaguePage({ params }: EditLeaguePageProps) {
   const { id } = await params;
   const league = await getLeague(id);

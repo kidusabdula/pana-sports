@@ -5,7 +5,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -25,6 +25,7 @@ import {
   Calendar,
   Filter,
   ChevronDown,
+  Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -49,6 +50,7 @@ import {
 export default function LeagueTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [filterActive, setFilterActive] = useState<boolean | undefined>(undefined);
   const { data: leagues, isLoading, error } = useLeagues();
   const deleteLeagueMutation = useDeleteLeague();
 
@@ -64,7 +66,10 @@ export default function LeagueTable() {
       const matchesCategory =
         filterCategory === "all" || league.category === filterCategory;
 
-      return matchesSearch && matchesCategory;
+      const matchesActive =
+        filterActive === undefined || league.is_active === filterActive;
+
+      return matchesSearch && matchesCategory && matchesActive;
     }) || [];
 
   const handleDelete = async (id: string, name: string) => {
@@ -154,7 +159,7 @@ export default function LeagueTable() {
           </CardContent>
         </Card>
 
-        <Card className="bg-linear-to-br from-green-500/5 to-green-500/10 border-green-500/20">
+        <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -271,9 +276,28 @@ export default function LeagueTable() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-                          {league.name_en.charAt(0)}
-                        </div>
+                        {league.logo_url ? (
+                          <div className="h-9 w-9 rounded-full overflow-hidden bg-muted flex items-center justify-center">
+                            <img
+                              src={league.logo_url}
+                              alt={league.name_en}
+                              className="h-full w-full object-cover"
+                              onError={(e) => {
+                                // Fallback to placeholder if image fails to load
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                target.nextElementSibling?.classList.remove('hidden');
+                              }}
+                            />
+                            <div className="hidden h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                              {league.name_en.charAt(0)}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                            {league.name_en.charAt(0)}
+                          </div>
+                        )}
                         <div className="flex flex-col">
                           <span className="font-medium text-foreground text-sm">
                             {league.name_en}
@@ -301,9 +325,9 @@ export default function LeagueTable() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <span className="h-2 w-2 rounded-full bg-green-500"></span>
-                        <span className="text-sm font-medium text-green-600">
-                          Active
+                        <span className={`h-2 w-2 rounded-full ${league.is_active ? "bg-green-500" : "bg-gray-400"}`}></span>
+                        <span className={`text-sm font-medium ${league.is_active ? "text-green-600" : "text-gray-500"}`}>
+                          {league.is_active ? "Active" : "Inactive"}
                         </span>
                       </div>
                     </TableCell>
@@ -376,7 +400,7 @@ export default function LeagueTable() {
             <span>leagues per page</span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Button
               variant="outline"
               size="icon"
@@ -400,13 +424,6 @@ export default function LeagueTable() {
                 className="h-8 w-8 rounded-lg p-0"
               >
                 2
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 rounded-lg p-0"
-              >
-                3
               </Button>
               <span className="text-muted-foreground px-1">...</span>
               <Button

@@ -1,8 +1,8 @@
-// app/api/leagues/[id]/route.ts
 import { createClient } from '@/lib/supabase/server'
 import { updateLeagueInputSchema } from '@/lib/schemas/league'
 import { requireAdmin } from '@/lib/auth'
 import { NextResponse } from 'next/server'
+import { type NextRequest } from 'next/server'
 
 export async function GET(
   request: Request,
@@ -159,7 +159,7 @@ export async function PATCH(
     
     return NextResponse.json(data)
   } catch (error) {
-    console.error('Unexpected error updating league:', error);
+    console.error('Unexpected error updating league:', error)
     return NextResponse.json(
       { 
         error: 'Failed to update league', 
@@ -226,6 +226,35 @@ export async function DELETE(
       )
     }
     
+    // Check if there are teams in this league
+    const { data: teams, error: teamsError } = await supabase
+      .from('teams')
+      .select('id')
+      .eq('league_id', id)
+      .limit(1)
+    
+    if (teamsError) {
+      console.error('Supabase error checking teams:', teamsError)
+      return NextResponse.json(
+        { 
+          error: 'Failed to check teams', 
+          details: teamsError.message 
+        },
+        { status: 500 }
+      )
+    }
+    
+    // Only allow deletion if there are no teams in the league
+    if (teams && teams.length > 0) {
+      return NextResponse.json(
+        { 
+          error: 'Cannot delete league with associated teams', 
+          details: 'Please delete or reassign all teams in this league first' 
+        },
+        { status: 400 }
+      )
+    }
+    
     // Delete the league without checking for associated teams or matches
     const { error: deleteError } = await supabase
       .from('leagues')
@@ -245,7 +274,7 @@ export async function DELETE(
     
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Unexpected error deleting league:', error);
+    console.error('Unexpected error deleting league:', error)
     return NextResponse.json(
       { 
         error: 'Failed to delete league', 

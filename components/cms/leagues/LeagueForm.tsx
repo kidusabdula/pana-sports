@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -32,7 +32,16 @@ import {
   UpdateLeague,
 } from "@/lib/schemas/league";
 import { useCreateLeague, useUpdateLeague } from "@/lib/hooks/cms/useLeagues";
-import { Trophy, Globe, Hash, Tag, Save, X } from "lucide-react";
+import {
+  Trophy,
+  Globe,
+  Hash,
+  Tag,
+  Save,
+  X,
+  Upload,
+  Image as ImageIcon,
+} from "lucide-react";
 
 // Utility function to generate slug from text
 function slugify(text: string): string {
@@ -59,6 +68,9 @@ export default function LeagueForm({
   onCancel,
 }: LeagueFormProps) {
   const isEditing = !!league;
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<CreateLeague | UpdateLeague>({
     resolver: zodResolver(
@@ -69,6 +81,12 @@ export default function LeagueForm({
       name_en: league?.name_en || "",
       name_am: league?.name_am || "",
       category: league?.category || "",
+      logo_url: league?.logo_url || "",
+      description_en: league?.description_en || "",
+      description_am: league?.description_am || "",
+      founded_year: league?.founded_year || undefined,
+      website_url: league?.website_url || "",
+      is_active: league?.is_active ?? true,
     },
   });
 
@@ -84,6 +102,52 @@ export default function LeagueForm({
 
   const createLeagueMutation = useCreateLeague();
   const updateLeagueMutation = useUpdateLeague();
+
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Only image files are allowed");
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("bucket", "league-logos");
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setUploadedImageUrl(result.publicUrl);
+        form.setValue("logo_url", result.publicUrl);
+        toast.success("Image uploaded successfully");
+      } else {
+        toast.error(result.error || "Failed to upload image");
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error("Failed to upload image");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const onSubmit = async (data: CreateLeague | UpdateLeague) => {
     const promise =
@@ -111,7 +175,6 @@ export default function LeagueForm({
     try {
       await promise;
       // Small delay to ensure the toast is visible before redirecting
-      // Although Sonner persists, this feels smoother
       setTimeout(() => {
         onSuccess?.();
       }, 500);
@@ -238,27 +301,239 @@ export default function LeagueForm({
                       </FormItem>
                     )}
                   />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="logo_url"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-medium text-foreground">
+                            Logo URL
+                          </FormLabel>
+                          <div className="space-y-2">
+                            <FormControl>
+                              <Input
+                                placeholder="https://example.com/logo.png"
+                                {...field}
+                                value={field.value ?? ""}
+                                onChange={(e) => {
+                                  field.onChange(e.target.value);
+                                  // Reset uploaded image URL if URL is manually changed
+                                  if (
+                                    e.target.value !== (uploadedImageUrl || "")
+                                  ) {
+                                    setUploadedImageUrl("");
+                                  }
+                                }}
+                                className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <div className="text-sm text-muted-foreground">
+                              OR
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => fileInputRef.current?.click()}
+                              disabled={isUploading}
+                              className="flex items-center gap-2"
+                            >
+                              {isUploading ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                                  Uploading...
+                                </>
+                              ) : (
+                                <>
+                                  <Upload className="h-4 w-4" />
+                                  Upload Image
+                                </>
+                              )}
+                            </Button>
+                          </div>
+
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileUpload}
+                            className="hidden"
+                          />
+
+                          {uploadedImageUrl && (
+                            <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                              <div className="flex items-center gap-2">
+                                <ImageIcon className="h-4 w-4 text-green-600" />
+                                <span className="text-sm text-green-800">
+                                  Image uploaded successfully
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="founded_year"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-medium text-foreground">
+                            Founded Year
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="1950"
+                              {...field}
+                              className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="description_en"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-medium text-foreground">
+                            Description (English)
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Brief description of the league"
+                              {...field}
+                              className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="website_url"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-medium text-foreground">
+                            Website URL
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="https://example.com"
+                              {...field}
+                              className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="is_active"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-3 rounded-lg border p-4">
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            checked={field.value}
+                            onChange={field.onChange}
+                            className="h-4 w-4 rounded border-muted-foreground/30 text-primary focus:ring-primary"
+                          />
+                        </FormControl>
+                        <FormLabel className="font-medium text-foreground">
+                          Active
+                        </FormLabel>
+                        <FormDescription>
+                          Whether this league is currently active
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </TabsContent>
 
                 <TabsContent value="amharic" className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="name_am"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="flex items-center gap-2 font-medium text-foreground">
+                            <Trophy className="h-4 w-4 text-primary" />
+                            League Name (Amharic)
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="ፕሪምየር ሊግ"
+                              {...field}
+                              className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            The official name of the league in Amharic
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="description_am"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-medium text-foreground">
+                            Description (Amharic)
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="የሊግትያ ቅርት መግልት"
+                              {...field}
+                              className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
                   <FormField
                     control={form.control}
-                    name="name_am"
+                    name="slug"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2 font-medium text-foreground">
-                          <Globe className="h-4 w-4 text-primary" />
-                          League Name (Amharic)
+                          <Hash className="h-4 w-4 text-primary" />
+                          Slug
                         </FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="ፕሪሚየር ሊግ"
+                            placeholder="league-slug"
                             {...field}
-                            className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
+                            className="h-11 bg-muted/50 border-input focus:border-primary transition-colors font-mono text-sm rounded-lg"
                           />
                         </FormControl>
                         <FormDescription>
-                          The official name of the league in Amharic
+                          Unique identifier for the league (auto-generated from
+                          name)
                         </FormDescription>
                         <FormMessage />
                       </FormItem>

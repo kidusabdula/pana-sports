@@ -1,8 +1,8 @@
-// app/api/leagues/route.ts
 import { createClient } from '@/lib/supabase/server'
 import { createLeagueInputSchema } from '@/lib/schemas/league'
 import { requireAdmin } from '@/lib/auth'
 import { NextResponse } from 'next/server'
+import { type NextRequest } from 'next/server'
 
 export async function GET() {
   try {
@@ -68,8 +68,6 @@ export async function POST(request: Request) {
         { status: 400 }
       )
     }
-    
-    console.log('Request body:', body); // Log the incoming data
     
     let validatedData;
     try {
