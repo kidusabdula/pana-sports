@@ -49,11 +49,11 @@ const navigation = [
     href: "/cms/matches",
     icon: Calendar,
   },
-  {
-    name: "Match Events",
-    href: "/cms/match-events",
-    icon: TrendingUp,
-  },
+  // {
+  //   name: "Match Events",
+  //   href: "/cms/match-events",
+  //   icon: TrendingUp,
+  // },
   {
     name: "Standings",
     href: "/cms/standings",

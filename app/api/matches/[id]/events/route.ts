@@ -1,27 +1,43 @@
 import { createClient } from "@/lib/supabase/server";
-import { createTeamInputSchema } from "@/lib/schemas/team";
+import { createMatchEventInputSchema } from "@/lib/schemas/matchEvent";
 import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params;
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: "Match ID is required" },
+        { status: 400 }
+      );
+    }
+    
     const supabase = await createClient();
-
-    // Fix: Include players in the query
+    
+    // Fix: Explicitly specify which relationship to use for each player reference
     const { data, error } = await supabase
-      .from("teams")
+      .from("match_events")
       .select(`
         *,
-        league:leagues(id, name_en, name_am, slug, category),
-        players(id, name_en, name_am, slug, jersey_number, position_en, position_am)
+        player:players!match_events_player_id_fkey(id, name_en, name_am, slug, jersey_number),
+        team:teams(id, name_en, name_am, slug, logo_url),
+        subbed_in_player:players!match_events_subbed_in_player_id_fkey(id, name_en, name_am, slug, jersey_number),
+        subbed_out_player:players!match_events_subbed_out_player_id_fkey(id, name_en, name_am, slug, jersey_number)
       `)
-      .order("created_at", { ascending: false });
+      .eq("match_id", id)
+      .order("minute", { ascending: true })
+      .order("created_at", { ascending: true });
 
     if (error) {
-      console.error("Supabase error fetching teams:", error);
+      console.error("Supabase error fetching match events:", error);
       return NextResponse.json(
         {
-          error: "Failed to fetch teams",
+          error: "Failed to fetch match events",
           details: error.message,
         },
         { status: 500 }
@@ -30,10 +46,10 @@ export async function GET() {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Unexpected error fetching teams:", error);
+    console.error("Unexpected error fetching match events:", error);
     return NextResponse.json(
       {
-        error: "Failed to fetch teams",
+        error: "Failed to fetch match events",
         details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
@@ -41,8 +57,20 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params;
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: "Match ID is required" },
+        { status: 400 }
+      );
+    }
+    
     // Verify admin authentication
     let user;
     try {
@@ -79,9 +107,12 @@ export async function POST(request: Request) {
       );
     }
 
+    // Add match_id to body
+    body.match_id = id;
+
     let validatedData;
     try {
-      validatedData = createTeamInputSchema.parse(body);
+      validatedData = createMatchEventInputSchema.parse(body);
     } catch (validationError) {
       console.error("Validation error:", validationError);
       return NextResponse.json(
@@ -98,43 +129,24 @@ export async function POST(request: Request) {
 
     const supabase = await createClient();
 
-    // Create the team with the current user as creator
+    // Fix: Remove created_by from the insert as it doesn't exist in the table
     const { data, error } = await supabase
-      .from("teams")
-      .insert({
-        ...validatedData,
-        created_by: user.id,
-      })
-      .select()
+      .from("match_events")
+      .insert(validatedData)
+      .select(`
+        *,
+        player:players!match_events_player_id_fkey(id, name_en, name_am, slug, jersey_number),
+        team:teams(id, name_en, name_am, slug, logo_url),
+        subbed_in_player:players!match_events_subbed_in_player_id_fkey(id, name_en, name_am, slug, jersey_number),
+        subbed_out_player:players!match_events_subbed_out_player_id_fkey(id, name_en, name_am, slug, jersey_number)
+      `)
       .single();
 
     if (error) {
-      console.error("Supabase error creating team:", error);
-
-      // Handle specific error codes
-      if (error.code === "23505") {
-        return NextResponse.json(
-          {
-            error: "Team with this slug already exists",
-            details: "The slug must be unique across all teams",
-          },
-          { status: 409 }
-        );
-      }
-
-      if (error.code === "23502") {
-        return NextResponse.json(
-          {
-            error: "Required field is missing",
-            details: error.details || "Please check all required fields",
-          },
-          { status: 400 }
-        );
-      }
-
+      console.error("Supabase error creating match event:", error);
       return NextResponse.json(
         {
-          error: "Failed to create team",
+          error: "Failed to create match event",
           details: error.message,
         },
         { status: 500 }
@@ -143,10 +155,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
-    console.error("Unexpected error creating team:", error);
+    console.error("Unexpected error creating match event:", error);
     return NextResponse.json(
       {
-        error: "Failed to create team",
+        error: "Failed to create match event",
         details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }

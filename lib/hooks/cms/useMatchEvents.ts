@@ -1,114 +1,81 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { MatchEvent, CreateMatchEvent, UpdateMatchEvent } from '@/lib/schemas/matchEvent'
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { MatchEvent, CreateMatchEvent } from "@/lib/schemas/matchEvent";
+import { toast } from "sonner";
 
 // API helper functions
-async function fetchMatchEvents() {
-  const res = await fetch('/api/match-events')
+async function fetchMatchEvents(matchId: string) {
+  const res = await fetch(`/api/matches/${matchId}/events`);
   if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to fetch match events')
+    const error = await res.json();
+    throw new Error(error.error || "Failed to fetch match events");
   }
-  return res.json() as Promise<MatchEvent[]>
+  return res.json() as Promise<MatchEvent[]>;
 }
 
-async function fetchMatchEvent(id: string) {
-  const res = await fetch(`/api/match-events/${id}`)
-  if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to fetch match event')
-  }
-  return res.json() as Promise<MatchEvent>
-}
+async function createMatchEvent(matchId: string, newEvent: CreateMatchEvent) {
+  const res = await fetch(`/api/matches/${matchId}/events`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newEvent),
+  });
 
-async function createMatchEvent(newMatchEvent: CreateMatchEvent) {
-  const res = await fetch('/api/match-events', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(newMatchEvent),
-  })
-  
   if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to create match event')
+    const error = await res.json();
+    throw new Error(error.error || "Failed to create match event");
   }
-  
-  return res.json() as Promise<MatchEvent>
-}
 
-async function updateMatchEvent({ id, updates }: { id: string, updates: UpdateMatchEvent }) {
-  const res = await fetch(`/api/match-events/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updates),
-  })
-  
-  if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to update match event')
-  }
-  
-  return res.json() as Promise<MatchEvent>
-}
-
-async function deleteMatchEvent(id: string) {
-  const res = await fetch(`/api/match-events/${id}`, {
-    method: 'DELETE',
-  })
-  
-  if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to delete match event')
-  }
-  
-  return id
+  return res.json() as Promise<MatchEvent>;
 }
 
 // React Query hooks
-export function useMatchEvents() {
+export function useMatchEvents(matchId: string) {
   return useQuery({
-    queryKey: ['match-events'],
-    queryFn: fetchMatchEvents,
-  })
+    queryKey: ["matches", matchId, "events"],
+    queryFn: () => fetchMatchEvents(matchId),
+    enabled: !!matchId,
+  });
 }
 
-export function useMatchEvent(id: string) {
-  return useQuery({
-    queryKey: ['match-events', id],
-    queryFn: () => fetchMatchEvent(id),
-    enabled: !!id,
-  })
-}
+export function useCreateMatchEvent(matchId: string) {
+  const queryClient = useQueryClient();
 
-export function useCreateMatchEvent() {
-  const queryClient = useQueryClient()
-  
   return useMutation({
-    mutationFn: createMatchEvent,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['match-events'] })
-    },
-  })
-}
+    mutationFn: (newEvent: CreateMatchEvent) =>
+      createMatchEvent(matchId, newEvent),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["matches", matchId, "events"],
+      });
 
-export function useUpdateMatchEvent() {
-  const queryClient = useQueryClient()
-  
-  return useMutation({
-    mutationFn: updateMatchEvent,
-    onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ['match-events'] })
-      queryClient.invalidateQueries({ queryKey: ['match-events', id] })
-    },
-  })
-}
+      // Add success toast based on event type
+      const eventLabels = {
+        goal: "Goal recorded",
+        yellow: "Yellow card issued",
+        red: "Red card issued",
+        sub: "Substitution made",
+        half_time: "Half time recorded",
+        second_half: "Second half started",
+        match_end: "Match ended",
+        match_start: "Match started",
+        own_goal: "Own goal recorded",
+        penalty: "Penalty recorded",
+        var_check: "VAR check initiated",
+        var_goal: "VAR goal confirmed",
+        var_no_goal: "VAR goal disallowed",
+        corner: "Corner kick",
+        free_kick: "Free kick",
+        offside: "Offside called",
+        injury_time: "Injury time added",
+      };
 
-export function useDeleteMatchEvent() {
-  const queryClient = useQueryClient()
-  
-  return useMutation({
-    mutationFn: deleteMatchEvent,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['match-events'] })
+      const label =
+        eventLabels[data.type as keyof typeof eventLabels] || "Event recorded";
+      toast.success(label);
     },
-  })
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create event"
+      );
+    },
+  });
 }

@@ -31,6 +31,7 @@ import {
   CheckCircle,
   XCircle,
   Pause,
+  Settings,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -55,14 +56,27 @@ import {
 // Status badge component
 function StatusBadge({ status }: { status: string }) {
   const statusConfig = {
-    scheduled: { label: "Scheduled", icon: Calendar, variant: "secondary" as const },
+    scheduled: {
+      label: "Scheduled",
+      icon: Calendar,
+      variant: "secondary" as const,
+    },
     live: { label: "Live", icon: Play, variant: "destructive" as const },
-    completed: { label: "Completed", icon: CheckCircle, variant: "default" as const },
+    completed: {
+      label: "Completed",
+      icon: CheckCircle,
+      variant: "default" as const,
+    },
     postponed: { label: "Postponed", icon: Clock, variant: "outline" as const },
-    cancelled: { label: "Cancelled", icon: XCircle, variant: "destructive" as const },
+    cancelled: {
+      label: "Cancelled",
+      icon: XCircle,
+      variant: "destructive" as const,
+    },
   };
 
-  const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.scheduled;
+  const config =
+    statusConfig[status as keyof typeof statusConfig] || statusConfig.scheduled;
   const Icon = config.icon;
 
   return (
@@ -83,8 +97,12 @@ export default function MatchTable() {
   const filteredMatches =
     matches?.filter((match) => {
       const matchesSearch =
-        match.home_team?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        match.away_team?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        match.home_team?.name_en
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        match.away_team?.name_en
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
         match.league?.name_en.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesLeague =
@@ -96,14 +114,20 @@ export default function MatchTable() {
       return matchesSearch && matchesLeague && matchesStatus;
     }) || [];
 
-  const handleDelete = async (id: string, homeTeam: string, awayTeam: string) => {
+  const handleDelete = async (
+    id: string,
+    homeTeam: string,
+    awayTeam: string
+  ) => {
     const promise = deleteMatchMutation.mutateAsync(id);
 
     toast.promise(promise, {
       loading: `Deleting match "${homeTeam} vs ${awayTeam}"...`,
       success: `Match deleted successfully`,
       error: (error) => {
-        return error instanceof Error ? error.message : "Failed to delete match";
+        return error instanceof Error
+          ? error.message
+          : "Failed to delete match";
       },
     });
 
@@ -354,7 +378,9 @@ export default function MatchTable() {
                             {match.home_team?.name_en}
                           </span>
                         </div>
-                        <span className="text-muted-foreground text-sm">vs</span>
+                        <span className="text-muted-foreground text-sm">
+                          vs
+                        </span>
                         <div className="flex items-center gap-2">
                           {match.away_team?.logo_url && (
                             <img
@@ -420,6 +446,16 @@ export default function MatchTable() {
                             <Edit className="h-4 w-4" />
                           </Button>
                         </Link>
+                        <Link href={`/cms/matches/${match.id}/control`}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-full"
+                            title="Control Match"
+                          >
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                        </Link>
 
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
@@ -436,8 +472,9 @@ export default function MatchTable() {
                               <AlertDialogTitle>Delete Match</AlertDialogTitle>
                               <AlertDialogDescription>
                                 Are you sure you want to delete &quot;
-                                {match.home_team?.name_en} vs {match.away_team?.name_en}&quot;? 
-                                This action cannot be undone.
+                                {match.home_team?.name_en} vs{" "}
+                                {match.away_team?.name_en}&quot;? This action
+                                cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
