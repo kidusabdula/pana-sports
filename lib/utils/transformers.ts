@@ -1,60 +1,75 @@
 // lib/utils/transformers.ts
-import { News } from '@/lib/schemas/news'
+
+import { News } from '@/lib/schemas/news';
 
 // Transform news data from API to UI format
 export function transformNewsToUINews(news: News) {
   return {
     id: news.id,
-    title: news.title_en, // Using English title for now, could add locale logic
-    category: news.category || 'General',
+    title: news.title_en,
+    title_am: news.title_am,
+    category: news.category?.name || 'General',
+    category_slug: news.category_slug,
     image: news.thumbnail_url || '/placeholder.svg',
-    date: formatDate(news.published_at),
+    date: formatDate(news.published_at), // Keep this as is
     author: news.author?.name || 'Pana Sports',
-    excerpt: generateExcerpt(news.content_en || ''),
+    author_avatar: news.author?.avatar_url,
+    excerpt: generateExcerpt(stripHtml(news.content_en || '')),
     content: news.content_en || '',
+    content_am: news.content_am || '',
+    views: news.views || 0,
+    comments_count: news.comments_count || 0,
+    league: news.league?.name_en,
+    league_slug: news.league_slug,
+  };
+}
+
+// Format date function
+function formatDate(dateString: string) {
+  try {
+    const date = new Date(dateString);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return 'Invalid Date';
+    }
+    
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Invalid Date';
   }
 }
 
-// Format date to a more readable format
-function formatDate(dateString: string) {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffTime = Math.abs(now.getTime() - date.getTime())
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+// Strip HTML tags from content
+function stripHtml(html: string) {
+  if (!html) return '';
   
-  if (diffDays === 0) {
-    const diffHours = Math.floor(diffTime / (1000 * 60 * 60))
-    if (diffHours === 0) {
-      const diffMinutes = Math.floor(diffTime / (1000 * 60))
-      return diffMinutes <= 1 ? 'Just now' : `${diffMinutes} minutes ago`
-    }
-    return diffHours === 1 ? '1 hour ago' : `${diffHours} hours ago`
-  } else if (diffDays === 1) {
-    return 'Yesterday'
-  } else if (diffDays < 7) {
-    return `${diffDays} days ago`
-  } else {
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    })
-  }
+  // Create a temporary div element
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+  
+  // Return the text content
+  return tempDiv.textContent || tempDiv.innerText || '';
 }
 
 // Generate excerpt from content
 function generateExcerpt(content: string, maxLength = 150) {
-  if (!content) return ''
+  if (!content) return '';
   
   // Strip HTML tags
-  const plainText = content.replace(/<[^>]*>/g, '')
+  const plainText = stripHtml(content);
   
-  if (plainText.length <= maxLength) return plainText
+  if (plainText.length <= maxLength) return plainText;
   
-  return plainText.substring(0, maxLength).trim() + '...'
+  return plainText.substring(0, maxLength).trim() + '...';
 }
 
 // Transform an array of news items
 export function transformNewsList(newsList: News[]) {
-  return newsList.map(transformNewsToUINews)
+  return newsList.map(transformNewsToUINews);
 }

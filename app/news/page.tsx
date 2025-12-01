@@ -17,39 +17,44 @@ function NewsPageContent() {
   const [activeCategory, setActiveCategory] = useState("All");
 
   // Fetch all news
-  const { 
-    data: allNews, 
-    isLoading: isLoadingAll, 
-    isError: isErrorAll, 
-    refetch: refetchAll 
+  const {
+    data: allNews,
+    isLoading: isLoadingAll,
+    isError: isErrorAll,
+    refetch: refetchAll,
   } = useAllNews();
 
   // Fetch filtered news if a category is selected
-  const { 
-    data: filteredNewsData, 
-    isLoading: isLoadingFiltered, 
-    isError: isErrorFiltered, 
-    refetch: refetchFiltered 
+  const {
+    data: filteredNewsData,
+    isLoading: isLoadingFiltered,
+    isError: isErrorFiltered,
+    refetch: refetchFiltered,
   } = useFilteredNews(activeCategory);
 
   // Determine which data to use based on active category
   const isLoading = activeCategory === "All" ? isLoadingAll : isLoadingFiltered;
   const isError = activeCategory === "All" ? isErrorAll : isErrorFiltered;
   const refetch = activeCategory === "All" ? refetchAll : refetchFiltered;
-  
+
   // Transform data to UI format
   const transformedNews = useMemo(() => {
     const newsData = activeCategory === "All" ? allNews : filteredNewsData;
     if (!newsData) return [];
-    
+
     return transformNewsList(newsData);
   }, [allNews, filteredNewsData, activeCategory]);
 
-  // Extract categories from all news for the filter
+  // Extract categories from all news for sidebar
   const categories = useMemo(() => {
     if (!allNews) return ["All"];
-    
-    const uniqueCategories = new Set(allNews.map(news => news.category).filter((cat): cat is string => cat !== null && cat !== undefined));
+
+    // Extract category names
+    const uniqueCategories = new Set(
+      allNews
+        .map((news) => news.category?.name)
+        .filter((name): name is string => !!name)
+    );
     return ["All", ...Array.from(uniqueCategories)];
   }, [allNews]);
 
@@ -65,13 +70,13 @@ function NewsPageContent() {
                 THE FEED
               </h1>
               <p className="text-zinc-400 text-lg md:text-xl max-w-2xl">
-                Stay ahead of the game with the latest updates, match reports,
-                and exclusive insights from the world of Ethiopian football.
+                Stay ahead of game with the latest updates, match reports, and
+                exclusive insights from the world of Ethiopian football.
               </p>
             </div>
-            <ErrorState 
-              message="Failed to load news. Please try again later." 
-              onRetry={refetch} 
+            <ErrorState
+              message="Failed to load news. Please try again later."
+              onRetry={refetch}
             />
           </div>
         </div>
@@ -104,8 +109,8 @@ function NewsPageContent() {
                 THE FEED
               </h1>
               <p className="text-zinc-400 text-lg md:text-xl max-w-2xl">
-                Stay ahead of the game with the latest updates, match reports,
-                and exclusive insights from the world of Ethiopian football.
+                Stay ahead of game with the latest updates, match reports, and
+                exclusive insights from the world of Ethiopian football.
               </p>
             </motion.div>
           </div>
@@ -113,7 +118,6 @@ function NewsPageContent() {
           <NewsFilter
             activeCategory={activeCategory}
             setActiveCategory={setActiveCategory}
-            categories={categories}
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

@@ -45,6 +45,14 @@ export async function GET(
           .single()
       : { data: null };
 
+    const { data: category } = news.category_slug
+      ? await supabase
+          .from("news_categories")
+          .select("*")
+          .eq("slug", news.category_slug)
+          .single()
+      : { data: null };
+
     const { data: author } = news.author_id
       ? await supabase
           .from("authors")
@@ -61,19 +69,23 @@ export async function GET(
         .from("news")
         .select("*")
         .neq("id", id)
-        .or(`category.eq.${news.category},league_slug.eq.${news.league_slug}`)
+        .or(`category_slug.eq.${news.category_slug},league_slug.eq.${news.league_slug}`)
         .order("published_at", { ascending: false })
         .limit(3);
 
       if (relatedData) {
-        // Fetch authors and leagues for related news
+        // Fetch categories, leagues, and authors for related news
         const { data: allLeagues } = await supabase.from("leagues").select("*");
+        const { data: allCategories } = await supabase.from("news_categories").select("*");
         const { data: allAuthors } = await supabase.from("authors").select("*");
 
         relatedNews = relatedData.map((item) => ({
           ...item,
           league: item.league_slug
             ? allLeagues?.find((l) => l.slug === item.league_slug)
+            : null,
+          category: item.category_slug
+            ? allCategories?.find((c) => c.slug === item.category_slug)
             : null,
           author: item.author_id
             ? allAuthors?.find((a) => a.id === item.author_id)
@@ -85,6 +97,7 @@ export async function GET(
     const enrichedNews = {
       ...news,
       league,
+      category,
       author,
       relatedNews,
     };
@@ -101,6 +114,9 @@ export async function GET(
     );
   }
 }
+
+// app/api/news/[id]/route.ts
+
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -158,6 +174,7 @@ export async function PATCH(
 
     const supabase = await createClient();
 
+    // No need to convert category_id to category_slug since we're already using category_slug
     const { data, error } = await supabase
       .from("news")
       .update({
@@ -191,7 +208,6 @@ export async function PATCH(
     );
   }
 }
-
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }

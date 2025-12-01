@@ -61,7 +61,7 @@ export default function NewsTable() {
         item.league?.name_en.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesCategory =
-        filterCategory === "all" || item.category === filterCategory;
+        filterCategory === "all" || item.category?.name === filterCategory;
 
       return matchesSearch && matchesCategory;
     }) || [];
@@ -107,7 +107,7 @@ export default function NewsTable() {
     );
 
   const categories = Array.from(
-    new Set(news?.map((n) => n.category).filter(Boolean) || [])
+    new Set(news?.map((n) => n.category?.name).filter(Boolean) || [])
   );
 
   return (
@@ -233,6 +233,9 @@ export default function NewsTable() {
                   Category
                 </TableHead>
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                  Author
+                </TableHead>
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
                   League
                 </TableHead>
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
@@ -252,7 +255,7 @@ export default function NewsTable() {
             <TableBody>
               {filteredNews.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12">
+                  <TableCell colSpan={8} className="text-center py-12">
                     <div className="flex flex-col items-center space-y-3">
                       <Newspaper className="h-12 w-12 text-muted-foreground/20" />
                       <p className="text-muted-foreground">No news found.</p>
@@ -288,9 +291,14 @@ export default function NewsTable() {
                     <TableCell>
                       {item.category && (
                         <Badge variant="outline" className="capitalize">
-                          {item.category}
+                          {item.category.name}
                         </Badge>
                       )}
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-muted-foreground">
+                        {item.author?.name || "-"}
+                      </span>
                     </TableCell>
                     <TableCell>
                       <span className="text-sm text-muted-foreground">
@@ -342,8 +350,9 @@ export default function NewsTable() {
                                 Delete Article
                               </AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete "{item.title_en}
-                                "? This action cannot be undone.
+                                Are you sure you want to delete &quot;
+                                {item.title_en}&quot;? This action cannot be
+                                undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

@@ -23,6 +23,8 @@ async function fetchNewsItem(id: string, includeRelated = false) {
 }
 
 
+// lib/hooks/cms/useNews.ts
+
 async function createNews(newNews: CreateNews) {
   const res = await fetch('/api/news', {
     method: 'POST',
@@ -31,8 +33,15 @@ async function createNews(newNews: CreateNews) {
   })
   
   if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to create news')
+    let errorMessage = 'Failed to create news';
+    try {
+      const error = await res.json();
+      errorMessage = error.error || error.details || errorMessage;
+    } catch (e) {
+      // If JSON parsing fails, use the status text
+      errorMessage = res.statusText || errorMessage;
+    }
+    throw new Error(errorMessage);
   }
   
   return res.json() as Promise<News>
@@ -46,8 +55,14 @@ async function updateNews({ id, updates }: { id: string, updates: UpdateNews }) 
   })
   
   if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to update news')
+    let errorMessage = 'Failed to update news';
+    try {
+      const error = await res.json();
+      errorMessage = error.error || error.details || errorMessage;
+    } catch (e) {
+      errorMessage = res.statusText || errorMessage;
+    }
+    throw new Error(errorMessage);
   }
   
   return res.json() as Promise<News>
@@ -59,13 +74,20 @@ async function deleteNews(id: string) {
   })
   
   if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to delete news')
+    let errorMessage = 'Failed to delete news';
+    try {
+      const error = await res.json();
+      errorMessage = error.error || error.details || errorMessage;
+    } catch (e) {
+      errorMessage = res.statusText || errorMessage;
+    }
+    throw new Error(errorMessage);
   }
   
   return id
 }
 
+// Similar improvements for other functions...
 // React Query hooks
 export function useNews() {
   return useQuery({

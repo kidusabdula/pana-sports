@@ -1,124 +1,175 @@
 // components/news/NewsDetail.tsx
+
 "use client";
 
+import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { Calendar, Eye, MessageCircle, User, Share2, Bookmark } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { User, Share2, ArrowLeft, Clock } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { motion } from "framer-motion";
 
+// Update the interface to match the transformed news object
 interface NewsDetailProps {
   news: {
-    id: number;
+    id: string;
     title: string;
+    title_am: string;
     category: string;
     image: string;
     date: string;
     author: string;
+    author_avatar?: string;
+    excerpt: string;
     content: string;
+    content_am: string;
+    views: number;
+    comments_count: number;
+    league?: string;
   };
 }
 
 export default function NewsDetail({ news }: NewsDetailProps) {
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
+
+  // Handle bookmark functionality
+  const handleBookmark = () => {
+    setIsBookmarked(!isBookmarked);
+    // In a real app, you would save this to the user's profile or local storage
+  };
+
+  // Handle share functionality
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: news.title,
+        text: `Read this article on Pana Sports: ${news.title}`,
+        url: window.location.href,
+      });
+    } else {
+      // Fallback for browsers that don't support Web Share API
+      navigator.clipboard.writeText(window.location.href);
+      setShareUrl("Link copied to clipboard!");
+      setTimeout(() => setShareUrl(""), 2000);
+    }
+  };
+
   return (
-    <div className="max-w-5xl mx-auto">
-      <motion.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.4 }}
-      >
-        <Button
-          variant="ghost"
-          className="mb-8 text-zinc-400 hover:text-white hover:bg-white/5 flex items-center gap-2 rounded-full px-4"
-          asChild
-        >
-          <Link href="/news">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Feed
-          </Link>
-        </Button>
-      </motion.div>
-
-      <article>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="relative h-[400px] md:h-[500px] lg:h-[600px] rounded-3xl overflow-hidden mb-12"
-        >
-          <Image
-            src={news.image}
-            alt={news.title}
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-black via-black/40 to-transparent" />
-
-          <div className="absolute bottom-0 left-0 p-6 md:p-12 w-full md:w-3/4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-            >
-              <Badge className="bg-primary hover:bg-primary text-white border-none text-sm px-4 py-1.5 mb-6 uppercase tracking-wider font-bold shadow-lg shadow-primary/20">
-                {news.category}
-              </Badge>
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-6 drop-shadow-lg">
-                {news.title}
-              </h1>
-
-              <div className="flex flex-wrap items-center gap-6 text-sm md:text-base text-zinc-200 font-medium">
-                <div className="flex items-center gap-2 bg-black/30 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
-                  <User className="w-4 h-4 text-primary" />
-                  <span>{news.author}</span>
-                </div>
-                <div className="flex items-center gap-2 bg-black/30 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
-                  <Clock className="w-4 h-4 text-primary" />
-                  <span>{news.date}</span>
+    <article className="max-w-4xl mx-auto">
+      <header className="mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          {news.category && (
+            <Badge variant="secondary" className="capitalize">
+              {news.category}
+            </Badge>
+          )}
+          {news.league && (
+            <Badge variant="outline" className="capitalize">
+              {news.league}
+            </Badge>
+          )}
+        </div>
+        
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+          {news.title}
+        </h1>
+        
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            {news.author && (
+              <div className="flex items-center gap-2">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={news.author_avatar} alt={news.author} />
+                  <AvatarFallback>
+                    <User className="h-5 w-5" />
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-medium">{news.author}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {format(new Date(news.date), "MMMM d, yyyy")}
+                  </p>
                 </div>
               </div>
-            </motion.div>
+            )}
           </div>
-        </motion.div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-2 hidden lg:block">
-            <div className="sticky top-32 space-y-4">
-              <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-4">
-                Share
-              </p>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Eye className="h-4 w-4" />
+                {news.views}
+              </div>
+              <div className="flex items-center gap-1">
+                <MessageCircle className="h-4 w-4" />
+                {news.comments_count}
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
-                className="rounded-full w-10 h-10 border-zinc-800 bg-zinc-900/50 text-zinc-400 hover:text-white hover:border-zinc-700"
+                onClick={handleShare}
+                className="h-8 w-8"
               >
-                <Share2 className="w-4 h-4" />
+                <Share2 className="h-4 w-4" />
               </Button>
-              {/* Add more social icons here if needed */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleBookmark}
+                className={`h-8 w-8 ${isBookmarked ? "text-primary" : ""}`}
+              >
+                <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-current" : ""}`} />
+              </Button>
             </div>
           </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.6 }}
-            className="lg:col-span-8"
-          >
-            <div
-              className="prose prose-lg prose-invert max-w-none 
-              prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-white
-              prose-p:text-zinc-300 prose-p:leading-relaxed prose-p:mb-6
-              prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-              prose-strong:text-white prose-strong:font-bold
-              prose-blockquote:border-l-primary prose-blockquote:bg-zinc-900/30 prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-lg prose-blockquote:not-italic
-              "
-              dangerouslySetInnerHTML={{ __html: news.content }}
-            />
-          </motion.div>
         </div>
-      </article>
-    </div>
+      </header>
+      
+      {news.image && (
+        <div className="mb-8">
+          <img
+            src={news.image}
+            alt={news.title}
+            className="w-full h-auto rounded-lg"
+          />
+        </div>
+      )}
+      
+      {/* English Content - Render HTML directly */}
+      <div className="prose prose-lg max-w-none dark:prose-invert mb-12">
+        <div 
+          dangerouslySetInnerHTML={{ __html: news.content || "" }}
+          className="tiptap-content"
+        />
+      </div>
+      
+      <Separator className="my-8" />
+      
+      {/* Amharic Content - Render HTML directly */}
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold tracking-tight">
+          {news.title_am}
+        </h2>
+        
+        <div className="prose prose-lg max-w-none dark:prose-invert">
+          <div 
+            dangerouslySetInnerHTML={{ __html: news.content_am || "" }}
+            className="tiptap-content"
+          />
+        </div>
+      </div>
+      
+      {/* Share notification */}
+      {shareUrl && (
+        <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-lg">
+          {shareUrl}
+        </div>
+      )}
+    </article>
   );
 }

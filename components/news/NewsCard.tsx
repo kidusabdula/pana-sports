@@ -7,15 +7,24 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
+// Updated interface to match transformed news object
 interface NewsCardProps {
   news: {
     id: string;
     title: string;
+    title_am?: string;
     category: string;
     image: string;
     date: string;
     author: string;
+    author_avatar?: string;
     excerpt: string;
+    content?: string;
+    content_am?: string;
+    views?: number;
+    comments_count?: number;
+    league?: string;
+    league_slug?: string;
   };
   variant?: "default" | "featured" | "compact" | "minimal" | "horizontal";
   index?: number;
@@ -52,7 +61,7 @@ export default function NewsCard({
             >
               <div className="flex items-center gap-3 mb-4">
                 <Badge className="bg-primary hover:bg-primary text-white border-none text-xs px-3 py-1 uppercase tracking-wider font-semibold">
-                  {news.category}
+                  {news.category || 'General'}
                 </Badge>
                 <span className="text-sm text-zinc-300 flex items-center gap-1.5 font-medium">
                   <Clock className="w-4 h-4" /> {news.date}
@@ -91,7 +100,7 @@ export default function NewsCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1.5">
               <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
-                {news.category}
+                {news.category || 'General'}
               </span>
               <span className="text-[10px] text-zinc-500">•</span>
               <span className="text-[10px] text-zinc-500">{news.date}</span>
@@ -124,7 +133,7 @@ export default function NewsCard({
             />
             <div className="absolute top-3 left-3">
               <Badge className="bg-black/50 backdrop-blur-md hover:bg-black/70 text-white border-white/10 text-xs">
-                {news.category}
+                {news.category || 'General'}
               </Badge>
             </div>
           </div>
@@ -171,7 +180,7 @@ export default function NewsCard({
           />
           <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-60" />
           <Badge className="absolute top-3 left-3 bg-black/50 backdrop-blur-md hover:bg-black/70 text-white border-white/10 text-xs px-2.5 py-1">
-            {news.category}
+            {news.category || 'General'}
           </Badge>
         </div>
         <div className="p-5 flex flex-col flex-1">

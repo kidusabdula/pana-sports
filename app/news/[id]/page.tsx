@@ -1,3 +1,4 @@
+"use client"
 // app/news/[id]/page.tsx
 import { notFound } from "next/navigation";
 import { useNewsItem } from "@/lib/hooks/public/useNews";
@@ -9,8 +10,9 @@ import NewsDetailSkeleton from "@/components/shared/Skeletons/NewsDetailSkeleton
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import React from "react";
 
-// app/news/[id]/page.tsx (update the NewsDetailPageContent function)
+// Make sure to export as default
 function NewsDetailPageContent({ id }: { id: string }) {
   const { 
     data: newsData, 
@@ -77,5 +79,18 @@ function NewsDetailPageContent({ id }: { id: string }) {
         )}
       </div>
     </div>
+  );
+}
+
+// Add the default export wrapper
+export default function NewsDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  // Unwrap the params promise
+  const resolvedParams = React.use(params);
+  const id = resolvedParams.id;
+
+  return (
+    <Suspense fallback={<NewsDetailSkeleton />}>
+      <NewsDetailPageContent id={id} />
+    </Suspense>
   );
 }
