@@ -64,21 +64,21 @@ const navigation = [
     href: "/cms/top-scorers",
     icon: TrendingUp,
   },
-  {
-    name: "Transfers",
-    href: "/cms/transfers",
-    icon: MoveRight,
-  },
+  // {
+  //   name: "Transfers",
+  //   href: "/cms/transfers",
+  //   icon: MoveRight,
+  // },
   {
     name: "News",
     href: "/cms/news",
     icon: FileText,
   },
-  {
-    name: "Comments",
-    href: "/cms/comments",
-    icon: MessageSquare,
-  },
+  // {
+  //   name: "Comments",
+  //   href: "/cms/comments",
+  //   icon: MessageSquare,
+  // },
   {
     name: "Authors",
     href: "/cms/authors",

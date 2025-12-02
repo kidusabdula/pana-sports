@@ -4,7 +4,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Create Top Scorer | Pana Sports CMS",
-  description: "Add a player to top scorers",
+  description: "Create a new top scorer entry",
 };
 
 export default function CreateTopScorerPage() {
@@ -26,7 +26,7 @@ export default function CreateTopScorerPage() {
           Create Top Scorer
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Add a player to the top scorers list.
+          Add a new top scorer entry to the system.
         </p>
       </div>
 

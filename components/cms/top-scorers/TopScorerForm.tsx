@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useState, useEffect } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -32,27 +31,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Trophy,
+  Save,
+  X,
+  Plus,
+  Target,
+  TrendingUp,
+} from "lucide-react";
+import {
   createTopScorerInputSchema,
   updateTopScorerInputSchema,
   TopScorer,
   CreateTopScorer,
   UpdateTopScorer,
 } from "@/lib/schemas/topScorer";
-import {
-  useCreateTopScorer,
-  useUpdateTopScorer,
-} from "@/lib/hooks/cms/useTopScorers";
-import {
-  Trophy,
-  Shield,
-  Hash,
-  Save,
-  X,
-  Target,
-  TrendingUp,
-} from "lucide-react";
+import { useCreateTopScorer, useUpdateTopScorer } from "@/lib/hooks/cms/useTopScorers";
 import { useLeagues } from "@/lib/hooks/cms/useLeagues";
-import { usePlayers } from "@/lib/hooks/cms/usePlayers";
 import { useTeams } from "@/lib/hooks/cms/useTeams";
 
 interface TopScorerFormProps {
@@ -61,30 +55,28 @@ interface TopScorerFormProps {
   onCancel?: () => void;
 }
 
-export default function TopScorerForm({
-  topScorer,
-  onSuccess,
-  onCancel,
-}: TopScorerFormProps) {
+export default function TopScorerForm({ topScorer, onSuccess, onCancel }: TopScorerFormProps) {
   const isEditing = !!topScorer;
-
-  // Fetch leagues and players for dropdowns
-  const { data: leagues } = useLeagues();
-  const { data: players } = usePlayers();
-  const { data: teams } = useTeams();
-
+  
   const form = useForm<CreateTopScorer | UpdateTopScorer>({
     resolver: zodResolver(
       isEditing ? updateTopScorerInputSchema : createTopScorerInputSchema
     ),
     defaultValues: {
-      league_slug: topScorer?.league_slug || "",
-      player_slug: topScorer?.player_slug || "",
-      team_slug: topScorer?.team_slug || "",
+      league_id: topScorer?.league_id || "",
+      player_id: topScorer?.player_id || "",
+      team_id: topScorer?.team_id || "",
+      season: topScorer?.season || "",
       goals: topScorer?.goals || 0,
       assists: topScorer?.assists || 0,
     },
   });
+
+  const { data: leagues } = useLeagues();
+  const { data: teams } = useTeams();
+  
+  const selectedLeagueId = form.watch("league_id");
+  const filteredTeams = teams?.filter((team) => team.league_id === selectedLeagueId) || [];
 
   const createTopScorerMutation = useCreateTopScorer();
   const updateTopScorerMutation = useUpdateTopScorer();
@@ -137,8 +129,8 @@ export default function TopScorerForm({
           </CardTitle>
           <CardDescription className="text-base text-muted-foreground max-w-md mx-auto">
             {isEditing
-              ? "Update top scorer information below."
-              : "Add a player to the top scorers list."}
+              ? "Update player top scorer statistics below."
+              : "Fill in the details to create a new top scorer entry."}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -147,11 +139,11 @@ export default function TopScorerForm({
       <Card className="shadow-sm border border-border/50 bg-card rounded-xl overflow-hidden">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="p-8">
+            <CardContent className="p-8 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
-                  name="league_slug"
+                  name="league_id"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center gap-2 font-medium text-foreground">
@@ -161,15 +153,14 @@ export default function TopScorerForm({
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        value={field.value}
                       >
-                        <FormControl>
-                          <SelectTrigger className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg">
-                            <SelectValue placeholder="Select a league" />
-                          </SelectTrigger>
-                        </FormControl>
+                        <SelectTrigger className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg">
+                          <SelectValue placeholder="Select a league" />
+                        </SelectTrigger>
                         <SelectContent>
                           {leagues?.map((league) => (
-                            <SelectItem key={league.slug} value={league.slug}>
+                            <SelectItem key={league.id} value={league.id}>
                               {league.name_en}
                             </SelectItem>
                           ))}
@@ -185,32 +176,29 @@ export default function TopScorerForm({
 
                 <FormField
                   control={form.control}
-                  name="player_slug"
+                  name="team_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="flex items-center gap-2 font-medium text-foreground">
-                        <Shield className="h-4 w-4 text-primary" />
-                        Player
-                      </FormLabel>
+                      <FormLabel className="font-medium text-foreground">Team</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        value={field.value}
+                        disabled={!selectedLeagueId}
                       >
-                        <FormControl>
-                          <SelectTrigger className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg">
-                            <SelectValue placeholder="Select a player" />
-                          </SelectTrigger>
-                        </FormControl>
+                        <SelectTrigger className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg">
+                          <SelectValue placeholder={selectedLeagueId ? "Select a team" : "Select a league first"} />
+                        </SelectTrigger>
                         <SelectContent>
-                          {players?.map((player) => (
-                            <SelectItem key={player.slug} value={player.slug}>
-                              {player.name_en}
+                          {filteredTeams.map((team) => (
+                            <SelectItem key={team.id} value={team.id}>
+                              {team.name_en}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        The player to add to top scorers
+                        The team this top scorer belongs to
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -221,38 +209,60 @@ export default function TopScorerForm({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
-                  name="team_slug"
+                  name="player_id"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="flex items-center gap-2 font-medium text-foreground">
-                        <Shield className="h-4 w-4 text-primary" />
-                        Team
-                      </FormLabel>
+                      <FormLabel className="font-medium text-foreground">Player</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        value={field.value}
+                        disabled={!selectedLeagueId}
                       >
-                        <FormControl>
-                          <SelectTrigger className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg">
-                            <SelectValue placeholder="Select a team" />
-                          </SelectTrigger>
-                        </FormControl>
+                        <SelectTrigger className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg">
+                          <SelectValue placeholder={selectedLeagueId ? "Select a player" : "Select a league first"} />
+                        </SelectTrigger>
                         <SelectContent>
-                          {teams?.map((team) => (
-                            <SelectItem key={team.slug} value={team.slug}>
-                              {team.name_en}
-                            </SelectItem>
+                          {filteredTeams.map((team) => (
+                            team.players?.map((player) => (
+                              <SelectItem key={player.id} value={player.id}>
+                                {player.jersey_number} - {player.name_en}
+                              </SelectItem>
+                            ))
                           ))}
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        The team this player belongs to
+                        The player this top scorer entry belongs to
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
+                <FormField
+                  control={form.control}
+                  name="season"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-medium text-foreground">Season</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="2023/2024"
+                          {...field}
+                          className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        The season this top scorer belongs to
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="goals"
@@ -267,17 +277,17 @@ export default function TopScorerForm({
                           type="number"
                           placeholder="0"
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value
-                                ? parseInt(e.target.value)
-                                : undefined
-                            )
-                          }
+                          value={field.value || ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            field.onChange(value === "" ? undefined : Number(value));
+                          }}
                           className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                         />
                       </FormControl>
-                      <FormDescription>Number of goals scored</FormDescription>
+                      <FormDescription>
+                        Total goals scored
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -288,27 +298,22 @@ export default function TopScorerForm({
                   name="assists"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="flex items-center gap-2 font-medium text-foreground">
-                        <TrendingUp className="h-4 w-4 text-primary" />
-                        Assists
-                      </FormLabel>
+                      <FormLabel className="font-medium text-foreground">Assists</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           placeholder="0"
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value
-                                ? parseInt(e.target.value)
-                                : undefined
-                            )
-                          }
+                          value={field.value || ""}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            field.onChange(value === "" ? undefined : Number(value));
+                          }}
                           className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                         />
                       </FormControl>
                       <FormDescription>
-                        Number of assists (optional)
+                        Total assists provided
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

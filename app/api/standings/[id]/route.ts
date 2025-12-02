@@ -21,7 +21,11 @@ export async function GET(
     
     const { data, error } = await supabase
       .from('standings')
-      .select('*')
+      .select(`
+        *,
+        team:teams(id, name_en, name_am, slug, logo_url),
+        league:leagues(id, name_en, name_am, slug, category)
+      `)
       .eq('id', id)
       .single()
     
@@ -123,11 +127,26 @@ export async function PATCH(
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
-      .select()
+      .select(`
+        *,
+        team:teams(id, name_en, name_am, slug, logo_url),
+        league:leagues(id, name_en, name_am, slug, category)
+      `)
       .single()
     
     if (error) {
       console.error('Supabase error updating standing:', error);
+      
+      // Handle specific error codes
+      if (error.code === '23505') {
+        return NextResponse.json(
+          { 
+            error: 'Standing already exists for this team in this league and season', 
+            details: 'Each team can only have one standing per league per season' 
+          },
+          { status: 409 }
+        )
+      }
       
       return NextResponse.json(
         { 
@@ -214,7 +233,7 @@ export async function DELETE(
       )
     }
     
-    // Delete standing
+    // Delete the standing
     const { error: deleteError } = await supabase
       .from('standings')
       .delete()

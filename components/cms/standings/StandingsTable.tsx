@@ -17,19 +17,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { useStandings, useDeleteStanding } from "@/lib/hooks/cms/useStandings";
 import { useLeagues } from "@/lib/hooks/cms/useLeagues";
-import { useTeams } from "@/lib/hooks/cms/useTeams";
-import { Standing } from "@/lib/schemas/standing";
 import {
   Edit,
   Trash2,
   Plus,
   Search,
   Trophy,
-  Calendar,
-  Filter,
-  ChevronDown,
   TrendingUp,
   TrendingDown,
+  ChevronDown,
+  Shield,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -51,37 +48,42 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function StandingTable() {
+export default function StandingsTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLeague, setFilterLeague] = useState("all");
-  const { data: standings, isLoading, error } = useStandings();
-  const { data: leagues } = useLeagues();
-  const { data: teams } = useTeams();
+  const [filterSeason, setFilterSeason] = useState("all");
+  const { data: standings, isLoading, error } = useStandings({
+    league_id: filterLeague === "all" ? undefined : filterLeague,
+    season: filterSeason === "all" ? undefined : filterSeason,
+  });
   const deleteStandingMutation = useDeleteStanding();
+  const { data: leagues } = useLeagues();
 
   const filteredStandings =
     standings?.filter((standing) => {
-      const team = teams?.find((t) => t.slug === standing.team_slug);
       const matchesSearch =
-        team?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        team?.name_am?.toLowerCase().includes(searchTerm.toLowerCase());
+        standing.team?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (standing.team?.name_am?.toLowerCase() ?? "").includes(
+          searchTerm.toLowerCase()
+        );
 
       const matchesLeague =
-        filterLeague === "all" || standing.league_slug === filterLeague;
+        filterLeague === "all" || standing.league?.id === filterLeague;
 
-      return matchesSearch && matchesLeague;
+      const matchesSeason =
+        filterSeason === "all" || standing.season === filterSeason;
+
+      return matchesSearch && matchesLeague && matchesSeason;
     }) || [];
 
   const handleDelete = async (id: string, teamName: string) => {
     const promise = deleteStandingMutation.mutateAsync(id);
 
     toast.promise(promise, {
-      loading: `Deleting standing for "${teamName}"...`,
+      loading: `Deleting "${teamName}"...`,
       success: `Standing deleted successfully`,
       error: (error) => {
-        return error instanceof Error
-          ? error.message
-          : "Failed to delete standing";
+        return error instanceof Error ? error.message : "Failed to delete standing";
       },
     });
 
@@ -115,66 +117,83 @@ export default function StandingTable() {
       </Card>
     );
 
+  const seasons = [
+    { value: "all", label: "All Seasons" },
+    { value: "2023/2024", label: "2023/2024" },
+    { value: "2024/2025", label: "2024/2025" },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card className="bg-linear-to-br from-primary/5 to-primary/10 border-primary/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  Total Standings
+                  Total Teams
                 </p>
                 <p className="text-3xl font-bold text-foreground mt-1">
                   {standings?.length || 0}
                 </p>
               </div>
               <div className="p-3 bg-primary/10 rounded-full">
-                <Trophy className="h-6 w-6 text-primary" />
+                <Shield className="h-6 w-6 text-primary" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
+        <Card className="bg-linear-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
-                  Active This Month
+                  Current Season
                 </p>
                 <p className="text-3xl font-bold text-foreground mt-1">
-                  {standings?.filter((s) => {
-                    const createdAt = new Date(s.created_at);
-                    const now = new Date();
-                    return (
-                      createdAt.getMonth() === now.getMonth() &&
-                      createdAt.getFullYear() === now.getFullYear()
-                    );
-                  }).length || 0}
-                </p>
-              </div>
-              <div className="p-3 bg-blue-500/10 rounded-full">
-                <Calendar className="h-6 w-6 text-blue-500" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Leagues
-                </p>
-                <p className="text-3xl font-bold text-foreground mt-1">
-                  {new Set(standings?.map((s) => s.league_slug)).size || 0}
+                  {filterSeason === "all" ? "All" : filterSeason}
                 </p>
               </div>
               <div className="p-3 bg-green-500/10 rounded-full">
-                <Trophy className="h-6 w-6 text-green-500" />
+                <TrendingUp className="h-6 w-6 text-green-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-linear-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Active Leagues
+                </p>
+                <p className="text-3xl font-bold text-foreground mt-1">
+                  {new Set(standings?.map(s => s.league?.id)).size || 0}
+                </p>
+              </div>
+              <div className="p-3 bg-blue-500/10 rounded-full">
+                <Trophy className="h-6 w-6 text-blue-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-linear-gradient-to-br from-purple-500/5 to-purple-500/10 border-purple-500/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Total Goals
+                </p>
+                <p className="text-3xl font-bold text-foreground mt-1">
+                  {standings?.reduce((sum, s) => sum + (s.goals_for || 0), 0) || 0}
+                </p>
+              </div>
+              <div className="p-3 bg-purple-500/10 rounded-full">
+                <TrendingUp className="h-6 w-6 text-purple-500" />
               </div>
             </div>
           </CardContent>
@@ -187,6 +206,7 @@ export default function StandingTable() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <CardTitle className="text-xl font-bold text-foreground flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-primary" />
                 Standings ({standings?.length || 0})
               </CardTitle>
             </div>
@@ -207,8 +227,20 @@ export default function StandingTable() {
                 <SelectContent>
                   <SelectItem value="all">All Leagues</SelectItem>
                   {leagues?.map((league) => (
-                    <SelectItem key={league.slug} value={league.slug}>
+                    <SelectItem key={league.id} value={league.id}>
                       {league.name_en}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={filterSeason} onValueChange={setFilterSeason}>
+                <SelectTrigger className="h-9 w-40">
+                  <SelectValue placeholder="Filter by season" />
+                </SelectTrigger>
+                <SelectContent>
+                  {seasons.map((season) => (
+                    <SelectItem key={season.value} value={season.value}>
+                      {season.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -240,16 +272,16 @@ export default function StandingTable() {
                   Team
                 </TableHead>
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  P
+                  Played
                 </TableHead>
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  W
+                  Won
                 </TableHead>
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  D
+                  Draw
                 </TableHead>
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  L
+                  Lost
                 </TableHead>
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
                   GF
@@ -261,7 +293,7 @@ export default function StandingTable() {
                   GD
                 </TableHead>
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  Pts
+                  Points
                 </TableHead>
                 <TableHead className="text-right font-medium text-muted-foreground text-xs uppercase tracking-wider pr-6">
                   Action
@@ -274,156 +306,137 @@ export default function StandingTable() {
                   <TableCell colSpan={11} className="text-center py-12">
                     <div className="flex flex-col items-center space-y-3">
                       <Trophy className="h-12 w-12 text-muted-foreground/20" />
-                      <p className="text-muted-foreground">
-                        No standings found.
-                      </p>
+                      <p className="text-muted-foreground">No standings found.</p>
                     </div>
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredStandings.map((standing) => {
-                  const team = teams?.find(
-                    (t) => t.slug === standing.team_slug
-                  );
-                  return (
-                    <TableRow
-                      key={standing.id}
-                      className="hover:bg-muted/30 transition-colors border-b border-border/40"
-                    >
-                      <TableCell className="pl-6">
-                        <input
-                          type="checkbox"
-                          className="rounded border-muted-foreground/30 text-primary focus:ring-primary"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
-                            <span className="font-bold text-primary">
-                              {standing.rank}
-                            </span>
-                          </div>
-                          {standing.rank <= 3 && (
-                            <TrendingUp className="h-4 w-4 text-green-500 ml-1" />
-                          )}
-                          {standing.rank >= 10 && (
-                            <TrendingDown className="h-4 w-4 text-red-500 ml-1" />
-                          )}
+                filteredStandings.map((standing) => (
+                  <TableRow
+                    key={standing.id}
+                    className="hover:bg-muted/30 transition-colors border-b border-border/40"
+                  >
+                    <TableCell className="pl-6">
+                      <input
+                        type="checkbox"
+                        className="rounded border-muted-foreground/30 text-primary focus:ring-primary"
+                      />
+                    </TableCell>
+                    <TableCell className="font-bold text-lg text-foreground">
+                      {standing.rank}
+                    </TableCell>
+                    <TableCell className="pl-6">
+                      <div className="flex items-center gap-3">
+                        {standing.team?.logo_url && (
+                          <img
+                            src={standing.team.logo_url}
+                            alt={standing.team.name_en}
+                            className="h-8 w-8 object-contain"
+                          />
+                        )}
+                        <div className="flex flex-col">
+                          <span className="font-medium text-foreground">
+                            {standing.team?.name_en}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {standing.league?.name_en}
+                          </span>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          {team?.logo_url ? (
-                            <img
-                              src={team.logo_url}
-                              alt={team.name_en}
-                              className="h-9 w-9 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="h-9 w-9 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 font-bold text-sm">
-                              {team?.name_en?.charAt(0) || "T"}
-                            </div>
-                          )}
-                          <div className="flex flex-col">
-                            <span className="font-medium text-foreground text-sm">
-                              {team?.name_en}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {team?.name_am || team?.slug}
-                            </span>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center font-bold text-foreground">
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-foreground">
                         {standing.played}
-                      </TableCell>
-                      <TableCell className="text-center font-bold text-green-600">
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-foreground">
                         {standing.won}
-                      </TableCell>
-                      <TableCell className="text-center font-bold text-yellow-600">
-                        {standing.drawn}
-                      </TableCell>
-                      <TableCell className="text-center font-bold text-red-600">
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-foreground">
+                        {standing.draw}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-foreground">
                         {standing.lost}
-                      </TableCell>
-                      <TableCell className="text-center font-bold text-foreground">
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-foreground">
                         {standing.goals_for}
-                      </TableCell>
-                      <TableCell className="text-center font-bold text-foreground">
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-sm text-foreground">
                         {standing.goals_against}
-                      </TableCell>
-                      <TableCell className="text-center font-bold text-foreground">
-                        <span
-                          className={
-                            standing.gd > 0
-                              ? "text-green-600"
-                              : standing.gd < 0
-                              ? "text-red-600"
-                              : ""
-                          }
-                        >
-                          {standing.gd > 0 ? "+" : ""}
-                          {standing.gd}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-center font-bold text-lg text-primary">
-                        {standing.points}
-                      </TableCell>
-                      <TableCell className="text-right pr-6">
-                        <div className="flex items-center justify-end gap-1">
-                          <Link href={`/cms/standings/${standing.id}/edit`}>
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={standing.gd > 0 ? "default" : standing.gd < 0 ? "destructive" : "secondary"}
+                        className="font-medium"
+                      >
+                        {standing.gd > 0 ? "+" : ""}
+                        {standing.gd}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-bold text-foreground">
+                      {standing.points}
+                    </TableCell>
+                    <TableCell className="text-right pr-6">
+                      <div className="flex items-center justify-end gap-1">
+                        <Link href={`/cms/standings/${standing.id}/edit`}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-full"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </Link>
+
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-full"
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
                             >
-                              <Edit className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
-                          </Link>
-
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Standing</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete the standing for &quot;
+                                {standing.team?.name_en}&quot;? This action cannot be
+                                undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() =>
+                                  handleDelete(
+                                    standing.id,
+                                    standing.team?.name_en || ""
+                                  )
+                                }
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Delete Standing
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete the standing
-                                  for &quot;
-                                  {team?.name_en}&quot;? This action cannot be
-                                  undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() =>
-                                    handleDelete(
-                                      standing.id,
-                                      team?.name_en || "Unknown Team"
-                                    )
-                                  }
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
               )}
             </TableBody>
           </Table>

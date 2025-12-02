@@ -1,49 +1,59 @@
-// app/api/top-scorers/route.ts
-import { requireAdmin } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
+import { updateTopScorerInputSchema } from '@/lib/schemas/topScorer'
+import { requireAdmin } from '@/lib/auth'
 import { NextResponse } from 'next/server'
 
-export async function GET(request: Request) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { searchParams } = new URL(request.url)
-    const league = searchParams.get('league')
+    const { id } = await params
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Top Scorer ID is required' },
+        { status: 400 }
+      )
+    }
     
     const supabase = await createClient()
     
-    let query = supabase
+    const { data, error } = await supabase
       .from('top_scorers')
       .select(`
         *,
-        player:players!player_slug(*),
-        team:teams!team_slug(*),
-        league:leagues!league_slug(*)
+        player:players(id, name_en, name_am, slug, jersey_number, photo_url),
+        team:teams(id, name_en, name_am, slug, logo_url),
+        league:leagues(id, name_en, name_am, slug, category)
       `)
-    
-    // Apply league filter if provided
-    if (league) {
-      query = query.eq('league_slug', league)
-    }
-    
-    const { data, error } = await query
-      .order('goals', { ascending: false })
+      .eq('id', id)
+      .single()
     
     if (error) {
-      console.error('Supabase error fetching top scorers:', error)
+      console.error('Supabase error fetching top scorer:', error)
       return NextResponse.json(
         { 
-          error: 'Failed to fetch top scorers', 
+          error: 'Failed to fetch top scorer', 
           details: error.message 
         },
         { status: 500 }
       )
     }
     
+    if (!data) {
+      return NextResponse.json(
+        { error: 'Top Scorer not found' },
+        { status: 404 }
+      )
+    }
+    
     return NextResponse.json(data)
   } catch (error) {
-    console.error('Unexpected error fetching top scorers:', error)
+    console.error('Unexpected error fetching top scorer:', error)
     return NextResponse.json(
       { 
-        error: 'Failed to fetch top scorers', 
+        error: 'Failed to fetch top scorer', 
         details: error instanceof Error ? error.message : 'Unknown error' 
       },
       { status: 500 }
@@ -51,8 +61,20 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id } = await params
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Top Scorer ID is required' },
+        { status: 400 }
+      )
+    }
+    
     // Verify admin authentication
     let user;
     try {
@@ -83,50 +105,159 @@ export async function POST(request: Request) {
       )
     }
     
-    // Validate with schema (you would need to import the appropriate schema)
-    // let validatedData;
-    // try {
-    //   validatedData = createTopScorerInputSchema.parse(body)
-    // } catch (validationError) {
-    //   console.error('Validation error:', validationError);
-    //   return NextResponse.json(
-    //     { 
-    //       error: 'Invalid input data', 
-    //       details: validationError instanceof Error ? validationError.message : 'Unknown validation error' 
-    //     },
-    //     { status: 400 }
-    //   )
-    // }
+    let validatedData;
+    try {
+      validatedData = updateTopScorerInputSchema.parse(body)
+    } catch (validationError) {
+      console.error('Validation error:', validationError);
+      return NextResponse.json(
+        { 
+          error: 'Invalid input data', 
+          details: validationError instanceof Error ? validationError.message : 'Unknown validation error' 
+        },
+        { status: 400 }
+      )
+    }
     
     const supabase = await createClient()
     
-    // Create top scorer with current user as creator
     const { data, error } = await supabase
       .from('top_scorers')
-      .insert({
-        ...body,
-        created_by: user.id,
+      .update({
+        ...validatedData,
+        updated_at: new Date().toISOString(),
       })
-      .select()
+      .eq('id', id)
+      .select(`
+        *,
+        player:players(id, name_en, name_am, slug, jersey_number, photo_url),
+        team:teams(id, name_en, name_am, slug, logo_url),
+        league:leagues(id, name_en, name_am, slug, category)
+      `)
       .single()
     
     if (error) {
-      console.error('Supabase error creating top scorer:', error);
+      console.error('Supabase error updating top scorer:', error);
+      
+      // Handle specific error codes
+      if (error.code === '23505') {
+        return NextResponse.json(
+          { 
+            error: 'Top scorer already exists for this player in this league and season', 
+            details: 'Each player can only have one top scorer entry per league per season' 
+          },
+          { status: 409 }
+        )
+      }
+      
       return NextResponse.json(
         { 
-          error: 'Failed to create top scorer', 
+          error: 'Failed to update top scorer', 
           details: error.message 
         },
         { status: 500 }
       )
     }
     
-    return NextResponse.json(data, { status: 201 })
+    if (!data) {
+      return NextResponse.json(
+        { error: 'Top Scorer not found' },
+        { status: 404 }
+      )
+    }
+    
+    return NextResponse.json(data)
   } catch (error) {
-    console.error('Unexpected error creating top scorer:', error);
+    console.error('Unexpected error updating top scorer:', error);
     return NextResponse.json(
       { 
-        error: 'Failed to create top scorer', 
+        error: 'Failed to update top scorer', 
+        details: error instanceof Error ? error.message : 'Unknown error' 
+      },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Top Scorer ID is required' },
+        { status: 400 }
+      )
+    }
+    
+    // Verify admin authentication
+    let user;
+    try {
+      user = await requireAdmin()
+    } catch (authError) {
+      console.error('Authentication error:', authError);
+      return NextResponse.json(
+        { 
+          error: 'Authentication failed', 
+          details: authError instanceof Error ? authError.message : 'Unknown auth error' 
+        },
+        { status: 401 }
+      )
+    }
+    
+    const supabase = await createClient()
+    
+    // Check if top scorer exists
+    const { data: topScorer, error: topScorerError } = await supabase
+      .from('top_scorers')
+      .select('id')
+      .eq('id', id)
+      .single()
+    
+    if (topScorerError) {
+      console.error('Supabase error checking top scorer existence:', topScorerError)
+      return NextResponse.json(
+        { 
+          error: 'Failed to check top scorer existence', 
+          details: topScorerError.message 
+        },
+        { status: 500 }
+      )
+    }
+    
+    if (!topScorer) {
+      return NextResponse.json(
+        { error: 'Top Scorer not found' },
+        { status: 404 }
+      )
+    }
+    
+    // Delete the top scorer
+    const { error: deleteError } = await supabase
+      .from('top_scorers')
+      .delete()
+      .eq('id', id)
+    
+    if (deleteError) {
+      console.error('Supabase error deleting top scorer:', deleteError)
+      return NextResponse.json(
+        { 
+          error: 'Failed to delete top scorer', 
+          details: deleteError.message 
+        },
+        { status: 500 }
+      )
+    }
+    
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Unexpected error deleting top scorer:', error);
+    return NextResponse.json(
+      { 
+        error: 'Failed to delete top scorer', 
         details: error instanceof Error ? error.message : 'Unknown error' 
       },
       { status: 500 }

@@ -1,9 +1,9 @@
-import TopScorerTable from "@/components/cms/top-scorers/TopScorerTable";
+import TopScorersTable from "@/components/cms/top-scorers/TopScorersTable";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Top Scorers | Pana Sports CMS",
-  description: "Manage top scorers",
+  description: "Manage top scorers statistics",
 };
 
 export default function TopScorersPage() {
@@ -14,11 +14,11 @@ export default function TopScorersPage() {
           Top Scorers
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Manage top scorers across all leagues.
+          Manage top scorers and player statistics.
         </p>
       </div>
 
-      <TopScorerTable />
+      <TopScorersTable />
     </div>
   );
 }

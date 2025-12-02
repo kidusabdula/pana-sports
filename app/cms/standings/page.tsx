@@ -1,4 +1,4 @@
-import StandingTable from "@/components/cms/standings/StandingTable";
+import StandingsTable from "@/components/cms/standings/StandingsTable";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -18,7 +18,7 @@ export default function StandingsPage() {
         </p>
       </div>
 
-      <StandingTable />
+      <StandingsTable />
     </div>
   );
 }

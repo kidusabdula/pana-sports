@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import StandingForm from "@/components/cms/standings/StandingForm";
+import StandingForm from "@/components/cms/standings/StandingsForm";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -26,7 +26,7 @@ export default function CreateStandingPage() {
           Create Standing
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Add a new standing record to the system.
+          Add a new team standing to the system.
         </p>
       </div>
 

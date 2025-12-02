@@ -1,13 +1,13 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import StandingForm from "@/components/cms/standings/StandingForm";
+import StandingForm from "@/components/cms/standings/StandingsForm";
 import { Metadata } from "next";
 
 interface EditStandingPageProps {
   params: Promise<{ id: string }>;
 }
 
-// --- Helper Function ---
+// Helper Function
 async function getStanding(id: string) {
   if (!id) {
     console.error("getStanding called without an ID");
@@ -18,7 +18,13 @@ async function getStanding(id: string) {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("standings")
-      .select("*")
+      .select(
+        `
+        *,
+        team:teams(id, name_en, name_am, slug, logo_url),
+        league:leagues(id, name_en, name_am, slug, category)
+      `
+      )
       .eq("id", id)
       .single();
 
@@ -39,7 +45,7 @@ async function getStanding(id: string) {
   }
 }
 
-// --- generateMetadata ---
+// Generate metadata
 export async function generateMetadata({
   params,
 }: EditStandingPageProps): Promise<Metadata> {
@@ -48,8 +54,8 @@ export async function generateMetadata({
   try {
     const standing = await getStanding(id);
     return {
-      title: `Edit Standing | Pana Sports CMS`,
-      description: `Edit standing record`,
+      title: `Edit ${standing.team?.name_en} Standing | Pana Sports CMS`,
+      description: `Edit ${standing.team?.name_en} standing`,
     };
   } catch {
     return {
@@ -59,8 +65,10 @@ export async function generateMetadata({
   }
 }
 
-// --- Page Component ---
-export default async function EditStandingPage({ params }: EditStandingPageProps) {
+// Page Component
+export default async function EditStandingPage({
+  params,
+}: EditStandingPageProps) {
   const { id } = await params;
   const standing = await getStanding(id);
 
@@ -81,7 +89,7 @@ export default async function EditStandingPage({ params }: EditStandingPageProps
           Edit Standing
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Update standing record and settings.
+          Update standing details and statistics.
         </p>
       </div>
 

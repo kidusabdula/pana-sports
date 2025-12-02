@@ -7,7 +7,7 @@ interface EditTopScorerPageProps {
   params: Promise<{ id: string }>;
 }
 
-// --- Helper Function ---
+// Helper Function
 async function getTopScorer(id: string) {
   if (!id) {
     console.error("getTopScorer called without an ID");
@@ -18,7 +18,12 @@ async function getTopScorer(id: string) {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("top_scorers")
-      .select("*")
+      .select(`
+        *,
+        player:players(id, name_en, name_am, slug, jersey_number, photo_url),
+        team:teams(id, name_en, name_am, slug, logo_url),
+        league:leagues(id, name_en, name_am, slug, category)
+      `)
       .eq("id", id)
       .single();
 
@@ -39,7 +44,7 @@ async function getTopScorer(id: string) {
   }
 }
 
-// --- generateMetadata ---
+// Generate metadata
 export async function generateMetadata({
   params,
 }: EditTopScorerPageProps): Promise<Metadata> {
@@ -48,8 +53,8 @@ export async function generateMetadata({
   try {
     const topScorer = await getTopScorer(id);
     return {
-      title: `Edit Top Scorer | Pana Sports CMS`,
-      description: `Edit top scorer record`,
+      title: `Edit ${topScorer.player?.name_en} | Pana Sports CMS`,
+      description: `Edit ${topScorer.player?.name_en} top scorer statistics`,
     };
   } catch {
     return {
@@ -59,7 +64,7 @@ export async function generateMetadata({
   }
 }
 
-// --- Page Component ---
+// Page Component
 export default async function EditTopScorerPage({ params }: EditTopScorerPageProps) {
   const { id } = await params;
   const topScorer = await getTopScorer(id);
@@ -81,7 +86,7 @@ export default async function EditTopScorerPage({ params }: EditTopScorerPagePro
           Edit Top Scorer
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Update top scorer record and settings.
+          Update top scorer statistics.
         </p>
       </div>
 
