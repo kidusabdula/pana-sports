@@ -192,18 +192,18 @@ export default function TeamTable() {
                 Teams ({teams?.length || 0})
               </CardTitle>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 h-9 bg-background border-input focus:border-primary w-64 rounded-lg transition-all"
+                  className="pl-9 h-9 bg-background border-input focus:border-primary w-full sm:w-64 rounded-lg transition-all"
                 />
               </div>
               <Select value={filterLeague} onValueChange={setFilterLeague}>
-                <SelectTrigger className="h-9 w-40">
+                <SelectTrigger className="h-9 w-full sm:w-40">
                   <SelectValue placeholder="Filter by league" />
                 </SelectTrigger>
                 <SelectContent>
@@ -215,7 +215,7 @@ export default function TeamTable() {
                 </SelectContent>
               </Select>
               <Link href="/cms/teams/create">
-                <Button size="sm" className="h-9 gap-2 rounded-lg shadow-sm">
+                <Button size="sm" className="h-9 gap-2 rounded-lg shadow-sm w-full sm:w-auto">
                   <Plus className="h-4 w-4" />
                   Add Team
                 </Button>
@@ -237,16 +237,16 @@ export default function TeamTable() {
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
                   Team
                 </TableHead>
-                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider hidden md:table-cell">
                   League
                 </TableHead>
-                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider hidden lg:table-cell">
                   Founded
                 </TableHead>
-                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider hidden lg:table-cell">
                   Stadium
                 </TableHead>
-                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider hidden md:table-cell">
                   Created Date
                 </TableHead>
                 <TableHead className="text-right font-medium text-muted-foreground text-xs uppercase tracking-wider pr-6">
@@ -301,22 +301,22 @@ export default function TeamTable() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <Badge variant="outline" className="bg-muted/20">
                         {team.league?.slug || "Unassigned"}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden lg:table-cell">
                       <span className="text-sm text-foreground">
                         {team.founded || "N/A"}
                       </span>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden lg:table-cell">
                       <span className="text-sm text-foreground">
                         {team.stadium_en || "N/A"}
                       </span>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <span className="text-sm text-muted-foreground">
                         {format(new Date(team.created_at), "MMM dd, yyyy")}
                       </span>

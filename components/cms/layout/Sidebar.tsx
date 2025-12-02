@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import {
   Home,
   Trophy,
@@ -89,11 +89,6 @@ const navigation = [
     href: "/cms/users",
     icon: Users,
   },
-  {
-    name: "Settings",
-    href: "/cms/settings",
-    icon: Settings,
-  },
 ];
 
 export function Sidebar() {
@@ -102,7 +97,7 @@ export function Sidebar() {
   // Desktop sidebar
   return (
     <>
-      <div className="hidden md:flex md:flex-shrink-0">
+      <div className="hidden md:flex md:shrink-0">
         <div className="flex flex-col w-64">
           <div className="flex flex-col grow pt-5 pb-4 overflow-y-auto bg-sidebar border-r border-sidebar-border">
             <div className="flex items-center shrink-0 px-6 mb-6">
@@ -150,12 +145,13 @@ export function Sidebar() {
       <div className="md:hidden">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden">
+            <Button variant="ghost" size="icon" className="md:hidden text-foreground hover:text-primary">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Open sidebar</span>
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="p-0 w-64">
+            <SheetTitle className="sr-only">CMS Navigation</SheetTitle>
             <div className="flex flex-col h-full bg-sidebar">
               <div className="flex items-center shrink-0 p-6 border-b border-sidebar-border">
                 <Link href="/cms" className="flex items-center gap-2">
@@ -170,27 +166,28 @@ export function Sidebar() {
               <div className="flex-1 overflow-y-auto">
                 <nav className="px-4 py-4 space-y-1">
                   {navigation.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className={cn(
-                        pathname === item.href
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                        "group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out"
-                      )}
-                    >
-                      <item.icon
+                    <SheetClose asChild key={item.name}>
+                      <Link
+                        href={item.href}
                         className={cn(
                           pathname === item.href
-                            ? "text-primary"
-                            : "text-muted-foreground group-hover:text-foreground",
-                          "mr-3 shrink-0 h-5 w-5 transition-colors duration-200"
+                            ? "bg-primary/10 text-primary"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                          "group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 ease-in-out"
                         )}
-                        aria-hidden="true"
-                      />
-                      {item.name}
-                    </Link>
+                      >
+                        <item.icon
+                          className={cn(
+                            pathname === item.href
+                              ? "text-primary"
+                              : "text-muted-foreground group-hover:text-foreground",
+                            "mr-3 shrink-0 h-5 w-5 transition-colors duration-200"
+                          )}
+                          aria-hidden="true"
+                        />
+                        {item.name}
+                      </Link>
+                    </SheetClose>
                   ))}
                 </nav>
               </div>

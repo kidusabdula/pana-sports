@@ -121,7 +121,7 @@ export default function NewsTable() {
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+        <Card className="bg-linear-to-br from-primary/5 to-primary/10 border-primary/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -139,7 +139,7 @@ export default function NewsTable() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
+        <Card className="bg-linear-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -157,7 +157,7 @@ export default function NewsTable() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
+        <Card className="bg-linear-to-br from-green-500/5 to-green-500/10 border-green-500/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -184,7 +184,7 @@ export default function NewsTable() {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-amber-500/5 to-amber-500/10 border-amber-500/20">
+        <Card className="bg-linear-to-br from-amber-500/5 to-amber-500/10 border-amber-500/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -212,18 +212,18 @@ export default function NewsTable() {
                 News Articles ({news?.length || 0})
               </CardTitle>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search articles..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 h-9 bg-background border-input focus:border-primary w-64 rounded-lg transition-all"
+                  className="pl-9 h-9 bg-background border-input focus:border-primary w-full sm:w-64 rounded-lg transition-all"
                 />
               </div>
               <Select value={filterCategory} onValueChange={setFilterCategory}>
-                <SelectTrigger className="w-[140px] h-9">
+                <SelectTrigger className="w-full sm:w-[140px] h-9">
                   <div className="flex items-center gap-2">
                     <Filter className="h-4 w-4" />
                     <SelectValue placeholder="Category" />
@@ -239,7 +239,7 @@ export default function NewsTable() {
                 </SelectContent>
               </Select>
               <Select value={filterLeague} onValueChange={setFilterLeague}>
-                <SelectTrigger className="w-[140px] h-9">
+                <SelectTrigger className="w-full sm:w-[140px] h-9">
                   <SelectValue placeholder="League" />
                 </SelectTrigger>
                 <SelectContent>
@@ -252,7 +252,7 @@ export default function NewsTable() {
                 </SelectContent>
               </Select>
               <Select value={filterPublished} onValueChange={setFilterPublished}>
-                <SelectTrigger className="w-[140px] h-9">
+                <SelectTrigger className="w-full sm:w-[140px] h-9">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -262,7 +262,7 @@ export default function NewsTable() {
                 </SelectContent>
               </Select>
               <Link href="/cms/news/create">
-                <Button size="sm" className="h-9 gap-2 rounded-lg shadow-sm">
+                <Button size="sm" className="h-9 gap-2 rounded-lg shadow-sm w-full sm:w-auto">
                   <Plus className="h-4 w-4" />
                   Add Article
                 </Button>
@@ -278,22 +278,22 @@ export default function NewsTable() {
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
                   Title
                 </TableHead>
-                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider hidden md:table-cell">
                   Category
                 </TableHead>
-                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider hidden lg:table-cell">
                   Author
                 </TableHead>
-                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider hidden lg:table-cell">
                   League
                 </TableHead>
-                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider hidden md:table-cell">
                   Published
                 </TableHead>
-                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider text-center">
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider text-center hidden xl:table-cell">
                   Views
                 </TableHead>
-                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider text-center">
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider text-center hidden xl:table-cell">
                   Comments
                 </TableHead>
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider text-center">
@@ -345,7 +345,7 @@ export default function NewsTable() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       {item.category && (
                         <Badge 
                           variant="outline" 
@@ -359,30 +359,30 @@ export default function NewsTable() {
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden lg:table-cell">
                       <span className="text-sm text-muted-foreground">
                         {item.author?.name || "-"}
                       </span>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden lg:table-cell">
                       <span className="text-sm text-muted-foreground">
                         {item.league?.name_en || "-"}
                       </span>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <span className="text-sm text-muted-foreground">
                         {item.published_at
                           ? format(new Date(item.published_at), "MMM dd, yyyy")
                           : "-"}
                       </span>
                     </TableCell>
-                    <TableCell className="text-center">
+                    <TableCell className="text-center hidden xl:table-cell">
                       <div className="flex items-center justify-center gap-1">
                         <Eye className="h-3 w-3 text-muted-foreground" />
                         <span className="text-sm">{item.views}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-center">
+                    <TableCell className="text-center hidden xl:table-cell">
                       <div className="flex items-center justify-center gap-1">
                         <MessageSquare className="h-3 w-3 text-muted-foreground" />
                         <span className="text-sm">{item.comments_count}</span>
