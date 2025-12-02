@@ -26,6 +26,7 @@ import {
   Filter,
   Eye,
   MessageSquare,
+  Star,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -50,7 +51,13 @@ import {
 export default function NewsTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("all");
-  const { data: news, isLoading, error } = useNews();
+  const [filterLeague, setFilterLeague] = useState<string>("all");
+  const [filterPublished, setFilterPublished] = useState<string>("all");
+  const { data: news, isLoading, error } = useNews({
+    category: filterCategory !== "all" ? filterCategory : undefined,
+    league: filterLeague !== "all" ? filterLeague : undefined,
+    published: filterPublished !== "all" ? filterPublished === "published" : undefined,
+  });
   const deleteNewsMutation = useDeleteNews();
 
   const filteredNews =
@@ -60,10 +67,7 @@ export default function NewsTable() {
         item.title_am.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.league?.name_en.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesCategory =
-        filterCategory === "all" || item.category?.name === filterCategory;
-
-      return matchesSearch && matchesCategory;
+      return matchesSearch;
     }) || [];
 
   const handleDelete = async (id: string, title: string) => {
@@ -107,13 +111,16 @@ export default function NewsTable() {
     );
 
   const categories = Array.from(
-    new Set(news?.map((n) => n.category?.name).filter(Boolean) || [])
+    new Set(news?.map((n) => n.category?.name_en).filter(Boolean) || [])
+  );
+  const leagues = Array.from(
+    new Set(news?.map((n) => n.league?.name_en).filter(Boolean) || [])
   );
 
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -159,6 +166,7 @@ export default function NewsTable() {
                 </p>
                 <p className="text-3xl font-bold text-foreground mt-1">
                   {news?.filter((n) => {
+                    if (!n.published_at) return false;
                     const publishedDate = new Date(n.published_at);
                     const now = new Date();
                     return (
@@ -171,6 +179,24 @@ export default function NewsTable() {
               </div>
               <div className="p-3 bg-green-500/10 rounded-full">
                 <Calendar className="h-6 w-6 text-green-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-amber-500/5 to-amber-500/10 border-amber-500/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">
+                  Featured
+                </p>
+                <p className="text-3xl font-bold text-foreground mt-1">
+                  {news?.filter((n) => n.is_featured).length || 0}
+                </p>
+              </div>
+              <div className="p-3 bg-amber-500/10 rounded-full">
+                <Star className="h-6 w-6 text-amber-500" />
               </div>
             </div>
           </CardContent>
@@ -212,6 +238,29 @@ export default function NewsTable() {
                   ))}
                 </SelectContent>
               </Select>
+              <Select value={filterLeague} onValueChange={setFilterLeague}>
+                <SelectTrigger className="w-[140px] h-9">
+                  <SelectValue placeholder="League" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Leagues</SelectItem>
+                  {leagues.map((league) => (
+                    <SelectItem key={league} value={league || ""}>
+                      {league}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={filterPublished} onValueChange={setFilterPublished}>
+                <SelectTrigger className="w-[140px] h-9">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                </SelectContent>
+              </Select>
               <Link href="/cms/news/create">
                 <Button size="sm" className="h-9 gap-2 rounded-lg shadow-sm">
                   <Plus className="h-4 w-4" />
@@ -247,6 +296,9 @@ export default function NewsTable() {
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider text-center">
                   Comments
                 </TableHead>
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider text-center">
+                  Status
+                </TableHead>
                 <TableHead className="text-right font-medium text-muted-foreground text-xs uppercase tracking-wider pr-6">
                   Action
                 </TableHead>
@@ -255,7 +307,7 @@ export default function NewsTable() {
             <TableBody>
               {filteredNews.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-12">
+                  <TableCell colSpan={9} className="text-center py-12">
                     <div className="flex flex-col items-center space-y-3">
                       <Newspaper className="h-12 w-12 text-muted-foreground/20" />
                       <p className="text-muted-foreground">No news found.</p>
@@ -279,9 +331,14 @@ export default function NewsTable() {
                           />
                         )}
                         <div className="flex flex-col max-w-md">
-                          <span className="font-medium text-foreground text-sm line-clamp-1">
-                            {item.title_en}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-foreground text-sm line-clamp-1">
+                              {item.title_en}
+                            </span>
+                            {item.is_featured && (
+                              <Star className="h-3 w-3 text-amber-500 fill-current" />
+                            )}
+                          </div>
                           <span className="text-xs text-muted-foreground line-clamp-1">
                             {item.title_am}
                           </span>
@@ -290,8 +347,15 @@ export default function NewsTable() {
                     </TableCell>
                     <TableCell>
                       {item.category && (
-                        <Badge variant="outline" className="capitalize">
-                          {item.category.name}
+                        <Badge 
+                          variant="outline" 
+                          className="capitalize"
+                          style={{
+                            backgroundColor: item.category.color ? `${item.category.color}20` : undefined,
+                            borderColor: item.category.color || undefined,
+                          }}
+                        >
+                          {item.category.name_en}
                         </Badge>
                       )}
                     </TableCell>
@@ -307,7 +371,9 @@ export default function NewsTable() {
                     </TableCell>
                     <TableCell>
                       <span className="text-sm text-muted-foreground">
-                        {format(new Date(item.published_at), "MMM dd, yyyy")}
+                        {item.published_at
+                          ? format(new Date(item.published_at), "MMM dd, yyyy")
+                          : "-"}
                       </span>
                     </TableCell>
                     <TableCell className="text-center">
@@ -321,6 +387,14 @@ export default function NewsTable() {
                         <MessageSquare className="h-3 w-3 text-muted-foreground" />
                         <span className="text-sm">{item.comments_count}</span>
                       </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge
+                        variant={item.is_published ? "default" : "secondary"}
+                        className="text-xs"
+                      >
+                        {item.is_published ? "Published" : "Draft"}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right pr-6">
                       <div className="flex items-center justify-end gap-1">

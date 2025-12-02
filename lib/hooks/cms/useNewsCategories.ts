@@ -1,22 +1,35 @@
 // lib/hooks/cms/useNewsCategories.ts
-import { useQuery } from '@tanstack/react-query';
-import { NewsCategory } from '@/lib/schemas/news';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
-async function fetchNewsCategories() {
-  const res = await fetch('/api/news-categories');
-  if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.error || 'Failed to fetch news categories');
-  }
-  return res.json() as Promise<NewsCategory[]>;
+// Define the NewsCategory type if not already defined
+type NewsCategory = {
+  id: string;
+  name: string;
+  name_en: string;
+  name_am: string;
+  slug: string;
+  color: string | null;
+  icon: string | null;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
+// API helper functions
+async function fetchNewsCategories() {
+  const res = await fetch('/api/news-categories')
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.error || 'Failed to fetch news categories')
+  }
+  return res.json() as Promise<NewsCategory[]>
+}
+
+// React Query hooks
 export function useNewsCategories() {
   return useQuery({
     queryKey: ['news-categories'],
     queryFn: fetchNewsCategories,
-    gcTime: 1000 * 60 * 60, // 1hr garbage collection
-    staleTime: 1000 * 60 * 10, // 10min stale cache
-    refetchOnWindowFocus: false,
-  });
+  })
 }

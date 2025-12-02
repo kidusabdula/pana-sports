@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { TiptapEditor } from "@/components/ui/tiptap-editor";
 import ImageUpload from "@/components/ui/image-upload";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   createNewsInputSchema,
   updateNewsInputSchema,
@@ -52,7 +53,9 @@ import {
   Calendar,
   Tag,
   User,
+  Star,
 } from "lucide-react";
+import { useEffect } from "react";
 
 interface NewsFormProps {
   news?: News;
@@ -69,37 +72,65 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
   const form = useForm<CreateNews | UpdateNews>({
     resolver: zodResolver(
       isEditing ? updateNewsInputSchema : createNewsInputSchema
-          //eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ) as any,
+    ),
     defaultValues: {
       title_en: news?.title_en || "",
       title_am: news?.title_am || "",
       content_en: news?.content_en || "",
       content_am: news?.content_am || "",
+      excerpt_en: news?.excerpt_en || "",
+      excerpt_am: news?.excerpt_am || "",
       thumbnail_url: news?.thumbnail_url || "",
-      category_slug: news?.category_slug || "", // Already using category_slug
-      league_slug: news?.league_slug || "",
-      author_id: news?.author_id || "",
+      category_id: news?.category_id || undefined, // Changed from "" to undefined
+      league_id: news?.league_id || undefined, // Changed from "" to undefined
+      author_id: news?.author_id || undefined, // Changed from "" to undefined
+      tags: news?.tags || [],
+      is_featured: news?.is_featured || false,
+      is_published: news?.is_published || false,
       published_at: news?.published_at || new Date().toISOString(),
     },
   });
+
+  // Add debugging to see what's happening
+  useEffect(() => {
+    console.log("Form errors:", form.formState.errors);
+    const subscription = form.watch((value, { name, type }) => {
+      console.log("Form watch:", { name, type, value });
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch, form.formState.errors]);
 
   const createNewsMutation = useCreateNews();
   const updateNewsMutation = useUpdateNews();
 
   const onSubmit = async (data: CreateNews | UpdateNews) => {
-    // No need to convert category_id to category_slug since we're already using category_slug
+    console.log("Form submitted with data:", data); // Debug log
+
+    // Remove any undefined values that might cause issues
+    const cleanedData = Object.fromEntries(
+      Object.entries(data).filter(([_, value]) => value !== undefined)
+    );
+
+    // Set published_at if publishing and not already set
+    if (cleanedData.is_published && !cleanedData.published_at) {
+      cleanedData.published_at = new Date().toISOString();
+    }
+
     const promise =
       isEditing && news
         ? updateNewsMutation.mutateAsync({
             id: news.id,
-            updates: data,
+            updates: cleanedData,
           })
-        : createNewsMutation.mutateAsync(data as CreateNews);
+        : createNewsMutation.mutateAsync(cleanedData as CreateNews);
 
     toast.promise(promise, {
       loading: isEditing ? "Updating article..." : "Creating article...",
-      success: "Article saved successfully",
+      success: (data) => {
+        return isEditing
+          ? `Article "${data.title_en}" updated successfully`
+          : `Article "${data.title_en}" created successfully`;
+      },
       error: (error) => {
         return error instanceof Error
           ? error.message
@@ -109,10 +140,12 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
 
     try {
       await promise;
+      // Small delay to ensure the toast is visible before redirecting
       setTimeout(() => {
         onSuccess?.();
       }, 500);
     } catch (error) {
+      // Error is handled by toast.promise
       console.error(error);
     }
   };
@@ -184,6 +217,34 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
 
                   <FormField
                     control={form.control}
+                    name="excerpt_en"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2 font-medium text-foreground">
+                          <Newspaper className="h-4 w-4 text-primary" />
+                          Excerpt (English)
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Brief summary of the article..."
+                            {...field}
+                            value={field.value || ""}
+                            onChange={(e) => {
+                              field.onChange(e.target.value);
+                            }}
+                            className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          A short summary of your article in English
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
                     name="content_en"
                     render={({ field }) => (
                       <FormItem>
@@ -235,6 +296,34 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
 
                   <FormField
                     control={form.control}
+                    name="excerpt_am"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2 font-medium text-foreground">
+                          <Newspaper className="h-4 w-4 text-primary" />
+                          Excerpt (Amharic)
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="የጽሁፍ ማጠቃለያ..."
+                            {...field}
+                            value={field.value || ""}
+                            onChange={(e) => {
+                              field.onChange(e.target.value);
+                            }}
+                            className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          A short summary of your article in Amharic
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
                     name="content_am"
                     render={({ field }) => (
                       <FormItem>
@@ -263,7 +352,7 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                 <FormField
                   control={form.control}
-                  name="category_slug"
+                  name="category_id"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center gap-2 font-medium text-foreground">
@@ -272,7 +361,8 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
                       </FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value || ""}
+                        value={field.value || ""}
+                        defaultValue={field.value || undefined} // Fixed: use undefined instead of empty string
                       >
                         <FormControl>
                           <SelectTrigger className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg">
@@ -281,8 +371,8 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
                         </FormControl>
                         <SelectContent>
                           {categories?.map((category) => (
-                            <SelectItem key={category.slug} value={category.slug}>
-                              {category.name}
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name_en}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -303,7 +393,8 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
                       </FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value || ""}
+                        value={field.value || ""}
+                        defaultValue={field.value || undefined} // Fixed: use undefined instead of empty string
                       >
                         <FormControl>
                           <SelectTrigger className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg">
@@ -326,7 +417,7 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
 
               <FormField
                 control={form.control}
-                name="league_slug"
+                name="league_id"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center gap-2 font-medium text-foreground">
@@ -335,8 +426,9 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
                     </FormLabel>
                     <Select
                       onValueChange={(value) =>
-                        field.onChange(value === "none" ? "" : value)
+                        field.onChange(value === "none" ? undefined : value)
                       }
+                      value={field.value || "none"}
                       defaultValue={field.value || "none"}
                     >
                       <FormControl>
@@ -347,7 +439,7 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
                       <SelectContent>
                         <SelectItem value="none">None</SelectItem>
                         {leagues?.map((league) => (
-                          <SelectItem key={league.id} value={league.slug}>
+                          <SelectItem key={league.id} value={league.id}>
                             {league.name_en}
                           </SelectItem>
                         ))}
@@ -374,43 +466,96 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
                       />
                     </FormControl>
                     <FormDescription>
-                      Upload an image or provide a URL for the article thumbnail
+                      Upload an image or provide a URL for article thumbnail
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="published_at"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-2 font-medium text-foreground">
-                      <Calendar className="h-4 w-4 text-primary" />
-                      Publish Date
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="datetime-local"
-                        {...field}
-                        value={
-                          field.value
-                            ? new Date(field.value).toISOString().slice(0, 16)
-                            : ""
-                        }
-                        onChange={(e) =>
-                          field.onChange(
-                            new Date(e.target.value).toISOString()
-                          )
-                        }
-                        className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="published_at"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2 font-medium text-foreground">
+                        <Calendar className="h-4 w-4 text-primary" />
+                        Publish Date
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="datetime-local"
+                          {...field}
+                          value={
+                            field.value
+                              ? new Date(field.value).toISOString().slice(0, 16)
+                              : ""
+                          }
+                          onChange={(e) =>
+                            field.onChange(
+                              new Date(e.target.value).toISOString()
+                            )
+                          }
+                          className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="is_featured"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="flex items-center gap-2 font-medium text-foreground">
+                            <Star className="h-4 w-4 text-primary" />
+                            Featured Article
+                          </FormLabel>
+                          <FormDescription>
+                            Display this article in featured sections
+                          </FormDescription>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="is_published"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="font-medium text-foreground">
+                            Published
+                          </FormLabel>
+                          <FormDescription>
+                            Make this article visible to the public
+                          </FormDescription>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
             </CardContent>
 
             <CardFooter className="bg-muted/20 px-8 py-6 border-t border-border/50">
@@ -425,7 +570,7 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
                   Cancel
                 </Button>
                 <Button
-                  type="submit"
+                  type="submit" // Explicitly set type to submit
                   disabled={form.formState.isSubmitting}
                   className="h-11 px-6 shadow-sm hover:shadow-md transition-all duration-200 rounded-lg"
                 >
@@ -437,7 +582,7 @@ export default function NewsForm({ news, onSuccess, onCancel }: NewsFormProps) {
                   ) : (
                     <>
                       <Save className="mr-2 h-4 w-4" />
-                      {isEditing ? "Update Article" : "Publish Article"}
+                      {isEditing ? "Update Article" : "Create Article"}
                     </>
                   )}
                 </Button>

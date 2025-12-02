@@ -1,10 +1,19 @@
-// lib/hooks/useNews.ts
+// lib/hooks/cms/useNews.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { News, CreateNews, UpdateNews } from '@/lib/schemas/news'
 
 // API helper functions
-async function fetchNews() {
-  const res = await fetch('/api/news')
+async function fetchNews(params?: { category?: string; league?: string; featured?: boolean; published?: boolean }) {
+  const queryString = new URLSearchParams(
+    Object.entries(params || {}).reduce((acc, [key, value]) => {
+      if (value !== undefined && value !== null) {
+        acc[key] = String(value);
+      }
+      return acc;
+    }, {} as Record<string, string>)
+  ).toString();
+  
+  const res = await fetch(`/api/news${queryString ? '?' + queryString : ''}`)
   if (!res.ok) {
     const error = await res.json()
     throw new Error(error.error || 'Failed to fetch news')
@@ -12,18 +21,14 @@ async function fetchNews() {
   return res.json() as Promise<News[]>
 }
 
-async function fetchNewsItem(id: string, includeRelated = false) {
-  const url = includeRelated ? `/api/news/${id}?includeRelated=true` : `/api/news/${id}`
-  const res = await fetch(url)
+async function fetchNewsItem(id: string) {
+  const res = await fetch(`/api/news/${id}`)
   if (!res.ok) {
     const error = await res.json()
     throw new Error(error.error || 'Failed to fetch news')
   }
-  return res.json() as Promise<News & { relatedNews?: News[] }>
+  return res.json() as Promise<News>
 }
-
-
-// lib/hooks/cms/useNews.ts
 
 async function createNews(newNews: CreateNews) {
   const res = await fetch('/api/news', {
@@ -33,15 +38,8 @@ async function createNews(newNews: CreateNews) {
   })
   
   if (!res.ok) {
-    let errorMessage = 'Failed to create news';
-    try {
-      const error = await res.json();
-      errorMessage = error.error || error.details || errorMessage;
-    } catch (e) {
-      // If JSON parsing fails, use the status text
-      errorMessage = res.statusText || errorMessage;
-    }
-    throw new Error(errorMessage);
+    const error = await res.json()
+    throw new Error(error.error || 'Failed to create news')
   }
   
   return res.json() as Promise<News>
@@ -55,14 +53,8 @@ async function updateNews({ id, updates }: { id: string, updates: UpdateNews }) 
   })
   
   if (!res.ok) {
-    let errorMessage = 'Failed to update news';
-    try {
-      const error = await res.json();
-      errorMessage = error.error || error.details || errorMessage;
-    } catch (e) {
-      errorMessage = res.statusText || errorMessage;
-    }
-    throw new Error(errorMessage);
+    const error = await res.json()
+    throw new Error(error.error || 'Failed to update news')
   }
   
   return res.json() as Promise<News>
@@ -74,43 +66,29 @@ async function deleteNews(id: string) {
   })
   
   if (!res.ok) {
-    let errorMessage = 'Failed to delete news';
-    try {
-      const error = await res.json();
-      errorMessage = error.error || error.details || errorMessage;
-    } catch (e) {
-      errorMessage = res.statusText || errorMessage;
-    }
-    throw new Error(errorMessage);
+    const error = await res.json()
+    throw new Error(error.error || 'Failed to delete news')
   }
   
   return id
 }
 
-// Similar improvements for other functions...
 // React Query hooks
-export function useNews() {
+export function useNews(params?: { category?: string; league?: string; featured?: boolean; published?: boolean }) {
   return useQuery({
-    queryKey: ['news'],
-    queryFn: fetchNews,
-    gcTime: 1000 * 60 * 60,        // 1hr garbage collection
-    staleTime: 1000 * 60 * 5,      // 5min stale cache
-    refetchOnWindowFocus: false, 
-    retry: 1,
+    queryKey: ['news', params],
+    queryFn: () => fetchNews(params),
   })
 }
 
-export function useNewsItem(id: string, includeRelated = false) {
+export function useNewsItem(id: string) {
   return useQuery({
-    queryKey: ['news', 'item', id, { includeRelated }],
-    queryFn: () => fetchNewsItem(id, includeRelated),
-    gcTime: 1000 * 60 * 60,        // 1hr garbage collection
-    staleTime: 1000 * 60 * 5,      // 5min stale cache
-    refetchOnWindowFocus: false, 
-    retry: 1,
+    queryKey: ['news', id],
+    queryFn: () => fetchNewsItem(id),
     enabled: !!id,
   })
 }
+
 export function useCreateNews() {
   const queryClient = useQueryClient()
   

@@ -1,121 +1,67 @@
+// app/api/news/[id]/route.ts
 import { createClient } from "@/lib/supabase/server";
 import { updateNewsInputSchema } from "@/lib/schemas/news";
 import { requireAdmin } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
-// app/api/news/[id]/route.ts (update the GET function)
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
-    const { searchParams } = new URL(request.url);
-    const includeRelated = searchParams.get("includeRelated") === "true";
-
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: "News ID is required" },
+        { status: 400 }
+      );
+    }
+    
     const supabase = await createClient();
-
-    const { data: news, error } = await supabase
+    
+    const { data, error } = await supabase
       .from("news")
-      .select("*")
+      .select(`
+        *,
+        category:news_categories(id, name, name_en, name_am, slug, color, icon),
+        author:authors(id, name, email, avatar_url),
+        league:leagues(id, name_en, name_am, slug, category),
+        match:matches(id, home_team_id, away_team_id, date, status, score_home, score_away)
+      `)
       .eq("id", id)
       .single();
-
+    
     if (error) {
       console.error("Supabase error fetching news:", error);
       return NextResponse.json(
-        {
-          error: "Failed to fetch news",
-          details: error.message,
+        { 
+          error: "Failed to fetch news", 
+          details: error.message 
         },
         { status: 500 }
       );
     }
-
-    if (!news) {
-      return NextResponse.json({ error: "News not found" }, { status: 404 });
+    
+    if (!data) {
+      return NextResponse.json(
+        { error: "News not found" },
+        { status: 404 }
+      );
     }
-
-    // Fetch related data
-    const { data: league } = news.league_slug
-      ? await supabase
-          .from("leagues")
-          .select("*")
-          .eq("slug", news.league_slug)
-          .single()
-      : { data: null };
-
-    const { data: category } = news.category_slug
-      ? await supabase
-          .from("news_categories")
-          .select("*")
-          .eq("slug", news.category_slug)
-          .single()
-      : { data: null };
-
-    const { data: author } = news.author_id
-      ? await supabase
-          .from("authors")
-          .select("*")
-          .eq("id", news.author_id)
-          .single()
-      : { data: null };
-
-    let relatedNews = [];
-
-    // Fetch related news if requested
-    if (includeRelated) {
-      const { data: relatedData } = await supabase
-        .from("news")
-        .select("*")
-        .neq("id", id)
-        .or(`category_slug.eq.${news.category_slug},league_slug.eq.${news.league_slug}`)
-        .order("published_at", { ascending: false })
-        .limit(3);
-
-      if (relatedData) {
-        // Fetch categories, leagues, and authors for related news
-        const { data: allLeagues } = await supabase.from("leagues").select("*");
-        const { data: allCategories } = await supabase.from("news_categories").select("*");
-        const { data: allAuthors } = await supabase.from("authors").select("*");
-
-        relatedNews = relatedData.map((item) => ({
-          ...item,
-          league: item.league_slug
-            ? allLeagues?.find((l) => l.slug === item.league_slug)
-            : null,
-          category: item.category_slug
-            ? allCategories?.find((c) => c.slug === item.category_slug)
-            : null,
-          author: item.author_id
-            ? allAuthors?.find((a) => a.id === item.author_id)
-            : null,
-        }));
-      }
-    }
-
-    const enrichedNews = {
-      ...news,
-      league,
-      category,
-      author,
-      relatedNews,
-    };
-
-    return NextResponse.json(enrichedNews);
+    
+    return NextResponse.json(data);
   } catch (error) {
     console.error("Unexpected error fetching news:", error);
     return NextResponse.json(
-      {
-        error: "Failed to fetch news",
-        details: error instanceof Error ? error.message : "Unknown error",
+      { 
+        error: "Failed to fetch news", 
+        details: error instanceof Error ? error.message : "Unknown error" 
       },
       { status: 500 }
     );
   }
 }
-
-// app/api/news/[id]/route.ts
 
 export async function PATCH(
   request: Request,
@@ -123,58 +69,83 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    // Verify admin authentication
-    try {
-      await requireAdmin();
-    } catch (authError) {
+    
+    if (!id) {
       return NextResponse.json(
-        {
-          error: "Authentication failed",
-          details:
-            authError instanceof Error
-              ? authError.message
-              : "Unknown auth error",
+        { error: "News ID is required" },
+        { status: 400 }
+      );
+    }
+    
+    // Verify admin authentication
+    let user;
+    try {
+      user = await requireAdmin();
+    } catch (authError) {
+      console.error("Authentication error:", authError);
+      return NextResponse.json(
+        { 
+          error: "Authentication failed", 
+          details: authError instanceof Error ? authError.message : "Unknown auth error" 
         },
         { status: 401 }
       );
     }
-
+    
     // Parse and validate request body
     let body;
     try {
       body = await request.json();
     } catch (parseError) {
+      console.error("JSON parsing error:", parseError);
       return NextResponse.json(
-        {
-          error: "Invalid JSON in request body",
-          details:
-            parseError instanceof Error
-              ? parseError.message
-              : "Unknown parsing error",
+        { 
+          error: "Invalid JSON in request body", 
+          details: parseError instanceof Error ? parseError.message : "Unknown parsing error" 
         },
         { status: 400 }
       );
     }
-
+    
     let validatedData;
     try {
       validatedData = updateNewsInputSchema.parse(body);
     } catch (validationError) {
+      console.error("Validation error:", validationError);
       return NextResponse.json(
-        {
-          error: "Invalid input data",
-          details:
-            validationError instanceof Error
-              ? validationError.message
-              : "Unknown validation error",
+        { 
+          error: "Invalid input data", 
+          details: validationError instanceof Error ? validationError.message : "Unknown validation error" 
         },
         { status: 400 }
       );
     }
-
+    
     const supabase = await createClient();
-
-    // No need to convert category_id to category_slug since we're already using category_slug
+    
+    // Generate slug from title if title is being updated and slug is not provided
+    if (validatedData.title_en && !validatedData.slug) {
+      const slug = validatedData.title_en
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      
+      // Check if slug already exists (excluding current article)
+      const { data: existingNews } = await supabase
+        .from("news")
+        .select("id")
+        .eq("slug", slug)
+        .neq("id", id)
+        .single();
+      
+      if (existingNews) {
+        // Add random suffix if slug already exists
+        validatedData.slug = `${slug}-${Date.now()}`;
+      } else {
+        validatedData.slug = slug;
+      }
+    }
+    
     const { data, error } = await supabase
       .from("news")
       .update({
@@ -182,76 +153,138 @@ export async function PATCH(
         updated_at: new Date().toISOString(),
       })
       .eq("id", id)
-      .select()
+      .select(`
+        *,
+        category:news_categories(id, name, name_en, name_am, slug, color, icon),
+        author:authors(id, name, email, avatar_url),
+        league:leagues(id, name_en, name_am, slug, category),
+        match:matches(id, home_team_id, away_team_id, date, status, score_home, score_away)
+      `)
       .single();
-
+    
     if (error) {
       console.error("Supabase error updating news:", error);
+      
+      // Handle specific error codes
+      if (error.code === "23505") {
+        return NextResponse.json(
+          { 
+            error: "News with this slug already exists", 
+            details: "The slug must be unique across all news articles" 
+          },
+          { status: 409 }
+        );
+      }
+      
       return NextResponse.json(
-        {
-          error: "Failed to update news",
-          details: error.message,
+        { 
+          error: "Failed to update news", 
+          details: error.message 
         },
         { status: 500 }
       );
     }
-
+    
+    if (!data) {
+      return NextResponse.json(
+        { error: "News not found" },
+        { status: 404 }
+      );
+    }
+    
     return NextResponse.json(data);
   } catch (error) {
     console.error("Unexpected error updating news:", error);
     return NextResponse.json(
-      {
-        error: "Failed to update news",
-        details: error instanceof Error ? error.message : "Unknown error",
+      { 
+        error: "Failed to update news", 
+        details: error instanceof Error ? error.message : "Unknown error" 
       },
       { status: 500 }
     );
   }
 }
+
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
-    // Verify admin authentication
-    try {
-      await requireAdmin();
-    } catch (authError) {
+    
+    if (!id) {
       return NextResponse.json(
-        {
-          error: "Authentication failed",
-          details:
-            authError instanceof Error
-              ? authError.message
-              : "Unknown auth error",
+        { error: "News ID is required" },
+        { status: 400 }
+      );
+    }
+    
+    // Verify admin authentication
+    let user;
+    try {
+      user = await requireAdmin();
+    } catch (authError) {
+      console.error("Authentication error:", authError);
+      return NextResponse.json(
+        { 
+          error: "Authentication failed", 
+          details: authError instanceof Error ? authError.message : "Unknown auth error" 
         },
         { status: 401 }
       );
     }
-
+    
     const supabase = await createClient();
-
-    const { error } = await supabase.from("news").delete().eq("id", id);
-
-    if (error) {
-      console.error("Supabase error deleting news:", error);
+    
+    // Check if news exists
+    const { data: news, error: newsError } = await supabase
+      .from("news")
+      .select("id")
+      .eq("id", id)
+      .single();
+    
+    if (newsError) {
+      console.error("Supabase error checking news existence:", newsError);
       return NextResponse.json(
-        {
-          error: "Failed to delete news",
-          details: error.message,
+        { 
+          error: "Failed to check news existence", 
+          details: newsError.message 
         },
         { status: 500 }
       );
     }
-
+    
+    if (!news) {
+      return NextResponse.json(
+        { error: "News not found" },
+        { status: 404 }
+      );
+    }
+    
+    // Delete the news
+    const { error: deleteError } = await supabase
+      .from("news")
+      .delete()
+      .eq("id", id);
+    
+    if (deleteError) {
+      console.error("Supabase error deleting news:", deleteError);
+      return NextResponse.json(
+        { 
+          error: "Failed to delete news", 
+          details: deleteError.message 
+        },
+        { status: 500 }
+      );
+    }
+    
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Unexpected error deleting news:", error);
     return NextResponse.json(
-      {
-        error: "Failed to delete news",
-        details: error instanceof Error ? error.message : "Unknown error",
+      { 
+        error: "Failed to delete news", 
+        details: error instanceof Error ? error.message : "Unknown error" 
       },
       { status: 500 }
     );
