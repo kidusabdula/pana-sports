@@ -17,10 +17,12 @@ export async function GET(request: NextRequest) {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
+    console.error("Auth callback error:", error);
     return NextResponse.redirect(
       `${origin}/login?error=${encodeURIComponent(error.message)}`
     );
   }
+
   // Get the user to check if they're an admin
   const {
     data: { user },
@@ -36,6 +38,11 @@ export async function GET(request: NextRequest) {
   // Get the redirectTo parameter from URL
   const redirectTo = searchParams.get("redirectTo") || "/cms/dashboard";
 
-  // URL to redirect to after sign up process completes
-  return NextResponse.redirect(`${origin}${redirectTo}`);
+  // Create response with redirect
+  const response = NextResponse.redirect(`${origin}${redirectTo}`);
+
+  // Force a hard navigation to ensure the session is properly loaded
+  response.headers.set("Cache-Control", "no-store, max-age=0");
+
+  return response;
 }

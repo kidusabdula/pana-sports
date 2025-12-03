@@ -1,10 +1,52 @@
 // lib/hooks/public/useTopScorers.ts
 import { useQuery } from '@tanstack/react-query'
-import { TopScorer } from '@/lib/schemas/topScorer'
 
-// API helper function to fetch top scorers for a league
-async function fetchLeagueTopScorers(leagueSlug: string) {
-  const res = await fetch(`/api/top-scorers?league=${leagueSlug}`)
+// Define types
+export type TopScorer = {
+  id: string;
+  league_id: string;
+  player_id: string;
+  team_id: string;
+  season: string;
+  goals: number;
+  assists: number;
+  player: {
+    id: string;
+    name_en: string;
+    name_am: string;
+    slug: string;
+    jersey_number: number;
+    photo_url: string;
+    position_en: string;
+  };
+  team: {
+    id: string;
+    name_en: string;
+    name_am: string;
+    slug: string;
+    logo_url: string;
+  };
+  league: {
+    id: string;
+    name_en: string;
+    name_am: string;
+    slug: string;
+    category: string;
+  };
+};
+
+// API helper functions
+async function fetchTopScorers(params?: { league_id?: string; limit?: number }) {
+  const queryString = new URLSearchParams(
+    Object.entries(params || {}).reduce((acc, [key, value]) => {
+      if (value !== undefined && value !== null) {
+        acc[key] = String(value);
+      }
+      return acc;
+    }, {} as Record<string, string>)
+  ).toString();
+  
+  const res = await fetch(`/api/public/top-scorers${queryString ? '?' + queryString : ''}`)
   if (!res.ok) {
     const error = await res.json()
     throw new Error(error.error || 'Failed to fetch top scorers')
@@ -12,37 +54,10 @@ async function fetchLeagueTopScorers(leagueSlug: string) {
   return res.json() as Promise<TopScorer[]>
 }
 
-// React Query hook for league top scorers
-export function useLeagueTopScorers(leagueSlug: string) {
+// React Query hooks
+export function useTopScorers(params?: { league_id?: string; limit?: number }) {
   return useQuery({
-    queryKey: ['topScorers', 'league', leagueSlug],
-    queryFn: () => fetchLeagueTopScorers(leagueSlug),
-    gcTime: 1000 * 60 * 60,        // 1hr garbage collection
-    staleTime: 1000 * 60 * 10,      // 10min stale cache
-    refetchOnWindowFocus: false, 
-    retry: 1,
-    enabled: !!leagueSlug,
-  })
-}
-
-// API helper function to fetch top scorers
-async function fetchTopScorers() {
-  const res = await fetch('/api/top-scorers')
-  if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to fetch top scorers')
-  }
-  return res.json() as Promise<TopScorer[]>
-}
-
-// React Query hook for top scorers
-export function useTopScorers() {
-  return useQuery({
-    queryKey: ['topScorers'],
-    queryFn: fetchTopScorers,
-    gcTime: 1000 * 60 * 60,        // 1hr garbage collection
-    staleTime: 1000 * 60 * 10,      // 10min stale cache
-    refetchOnWindowFocus: false, 
-    retry: 1,
+    queryKey: ['top-scorers', params],
+    queryFn: () => fetchTopScorers(params),
   })
 }

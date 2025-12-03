@@ -1,115 +1,109 @@
-// components/matches/MatchRow.tsx
+// components/matches/MatchRow.tsx (updated)
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Star, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
+import { Match } from "@/lib/hooks/public/useMatches";
+import Image from 'next/image';
+import Link from 'next/link';
 
 interface MatchRowProps {
-  match: {
-    id: string;
-    home: string;
-    away: string;
-    homeScore: number;
-    awayScore: number;
-    minute: number;
-    status: string;
-    time: string;
-    homeLogo: string;
-    awayLogo: string;
-  };
+  match: Match;
   isLive?: boolean;
 }
 
-export default function MatchRow({
-  match,
-  isLive = false,
-}: MatchRowProps) {
-  return (
-    <div className="group relative flex items-center justify-between py-3 px-1 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer">
-      {/* Time / Status */}
-      <div className="w-12 flex flex-col items-center justify-center gap-1">
-        {isLive ? (
-          <span className="text-[10px] font-bold text-red-500 animate-pulse">
-            {match.minute}&apos;
-          </span>
-        ) : (
-          <span className="text-[10px] font-medium text-zinc-500">
-            {match.time || match.status || "FT"}
-          </span>
-        )}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-4 w-4 text-zinc-600 hover:text-yellow-500 p-0"
-        >
-          <Star className="h-3 w-3" />
-        </Button>
-      </div>
+export default function MatchRow({ match, isLive = false }: MatchRowProps) {
+  const getStatusBadge = () => {
+    if (isLive) {
+      return (
+        <Badge className="bg-red-500/20 text-red-400 border-red-800/30 animate-pulse">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-500 mr-1"></span>
+          LIVE {match.minute}'
+        </Badge>
+      );
+    }
 
-      {/* Match Info */}
-      <div className="flex-1 grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-sm">
+    switch (match.status) {
+      case 'scheduled':
+        return (
+          <Badge className="bg-blue-500/20 text-blue-400 border-blue-800/30">
+            {new Date(match.date).toLocaleDateString('en-US', { 
+              month: 'short', 
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </Badge>
+        );
+      case 'completed':
+        return (
+          <Badge className="bg-green-500/20 text-green-400 border-green-800/30">
+            FT
+          </Badge>
+        );
+      case 'postponed':
+        return (
+          <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-800/30">
+            POSTPONED
+          </Badge>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Link href={`/matches/${match.id}`}>
+      <div className={cn(
+        "grid grid-cols-[1fr_auto_1fr] gap-3 px-3 py-2 items-center hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 cursor-pointer",
+        isLive && "bg-red-900/10"
+      )}>
         {/* Home Team */}
-        <div
-          className={cn(
-            "flex items-center justify-end gap-2 text-right",
-            isLive && match.homeScore > match.awayScore
-              ? "font-bold text-white"
-              : "text-zinc-300"
-          )}
-        >
-          <span className="truncate hidden sm:block">{match.home}</span>
-          <span className="sm:hidden">
-            {match.home.substring(0, 3).toUpperCase()}
-          </span>
-          {/* Team Logo */}
-          <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full overflow-hidden">
             <Image
-              src={match.homeLogo}
-              alt={match.home}
-              width={20}
-              height={20}
+              src={match.home_team.logo_url || ''}
+              alt={match.home_team.name_en}
+              width={24}
+              height={24}
               className="object-cover"
             />
           </div>
+          <span className="text-sm text-zinc-200 truncate">{match.home_team.name_en}</span>
         </div>
 
-        {/* Score */}
-        <div className="px-2 py-0.5 bg-zinc-900/50 rounded-md font-mono text-xs font-bold text-white border border-white/5">
-          {isLive || match.status === "FT" ? (
-            `${match.homeScore} - ${match.awayScore}`
+        {/* Match Status */}
+        <div className="flex flex-col items-center gap-1">
+          {isLive ? (
+            <div className="text-lg font-bold text-white">
+              {match.score_home} - {match.score_away}
+            </div>
+          ) : match.status === 'completed' ? (
+            <div className="text-lg font-bold text-white">
+              {match.score_home} - {match.score_away}
+            </div>
           ) : (
-            <span className="text-zinc-500">VS</span>
+            <div className="text-lg font-bold text-zinc-400">
+              vs
+            </div>
           )}
+          {getStatusBadge()}
         </div>
 
         {/* Away Team */}
-        <div
-          className={cn(
-            "flex items-center justify-start gap-2 text-left",
-            isLive && match.awayScore > match.homeScore
-              ? "font-bold text-white"
-              : "text-zinc-300"
-          )}
-        >
-          {/* Team Logo */}
-          <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0">
+        <div className="flex items-center gap-2 justify-end">
+          <span className="text-sm text-zinc-200 truncate text-right">{match.away_team.name_en}</span>
+          <div className="w-6 h-6 rounded-full overflow-hidden">
             <Image
-              src={match.awayLogo}
-              alt={match.away}
-              width={20}
-              height={20}
+              src={match.away_team.logo_url || ''}
+              alt={match.away_team.name_en}
+              width={24}
+              height={24}
               className="object-cover"
             />
           </div>
-          <span className="truncate hidden sm:block">{match.away}</span>
-          <span className="sm:hidden">
-            {match.away.substring(0, 3).toUpperCase()}
-          </span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

@@ -5,21 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronRight } from "lucide-react";
 import MatchRow from "./MatchRow";
 import { cn } from "@/lib/utils";
+import { Match } from "@/lib/hooks/public/useMatches";
 
 interface MatchesListProps {
   title: string;
-  matches: Array<{
-    id: string;
-    home: string;
-    away: string;
-    homeScore: number;
-    awayScore: number;
-    minute: number;
-    status: string;
-    time: string;
-    homeLogo: string;
-    awayLogo: string;
-  }>;
+  matches: Match[];
   isLive?: boolean;
   className?: string;
 }
@@ -48,9 +38,15 @@ export default function MatchesList({
         <ChevronRight className="h-3 w-3 text-zinc-400/50" />
       </div>
       <div className="px-2">
-        {matches.map((match) => (
-          <MatchRow key={match.id} match={match} isLive={isLive} />
-        ))}
+        {matches.length === 0 ? (
+          <div className="py-8 text-center text-zinc-500">
+            {isLive ? "No live matches at the moment" : `No ${title.toLowerCase()} available`}
+          </div>
+        ) : (
+          matches.map((match) => (
+            <MatchRow key={match.id} match={match} isLive={isLive} />
+          ))
+        )}
       </div>
     </div>
   );

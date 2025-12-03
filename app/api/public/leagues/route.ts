@@ -1,36 +1,16 @@
+// app/api/public/leagues/route.ts
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-import { type NextRequest } from "next/server";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const category = searchParams.get("category");
-    const active = searchParams.get("active") === "true";
-    const limit = searchParams.get("limit");
-
     const supabase = await createClient();
 
-    let query = supabase
+    const { data, error } = await supabase
       .from("leagues")
       .select("*")
-      .order("created_at", { ascending: false });
-
-    // Apply filters
-    if (category && category !== "all") {
-      query = query.eq("category", category);
-    }
-
-    if (active) {
-      query = query.eq("is_active", true);
-    }
-
-    // Apply limit
-    if (limit) {
-      query = query.limit(parseInt(limit));
-    }
-
-    const { data, error } = await query;
+      .eq("is_active", true)
+      .order("name_en");
 
     if (error) {
       console.error("Supabase error fetching leagues:", error);

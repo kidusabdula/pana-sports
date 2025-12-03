@@ -1,11 +1,11 @@
-// app/league-one/page.tsx
-import LeagueOneHeader from '@/components/league-one/LeagueOneHeader';
+"use client"
+import ComingSoon from "@/components/shared/ComingSoon";
 
 export default function LeagueOnePage() {
   return (
-    <div className="container mx-auto px-4 py-6">
-      <LeagueOneHeader />
-    </div>
+    <ComingSoon
+      title="League One"
+      description="The battle for promotion. League One coverage, standings, and stats are coming soon."
+    />
   );
 }
-

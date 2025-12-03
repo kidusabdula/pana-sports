@@ -1,11 +1,6 @@
 // app/ethiopian-cup/page.tsx
-import EthiopianCupHeader from '@/components/ethiopian-cup/EthiopianCupHeader';
+import EthiopianCupPage from "@/components/ethiopian-cup/EthiopianCupPage";
 
-export default function EthiopianCupPage() {
-  return (
-    <div className="container mx-auto px-4 py-6">
-      <EthiopianCupHeader />
-    </div>
-  );
+export default function EthiopianCupRoute() {
+  return <EthiopianCupPage />;
 }
-

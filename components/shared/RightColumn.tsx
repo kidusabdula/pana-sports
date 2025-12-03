@@ -3,25 +3,26 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useLiveMatches, useTodayMatches } from "@/lib/hooks/public/useMatches";
-import { useTopTeams } from "@/lib/hooks/public/useStandings";
+import { useLiveMatches, useUpcomingMatches, useRecentMatches } from "@/lib/hooks/public/useMatches";
+import { useStandings } from "@/lib/hooks/public/useStandings";
 import { useTopScorers } from "@/lib/hooks/public/useTopScorers";
-import { transformMatchesList, transformStandingsList, transformTopScorersList } from "@/lib/utils/transformers";
+import { useLeagues } from "@/lib/hooks/public/useLeagues";
 import ErrorState from "@/components/shared/ErrorState";
 import MatchesList from "@/components/matches/MatchesList";
 import StandingsTable from "@/components/standings/StandingsTable";
-import TopScorersList from "@/components/players/TopScorersList";
 import PlayerSpotlight from "@/components/players/PlayerSpotlight";
 import MatchesListSkeleton from "@/components/shared/Skeletons/MatchesListSkeleton";
 import StandingsTableSkeleton from "@/components/shared/Skeletons/StandingsTableSkeleton";
-import TopScorersListSkeleton from "@/components/shared/Skeletons/TopScorersListSkeleton";
 import PlayerSpotlightSkeleton from "@/components/shared/Skeletons/PlayerSpotlightSkeleton";
 import { Suspense } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 function RightColumnContent() {
   const [activeTab, setActiveTab] = useState("matches");
-
-  // Fetch live matches
+  const [currentLeagueIndex, setCurrentLeagueIndex] = useState(0);
+  
+  // Fetch data
   const { 
     data: liveMatches, 
     isLoading: isLoadingLive, 
@@ -29,50 +30,53 @@ function RightColumnContent() {
     refetch: refetchLive 
   } = useLiveMatches();
 
-  // Fetch today's matches
   const { 
-    data: todayMatches, 
-    isLoading: isLoadingToday, 
-    isError: isErrorToday, 
-    refetch: refetchToday 
-  } = useTodayMatches();
+    data: upcomingMatches, 
+    isLoading: isLoadingUpcoming, 
+    isError: isErrorUpcoming 
+  } = useUpcomingMatches({ limit: 5 });
 
-  // Fetch top teams for standings
   const { 
-    data: topTeams, 
+    data: recentMatches, 
+    isLoading: isLoadingRecent, 
+    isError: isErrorRecent 
+  } = useRecentMatches({ limit: 5 });
+
+  const { 
+    data: topScorer, 
+    isLoading: isLoadingTopScorer, 
+    isError: isErrorTopScorer 
+  } = useTopScorers({ limit: 1 });
+
+  const { 
+    data: leagues, 
+    isLoading: isLoadingLeagues 
+  } = useLeagues();
+
+  const { 
+    data: standings, 
     isLoading: isLoadingStandings, 
-    isError: isErrorStandings, 
-    refetch: refetchStandings 
-  } = useTopTeams("premier-league", 5);
-
-  // Fetch top scorers
-  const { 
-    data: topScorers, 
-    isLoading: isLoadingTopScorers, 
-    isError: isErrorTopScorers, 
-    refetch: refetchTopScorers 
-  } = useTopScorers("premier-league");
-
-  // Transform data to UI format
-  const transformedLiveMatches = liveMatches ? transformMatchesList(liveMatches) : [];
-  const transformedTodayMatches = todayMatches ? transformMatchesList(todayMatches) : [];
-  const transformedTopTeams = topTeams ? transformStandingsList(topTeams) : [];
-  const transformedTopScorers = topScorers ? transformTopScorersList(topScorers) : [];
+    isError: isErrorStandings 
+  } = useStandings({ 
+    league_id: leagues?.[currentLeagueIndex]?.id, 
+    limit: 10 
+  });
 
   // Handle loading states
-  const isLoadingMatches = isLoadingLive || isLoadingToday;
-  const isLoading = isLoadingMatches || isLoadingStandings || isLoadingTopScorers;
+  const isLoadingMatches = isLoadingLive || isLoadingUpcoming || isLoadingRecent;
+  const isLoading = isLoadingMatches || isLoadingStandings || isLoadingTopScorer || isLoadingLeagues;
 
   // Handle error states
-  const isErrorMatches = isErrorLive || isErrorToday;
-  const isError = isErrorMatches || isErrorStandings || isErrorTopScorers;
+  const isErrorMatches = isErrorLive || isErrorUpcoming || isErrorRecent;
+  const isError = isErrorMatches || isErrorStandings || isErrorTopScorer;
 
-  // Handle refetch
-  const handleRefetch = () => {
-    if (isErrorLive) refetchLive();
-    if (isErrorToday) refetchToday();
-    if (isErrorStandings) refetchStandings();
-    if (isErrorTopScorers) refetchTopScorers();
+  // Handle navigation between leagues
+  const handlePrevLeague = () => {
+    setCurrentLeagueIndex((prev) => (prev > 0 ? prev - 1 : leagues?.length - 1 || 0));
+  };
+
+  const handleNextLeague = () => {
+    setCurrentLeagueIndex((prev) => (prev < (leagues?.length - 1 || 0) ? prev + 1 : 0));
   };
 
   // Handle error state
@@ -80,8 +84,8 @@ function RightColumnContent() {
     return (
       <div className="space-y-6">
         <ErrorState 
-          message="Failed to load match data. Please try again later." 
-          onRetry={handleRefetch} 
+          message="Failed to load data. Please try again later." 
+          onRetry={() => window.location.reload()} 
         />
       </div>
     );
@@ -97,6 +101,9 @@ function RightColumnContent() {
       </div>
     );
   }
+
+  const currentLeague = leagues?.[currentLeagueIndex];
+  const topScorerData = topScorer?.[0];
 
   return (
     <div className="space-y-6">
@@ -118,35 +125,65 @@ function RightColumnContent() {
 
         <TabsContent value="matches" className="mt-4 space-y-6">
           {/* Live Matches */}
-          {transformedLiveMatches.length > 0 && (
-            <MatchesList
-              title="Premier League Live"
-              matches={transformedLiveMatches}
-              isLive={true}
-            />
-          )}
+          <MatchesList
+            title="Live Matches"
+            matches={liveMatches || []}
+            isLive={true}
+          />
 
-          {/* Today's Matches */}
-          {transformedTodayMatches.length > 0 && (
-            <MatchesList
-              title="Today"
-              matches={transformedTodayMatches}
-            />
-          )}
+          {/* Upcoming Matches */}
+          <MatchesList
+            title="Upcoming Fixtures"
+            matches={upcomingMatches || []}
+          />
 
-          {transformedLiveMatches.length === 0 && transformedTodayMatches.length === 0 && (
-            <div className="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-white/5 overflow-hidden p-8 text-center">
-              <p className="text-zinc-500">No matches scheduled for today</p>
-            </div>
+          {/* Recent Matches */}
+          <MatchesList
+            title="Recent Results"
+            matches={recentMatches || []}
+          />
+
+          {/* Top Scorer */}
+          {topScorerData && (
+            <PlayerSpotlight player={topScorerData} />
           )}
         </TabsContent>
 
         <TabsContent value="standings" className="mt-4">
-          <StandingsTable
-            title="Premier League Table"
-            subtitle="Season 2023/24"
-            standings={transformedTopTeams}
-          />
+          {currentLeague && (
+            <div className="bg-zinc-900/40 backdrop-blur-xl border-white/5 overflow-hidden rounded-2xl">
+              <div className="py-3 px-4 border-b border-white/5 flex flex-row items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handlePrevLeague}
+                    className="h-6 w-6 text-zinc-400 hover:text-white"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm font-bold text-zinc-200">
+                    {currentLeague.name_en}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleNextLeague}
+                    className="h-6 w-6 text-zinc-400 hover:text-white"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="text-xs text-zinc-500">
+                  {currentLeagueIndex + 1} / {leagues?.length || 0}
+                </div>
+              </div>
+              <StandingsTable
+                standings={standings || []}
+                showViewAllButton={true}
+              />
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

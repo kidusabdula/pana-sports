@@ -43,7 +43,7 @@ export function useFilteredNews(category: string) {
     staleTime: 1000 * 60 * 5, // 5min stale cache
     refetchOnWindowFocus: false,
     retry: 1,
-    enabled: !!category && category !== "All",
+    enabled: !!category && category !== "all", // Changed from "All" to "all"
   });
 }
 

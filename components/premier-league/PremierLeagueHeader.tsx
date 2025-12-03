@@ -141,9 +141,6 @@ export default function PremierLeagueHeader() {
           <TeamsTab />
         </TabsContent>
         
-        <TabsContent value="stats" className="mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <StatsTab />
-        </TabsContent>
       </Tabs>
     </div>
   );

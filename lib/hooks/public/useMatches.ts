@@ -1,47 +1,109 @@
 // lib/hooks/public/useMatches.ts
 import { useQuery } from '@tanstack/react-query'
 
-// API helper function to fetch live matches
+// Define types
+export type Match = {
+  id: string;
+  date: string;
+  status: string;
+  score_home: number;
+  score_away: number;
+  minute: number;
+  home_team: {
+    id: string;
+    name_en: string;
+    name_am: string;
+    slug: string;
+    logo_url: string;
+  };
+  away_team: {
+    id: string;
+    name_en: string;
+    name_am: string;
+    slug: string;
+    logo_url: string;
+  };
+  league: {
+    id: string;
+    name_en: string;
+    name_am: string;
+    slug: string;
+    category: string;
+  };
+  venue?: {
+    id: string;
+    name_en: string;
+    name_am: string;
+    city: string;
+    capacity: number;
+  };
+};
+
+// API helper functions
 async function fetchLiveMatches() {
-  const res = await fetch('/api/matches?status=live')
+  const res = await fetch('/api/public/matches/live')
   if (!res.ok) {
     const error = await res.json()
     throw new Error(error.error || 'Failed to fetch live matches')
   }
-  return res.json()
+  return res.json() as Promise<Match[]>
 }
 
-// React Query hook for live matches
+async function fetchUpcomingMatches(params?: { league_id?: string; limit?: number }) {
+  const queryString = new URLSearchParams(
+    Object.entries(params || {}).reduce((acc, [key, value]) => {
+      if (value !== undefined && value !== null) {
+        acc[key] = String(value);
+      }
+      return acc;
+    }, {} as Record<string, string>)
+  ).toString();
+  
+  const res = await fetch(`/api/public/matches/upcoming${queryString ? '?' + queryString : ''}`)
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.error || 'Failed to fetch upcoming matches')
+  }
+  return res.json() as Promise<Match[]>
+}
+
+async function fetchRecentMatches(params?: { league_id?: string; limit?: number }) {
+  const queryString = new URLSearchParams(
+    Object.entries(params || {}).reduce((acc, [key, value]) => {
+      if (value !== undefined && value !== null) {
+        acc[key] = String(value);
+      }
+      return acc;
+    }, {} as Record<string, string>)
+  ).toString();
+  
+  const res = await fetch(`/api/public/matches/recent${queryString ? '?' + queryString : ''}`)
+  if (!res.ok) {
+    const error = await res.json()
+    throw new Error(error.error || 'Failed to fetch recent matches')
+  }
+  return res.json() as Promise<Match[]>
+}
+
+// React Query hooks
 export function useLiveMatches() {
   return useQuery({
-    queryKey: ['matches', 'live'],
+    queryKey: ['live-matches'],
     queryFn: fetchLiveMatches,
-    gcTime: 1000 * 60 * 5,      // 5min garbage collection
-    staleTime: 1000 * 60,        // 1min stale cache
-    refetchInterval: 1000 * 30,    // 30s refetch interval
-    refetchOnWindowFocus: false, 
-    retry: 1,
+    refetchInterval: 30000, // Refetch every 30 seconds for live data
   })
 }
 
-// API helper function to fetch today's matches
-async function fetchTodayMatches() {
-  const res = await fetch('/api/matches?date=today')
-  if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to fetch today matches')
-  }
-  return res.json()
+export function useUpcomingMatches(params?: { league_id?: string; limit?: number }) {
+  return useQuery({
+    queryKey: ['upcoming-matches', params],
+    queryFn: () => fetchUpcomingMatches(params),
+  })
 }
 
-// React Query hook for today matches
-export function useTodayMatches() {
+export function useRecentMatches(params?: { league_id?: string; limit?: number }) {
   return useQuery({
-    queryKey: ['matches', 'today'],
-    queryFn: fetchTodayMatches,
-    gcTime: 1000 * 60 * 60,      // 1hr garbage collection
-    staleTime: 1000 * 60 * 5,      // 5min stale cache
-    refetchOnWindowFocus: false, 
-    retry: 1,
+    queryKey: ['recent-matches', params],
+    queryFn: () => fetchRecentMatches(params),
   })
 }

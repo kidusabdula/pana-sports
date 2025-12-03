@@ -14,7 +14,7 @@ import AdBanner from "@/components/shared/AdBanner";
 import { Suspense } from "react";
 
 function NewsPageContent() {
-  const [activeCategory, setActiveCategory] = useState("All");
+  const [activeCategory, setActiveCategory] = useState("all");
 
   // Fetch all news
   const {
@@ -33,13 +33,13 @@ function NewsPageContent() {
   } = useFilteredNews(activeCategory);
 
   // Determine which data to use based on active category
-  const isLoading = activeCategory === "All" ? isLoadingAll : isLoadingFiltered;
-  const isError = activeCategory === "All" ? isErrorAll : isErrorFiltered;
-  const refetch = activeCategory === "All" ? refetchAll : refetchFiltered;
+  const isLoading = activeCategory === "all" ? isLoadingAll : isLoadingFiltered;
+  const isError = activeCategory === "all" ? isErrorAll : isErrorFiltered;
+  const refetch = activeCategory === "all" ? refetchAll : refetchFiltered;
 
   // Transform data to UI format
   const transformedNews = useMemo(() => {
-    const newsData = activeCategory === "All" ? allNews : filteredNewsData;
+    const newsData = activeCategory === "all" ? allNews : filteredNewsData;
     if (!newsData) return [];
 
     return transformNewsList(newsData);

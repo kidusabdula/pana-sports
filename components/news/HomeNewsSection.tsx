@@ -16,7 +16,7 @@ import { Zap } from "lucide-react";
 import { Suspense } from "react";
 
 export default function HomeNewsSection() {
-  const [activeCategory, setActiveCategory] = useState("All");
+  const [activeCategory, setActiveCategory] = useState("all");
 
   // Fetch all news for the home page (limited to 5 items)
   const {
@@ -35,31 +35,19 @@ export default function HomeNewsSection() {
   } = useFilteredNews(activeCategory);
 
   // Determine which data to use based on active category
-  const isLoading = activeCategory === "All" ? isLoadingAll : isLoadingFiltered;
-  const isError = activeCategory === "All" ? isErrorAll : isErrorFiltered;
-  const refetch = activeCategory === "All" ? refetchAll : refetchFiltered;
+  const isLoading = activeCategory === "all" ? isLoadingAll : isLoadingFiltered;
+  const isError = activeCategory === "all" ? isErrorAll : isErrorFiltered;
+  const refetch = activeCategory === "all" ? refetchAll : refetchFiltered;
 
   // Transform data to UI format
   const transformedNews = useMemo(() => {
-    const newsData = activeCategory === "All" ? allNews : filteredNewsData;
+    const newsData = activeCategory === "all" ? allNews : filteredNewsData;
     if (!newsData) return [];
 
     // Transform and limit to 5 items for the home page
     const transformed = transformNewsList(newsData);
     return transformed.slice(0, 5);
   }, [allNews, filteredNewsData, activeCategory]);
-
-  // Extract categories from all news for the filter
-  const categories = useMemo(() => {
-    if (!allNews) return ["All"];
-
-    const uniqueCategories = new Set(
-      allNews
-        .map((news) => news.category)
-        .filter((cat): cat is string => cat !== null && cat !== undefined)
-    );
-    return ["All", ...Array.from(uniqueCategories)];
-  }, [allNews]);
 
   // Handle error state
   if (isError) {
@@ -109,7 +97,6 @@ export default function HomeNewsSection() {
       <NewsFilter
         activeCategory={activeCategory}
         setActiveCategory={setActiveCategory}
-        categories={categories}
       />
 
       {/* Main News Content */}

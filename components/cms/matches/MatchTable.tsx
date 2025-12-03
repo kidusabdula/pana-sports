@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,13 +25,11 @@ import {
   Calendar,
   ChevronDown,
   MapPin,
-  Users,
   Trophy,
   Play,
   Clock,
   CheckCircle,
   XCircle,
-  Pause,
   Settings,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -162,12 +161,22 @@ export default function MatchTable() {
     );
 
   // Extract unique leagues for filter
+  const uniqueLeaguesMap = new Map<string, string>();
+
+  matches?.forEach((match) => {
+    const id = match.league?.id || "no-league";
+    const name = match.league?.name_en || "No League";
+    if (!uniqueLeaguesMap.has(id)) {
+      uniqueLeaguesMap.set(id, name);
+    }
+  });
+
   const leagues = [
     { value: "all", label: "All Leagues" },
-    ...(matches?.map((match) => ({
-      value: match.league?.id || "",
-      label: match.league?.name_en || "No League",
-    })) || []),
+    ...Array.from(uniqueLeaguesMap.entries()).map(([value, label]) => ({
+      value,
+      label,
+    })),
   ];
 
   const statuses = [
@@ -368,9 +377,11 @@ export default function MatchTable() {
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2">
                           {match.home_team?.logo_url && (
-                            <img
+                            <Image
                               src={match.home_team.logo_url}
                               alt={match.home_team.name_en}
+                              width={24}
+                              height={24}
                               className="h-6 w-6 object-contain"
                             />
                           )}
@@ -383,9 +394,11 @@ export default function MatchTable() {
                         </span>
                         <div className="flex items-center gap-2">
                           {match.away_team?.logo_url && (
-                            <img
+                            <Image
                               src={match.away_team.logo_url}
                               alt={match.away_team.name_en}
+                              width={24}
+                              height={24}
                               className="h-6 w-6 object-contain"
                             />
                           )}
@@ -424,7 +437,7 @@ export default function MatchTable() {
                         </span>
                         {match.status === "live" && (
                           <Badge variant="outline" className="text-xs">
-                            {match.minute}'
+                            {match.minute}&apos;
                           </Badge>
                         )}
                       </div>

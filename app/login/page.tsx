@@ -47,6 +47,7 @@ function LoginForm() {
 
       toast.success("Login successful");
       router.push(redirectTo);
+      router.refresh(); // Force refresh to update navbar
     } catch (error) {
       setError("An unexpected error occurred");
     } finally {
@@ -63,7 +64,9 @@ function LoginForm() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
+          redirectTo: `${
+            window.location.origin
+          }/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`,
         },
       });
 
@@ -150,7 +153,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center bg-black py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md">
         <Suspense
           fallback={

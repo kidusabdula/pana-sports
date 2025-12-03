@@ -1,10 +1,49 @@
 // lib/hooks/public/useStandings.ts
 import { useQuery } from '@tanstack/react-query'
-import { Standing } from '@/lib/schemas/standing'
 
-// API helper function to fetch standings for a league
-async function fetchLeagueStandings(leagueSlug: string) {
-  const res = await fetch(`/api/standings?league=${leagueSlug}`)
+// Define types
+export type Standing = {
+  id: string;
+  league_id: string;
+  team_id: string;
+  season: string;
+  played: number;
+  won: number;
+  draw: number;
+  lost: number;
+  goals_for: number;
+  goals_against: number;
+  gd: number;
+  points: number;
+  rank: number;
+  team: {
+    id: string;
+    name_en: string;
+    name_am: string;
+    slug: string;
+    logo_url: string;
+  };
+  league: {
+    id: string;
+    name_en: string;
+    name_am: string;
+    slug: string;
+    category: string;
+  };
+};
+
+// API helper functions
+async function fetchStandings(params?: { league_id?: string; season?: string; limit?: number }) {
+  const queryString = new URLSearchParams(
+    Object.entries(params || {}).reduce((acc, [key, value]) => {
+      if (value !== undefined && value !== null) {
+        acc[key] = String(value);
+      }
+      return acc;
+    }, {} as Record<string, string>)
+  ).toString();
+  
+  const res = await fetch(`/api/public/standings${queryString ? '?' + queryString : ''}`)
   if (!res.ok) {
     const error = await res.json()
     throw new Error(error.error || 'Failed to fetch standings')
@@ -12,38 +51,10 @@ async function fetchLeagueStandings(leagueSlug: string) {
   return res.json() as Promise<Standing[]>
 }
 
-// React Query hook for league standings
-export function useLeagueStandings(leagueSlug: string) {
+// React Query hooks
+export function useStandings(params?: { league_id?: string; season?: string; limit?: number }) {
   return useQuery({
-    queryKey: ['standings', 'league', leagueSlug],
-    queryFn: () => fetchLeagueStandings(leagueSlug),
-    gcTime: 1000 * 60 * 60,        // 1hr garbage collection
-    staleTime: 1000 * 60 * 10,      // 10min stale cache
-    refetchOnWindowFocus: false, 
-    retry: 1,
-    enabled: !!leagueSlug,
-  })
-}
-
-// API helper function to fetch top teams in a league
-async function fetchTopTeams(leagueSlug: string, limit = 5) {
-  const res = await fetch(`/api/standings?league=${leagueSlug}&limit=${limit}`)
-  if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to fetch top teams')
-  }
-  return res.json() as Promise<Standing[]>
-}
-
-// React Query hook for top teams
-export function useTopTeams(leagueSlug: string, limit = 5) {
-  return useQuery({
-    queryKey: ['standings', 'top', leagueSlug, limit],
-    queryFn: () => fetchTopTeams(leagueSlug, limit),
-    gcTime: 1000 * 60 * 60,        // 1hr garbage collection
-    staleTime: 1000 * 60 * 10,      // 10min stale cache
-    refetchOnWindowFocus: false, 
-    retry: 1,
-    enabled: !!leagueSlug,
+    queryKey: ['standings', params],
+    queryFn: () => fetchStandings(params),
   })
 }

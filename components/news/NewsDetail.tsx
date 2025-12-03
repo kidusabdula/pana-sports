@@ -6,7 +6,14 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, Eye, MessageCircle, User, Share2, Bookmark } from "lucide-react";
+import {
+  Calendar,
+  Eye,
+  MessageCircle,
+  User,
+  Share2,
+  Bookmark,
+} from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -57,33 +64,36 @@ export default function NewsDetail({ news }: NewsDetailProps) {
   };
 
   return (
-    <article className="max-w-4xl mx-auto">
-      <header className="mb-8">
-        <div className="flex items-center gap-2 mb-4">
+    <article className="px-4 md:px-0">
+      <header className="mb-6 md:mb-8">
+        <div className="flex items-center gap-2 mb-3 md:mb-4">
           {news.category && (
-            <Badge variant="secondary" className="capitalize">
+            <Badge
+              variant="secondary"
+              className="capitalize text-xs md:text-sm"
+            >
               {news.category}
             </Badge>
           )}
           {news.league && (
-            <Badge variant="outline" className="capitalize">
+            <Badge variant="outline" className="capitalize text-xs md:text-sm">
               {news.league}
             </Badge>
           )}
         </div>
-        
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+
+        <h1 className="text-2xl md:text-4xl font-bold tracking-tight mb-4 leading-tight">
           {news.title}
         </h1>
-        
-        <div className="flex items-center justify-between">
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             {news.author && (
               <div className="flex items-center gap-2">
-                <Avatar className="h-10 w-10">
+                <Avatar className="h-8 w-8 md:h-10 md:w-10">
                   <AvatarImage src={news.author_avatar} alt={news.author} />
                   <AvatarFallback>
-                    <User className="h-5 w-5" />
+                    <User className="h-4 w-4 md:h-5 md:w-5" />
                   </AvatarFallback>
                 </Avatar>
                 <div>
@@ -95,8 +105,8 @@ export default function NewsDetail({ news }: NewsDetailProps) {
               </div>
             )}
           </div>
-          
-          <div className="flex items-center gap-4">
+
+          <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-zinc-800 pt-3 sm:pt-0">
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Eye className="h-4 w-4" />
@@ -107,7 +117,7 @@ export default function NewsDetail({ news }: NewsDetailProps) {
                 {news.comments_count}
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
@@ -123,50 +133,52 @@ export default function NewsDetail({ news }: NewsDetailProps) {
                 onClick={handleBookmark}
                 className={`h-8 w-8 ${isBookmarked ? "text-primary" : ""}`}
               >
-                <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-current" : ""}`} />
+                <Bookmark
+                  className={`h-4 w-4 ${isBookmarked ? "fill-current" : ""}`}
+                />
               </Button>
             </div>
           </div>
         </div>
       </header>
-      
+
       {news.image && (
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8 -mx-4 md:mx-0">
           <img
             src={news.image}
             alt={news.title}
-            className="w-full h-auto rounded-lg"
+            className="w-full h-auto md:rounded-lg"
           />
         </div>
       )}
-      
+
       {/* English Content - Render HTML directly */}
-      <div className="prose prose-lg max-w-none dark:prose-invert mb-12">
-        <div 
+      <div className="prose prose-base md:prose-lg max-w-none dark:prose-invert mb-8 md:mb-12">
+        <div
           dangerouslySetInnerHTML={{ __html: news.content || "" }}
           className="tiptap-content"
         />
       </div>
-      
-      <Separator className="my-8" />
-      
+
+      <Separator className="my-6 md:my-8" />
+
       {/* Amharic Content - Render HTML directly */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold tracking-tight">
+        <h2 className="text-xl md:text-2xl font-bold tracking-tight">
           {news.title_am}
         </h2>
-        
-        <div className="prose prose-lg max-w-none dark:prose-invert">
-          <div 
+
+        <div className="prose prose-base md:prose-lg max-w-none dark:prose-invert">
+          <div
             dangerouslySetInnerHTML={{ __html: news.content_am || "" }}
             className="tiptap-content"
           />
         </div>
       </div>
-      
+
       {/* Share notification */}
       {shareUrl && (
-        <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-lg">
+        <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-lg z-50">
           {shareUrl}
         </div>
       )}
