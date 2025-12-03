@@ -81,75 +81,77 @@ export default function OverviewTab({
     match: Match;
     showScore?: boolean;
   }) => (
-    <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-b border-zinc-800 last:border-0 hover:bg-zinc-800/30 transition-colors gap-4 sm:gap-0">
-      <div className="flex items-center gap-3 flex-1 w-full sm:w-auto">
-        <div className="flex items-center gap-3 flex-1 justify-end sm:justify-start">
-          <span className="text-white font-medium text-right sm:text-left truncate w-full sm:w-auto">
-            {match.home_team?.name_en}
-          </span>
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border border-zinc-700 shrink-0">
-            <Image
-              src={match.home_team?.logo_url || ""}
-              alt={match.home_team?.name_en || ""}
-              width={40}
-              height={40}
-              className="object-cover"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="text-center px-2 sm:px-4 min-w-[100px]">
-        {showScore ? (
-          <div className="text-xl sm:text-2xl font-bold text-white">
-            {match.score_home} - {match.score_away}
-          </div>
-        ) : (
-          <div className="text-sm font-medium text-zinc-400 bg-zinc-800/50 px-3 py-1 rounded-full">
-            VS
-          </div>
-        )}
-
-        <div className="flex flex-col items-center gap-1 mt-1">
-          <div className="flex items-center justify-center gap-2">
-            <span
-              className={cn(
-                "px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium border uppercase",
-                getStatusColor(match.status)
-              )}
-            >
-              {match.status}
+    <Link href={`/matches/${match.id}`} className="block">
+      <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-b border-zinc-800 last:border-0 hover:bg-zinc-800/30 transition-colors gap-4 sm:gap-0 cursor-pointer">
+        <div className="flex items-center gap-3 flex-1 w-full sm:w-auto">
+          <div className="flex items-center gap-3 flex-1 justify-end sm:justify-start">
+            <span className="text-white font-medium text-right sm:text-left truncate w-full sm:w-auto">
+              {match.home_team?.name_en}
             </span>
-            {match.status === "live" && (
-              <span className="text-xs text-red-400 flex items-center gap-1 animate-pulse font-bold">
-                <Clock className="h-3 w-3" />
-                {match.minute}&apos;
-              </span>
-            )}
-          </div>
-          <div className="text-[10px] sm:text-xs text-zinc-500">
-            {formatDate(match.date)}
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border border-zinc-700 shrink-0">
+              <Image
+                src={match.home_team?.logo_url || ""}
+                alt={match.home_team?.name_en || ""}
+                width={40}
+                height={40}
+                className="object-cover"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex items-center gap-3 flex-1 justify-end w-full sm:w-auto">
-        <div className="flex items-center gap-3 flex-1 justify-start sm:justify-end">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border border-zinc-700 shrink-0">
-            <Image
-              src={match.away_team?.logo_url || ""}
-              alt={match.away_team?.name_en || ""}
-              width={40}
-              height={40}
-              className="object-cover"
-            />
+        <div className="text-center px-2 sm:px-4 min-w-[100px]">
+          {showScore ? (
+            <div className="text-xl sm:text-2xl font-bold text-white">
+              {match.score_home} - {match.score_away}
+            </div>
+          ) : (
+            <div className="text-sm font-medium text-zinc-400 bg-zinc-800/50 px-3 py-1 rounded-full">
+              VS
+            </div>
+          )}
+
+          <div className="flex flex-col items-center gap-1 mt-1">
+            <div className="flex items-center justify-center gap-2">
+              <span
+                className={cn(
+                  "px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium border uppercase",
+                  getStatusColor(match.status)
+                )}
+              >
+                {match.status}
+              </span>
+              {match.status === "live" && (
+                <span className="text-xs text-red-400 flex items-center gap-1 animate-pulse font-bold">
+                  <Clock className="h-3 w-3" />
+                  {match.minute}&apos;
+                </span>
+              )}
+            </div>
+            <div className="text-[10px] sm:text-xs text-zinc-500">
+              {formatDate(match.date)}
+            </div>
           </div>
-          <span className="text-white font-medium text-left sm:text-right truncate w-full sm:w-auto">
-            {match.away_team?.name_en}
-          </span>
+        </div>
+
+        <div className="flex items-center gap-3 flex-1 justify-end w-full sm:w-auto">
+          <div className="flex items-center gap-3 flex-1 justify-start sm:justify-end">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border border-zinc-700 shrink-0">
+              <Image
+                src={match.away_team?.logo_url || ""}
+                alt={match.away_team?.name_en || ""}
+                width={40}
+                height={40}
+                className="object-cover"
+              />
+            </div>
+            <span className="text-white font-medium text-left sm:text-right truncate w-full sm:w-auto">
+              {match.away_team?.name_en}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 
   return (
