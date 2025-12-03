@@ -450,76 +450,154 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
           <TabsContent value="players" className="mt-6">
             <Card className="bg-zinc-900/40 backdrop-blur-xl border-white/5 overflow-hidden">
               <CardHeader className="pb-3 border-b border-white/5">
-                <CardTitle className="text-lg text-white flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
+                <CardTitle className="text-base sm:text-lg text-white flex items-center gap-2">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   Squad ({team?.players?.length || 0})
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 {team?.players && team.players.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-zinc-800">
-                          <th className="text-left p-3 text-zinc-400 font-medium">
-                            Number
-                          </th>
-                          <th className="text-left p-3 text-zinc-400 font-medium">
-                            Name
-                          </th>
-                          <th className="text-left p-3 text-zinc-400 font-medium">
-                            Position
-                          </th>
-                          <th className="text-left p-3 text-zinc-400 font-medium">
-                            Age
-                          </th>
-                          <th className="text-left p-3 text-zinc-400 font-medium">
-                            Nationality
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {team.players.map((player) => (
-                          <tr
-                            key={player.id}
-                            className="border-b border-zinc-800 hover:bg-zinc-800/30 cursor-pointer transition-colors"
-                            onClick={() => router.push(`/players/${player.id}`)}
-                          >
-                            <td className="p-3 text-white">
-                              {player.jersey_number || "N/A"}
-                            </td>
-                            <td className="p-3">
-                              <div className="flex items-center gap-2">
+                  <>
+                    {/* Mobile: Card Layout */}
+                    <div className="sm:hidden divide-y divide-zinc-800">
+                      {team.players.map((player) => (
+                        <div
+                          key={player.id}
+                          className="p-4 hover:bg-zinc-800/30 active:bg-zinc-800/50 cursor-pointer transition-colors"
+                          onClick={() => router.push(`/players/${player.id}`)}
+                        >
+                          <div className="flex items-start gap-3">
+                            {/* Jersey Number Badge */}
+                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/30 flex items-center justify-center shrink-0">
+                              <span className="text-sm font-bold text-primary">
+                                {player.jersey_number || "-"}
+                              </span>
+                            </div>
+
+                            {/* Player Info */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
                                 {player.photo_url && (
-                                  <Image
-                                    src={player.photo_url}
-                                    alt={player.name_en}
-                                    width={24}
-                                    height={24}
-                                    className="rounded-full object-cover"
-                                  />
+                                  <div className="w-8 h-8 rounded-full overflow-hidden border border-zinc-700 shrink-0">
+                                    <Image
+                                      src={player.photo_url}
+                                      alt={player.name_en}
+                                      width={32}
+                                      height={32}
+                                      className="object-cover"
+                                    />
+                                  </div>
                                 )}
-                                <span className="text-white">
+                                <span className="text-sm font-semibold text-white truncate">
                                   {player.name_en}
                                 </span>
                               </div>
-                            </td>
-                            <td className="p-3 text-zinc-300">
-                              {player.position_en || "N/A"}
-                            </td>
-                            <td className="p-3 text-zinc-300">
-                              {player.dob ? calculateAge(player.dob) : "N/A"}
-                            </td>
-                            <td className="p-3 text-zinc-300">
-                              {player.nationality || "N/A"}
-                            </td>
+
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div>
+                                  <span className="text-zinc-500">
+                                    Position:
+                                  </span>
+                                  <span className="ml-1 text-zinc-300 font-medium">
+                                    {player.position_en || "N/A"}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-zinc-500">Age:</span>
+                                  <span className="ml-1 text-zinc-300 font-medium">
+                                    {player.dob
+                                      ? calculateAge(player.dob)
+                                      : "N/A"}
+                                  </span>
+                                </div>
+                                <div className="col-span-2">
+                                  <span className="text-zinc-500">
+                                    Nationality:
+                                  </span>
+                                  <span className="ml-1 text-zinc-300 font-medium">
+                                    {player.nationality || "N/A"}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Desktop: Table Layout */}
+                    <div className="hidden sm:block overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-zinc-800">
+                            <th className="text-left p-3 sm:p-4 text-zinc-400 font-medium text-xs sm:text-sm">
+                              #
+                            </th>
+                            <th className="text-left p-3 sm:p-4 text-zinc-400 font-medium text-xs sm:text-sm">
+                              Name
+                            </th>
+                            <th className="text-left p-3 sm:p-4 text-zinc-400 font-medium text-xs sm:text-sm">
+                              Position
+                            </th>
+                            <th className="text-left p-3 sm:p-4 text-zinc-400 font-medium text-xs sm:text-sm">
+                              Age
+                            </th>
+                            <th className="text-left p-3 sm:p-4 text-zinc-400 font-medium text-xs sm:text-sm">
+                              Nationality
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody>
+                          {team.players.map((player) => (
+                            <tr
+                              key={player.id}
+                              className="border-b border-zinc-800 hover:bg-zinc-800/30 cursor-pointer transition-colors group"
+                              onClick={() =>
+                                router.push(`/players/${player.id}`)
+                              }
+                            >
+                              <td className="p-3 sm:p-4">
+                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 flex items-center justify-center group-hover:border-primary/40 transition-colors">
+                                  <span className="text-xs sm:text-sm font-bold text-primary">
+                                    {player.jersey_number || "-"}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="p-3 sm:p-4">
+                                <div className="flex items-center gap-2 sm:gap-3">
+                                  {player.photo_url && (
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border border-zinc-700 shrink-0 group-hover:border-primary/30 transition-colors">
+                                      <Image
+                                        src={player.photo_url}
+                                        alt={player.name_en}
+                                        width={40}
+                                        height={40}
+                                        className="object-cover"
+                                      />
+                                    </div>
+                                  )}
+                                  <span className="text-sm sm:text-base text-white font-medium group-hover:text-primary transition-colors">
+                                    {player.name_en}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="p-3 sm:p-4 text-xs sm:text-sm text-zinc-300">
+                                {player.position_en || "N/A"}
+                              </td>
+                              <td className="p-3 sm:p-4 text-xs sm:text-sm text-zinc-300 tabular-nums">
+                                {player.dob ? calculateAge(player.dob) : "N/A"}
+                              </td>
+                              <td className="p-3 sm:p-4 text-xs sm:text-sm text-zinc-300">
+                                {player.nationality || "N/A"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
                 ) : (
-                  <div className="p-8 text-center text-zinc-400">
+                  <div className="p-6 sm:p-8 text-center text-zinc-400 text-sm sm:text-base">
                     No players available
                   </div>
                 )}
