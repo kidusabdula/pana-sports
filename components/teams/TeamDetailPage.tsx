@@ -386,10 +386,10 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
                                 <div className="text-white font-medium">
                                   {homeTeam?.name_en}
                                 </div>
-                                <div className="text-zinc-400 text-sm flex items-center gap-1">
+                                {/* <div className="text-zinc-400 text-sm flex items-center gap-1">
                                   <MapPin className="h-3 w-3" />
                                   {match.venue?.city || "N/A"}
-                                </div>
+                                </div> */}
                               </div>
                             </div>
                             <div className="text-center px-4">
@@ -559,10 +559,10 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
                             <div className="text-white font-medium">
                               {team.name_en}
                             </div>
-                            <div className="text-zinc-400 text-sm flex items-center gap-1">
+                            {/* <div className="text-zinc-400 text-sm flex items-center gap-1">
                               <MapPin className="h-3 w-3" />
                               {match.venue?.city || "N/A"}
-                            </div>
+                            </div> */}
                           </div>
                         </div>
                         <div className="text-center px-4">
@@ -677,10 +677,10 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
                             <div className="text-white font-medium">
                               {team.name_en}
                             </div>
-                            <div className="text-zinc-400 text-sm flex items-center gap-1 justify-end">
+                            {/* <div className="text-zinc-400 text-sm flex items-center gap-1 justify-end">
                               <MapPin className="h-3 w-3" />
                               {match.venue?.city || "N/A"}
-                            </div>
+                            </div> */}
                           </div>
                           <div className="w-10 h-10 rounded-full overflow-hidden border border-zinc-700">
                             <Image

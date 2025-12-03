@@ -10,9 +10,9 @@ export default function AdBanner() {
   const [currentAd, setCurrentAd] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const ads = [
-    { id: 1, image: "/ad1.jpeg", alt: "Advertisement 1" },
-    { id: 2, image: "/ad2.jpeg", alt: "Advertisement 2" },
-    { id: 3, image: "/ad3.jpeg", alt: "Advertisement 3" },
+    { id: 1, image: "/ad1.jpg", alt: "Advertisement 1" },
+    { id: 2, image: "/ad2.png", alt: "Advertisement 2" },
+    { id: 3, image: "/ad3.jpg", alt: "Advertisement 3" },
   ];
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export default function AdBanner() {
                   src={ads[currentAd].image}
                   alt={ads[currentAd].alt}
                   fill
-                  className="object-fill"
+                  className="object-cover"
                   priority={currentAd === 0}
                 />
               </motion.div>
