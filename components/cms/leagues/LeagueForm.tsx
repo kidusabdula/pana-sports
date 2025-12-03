@@ -391,7 +391,14 @@ export default function LeagueForm({
                             <Input
                               type="number"
                               placeholder="1950"
-                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                // Convert to number or undefined
+                                field.onChange(
+                                  value === "" ? undefined : Number(value)
+                                );
+                              }}
                               className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                             />
                           </FormControl>

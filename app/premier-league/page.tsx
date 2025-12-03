@@ -23,6 +23,8 @@ async function getPremierLeagueId() {
 
     // Find the Premier League by name or slug
     const premierLeague = leagues.find(
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (league: any) =>
         league.name_en?.toLowerCase().includes("premier") ||
         league.slug?.toLowerCase().includes("premier")

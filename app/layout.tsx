@@ -14,6 +14,9 @@ const dmMono = DM_Mono({
 export const metadata = {
   title: "Pana Sports",
   description: "Ethiopian Football Hub",
+  icons: {
+    icon: "/logo2.png",
+  },
 };
 
 export default function RootLayout({
