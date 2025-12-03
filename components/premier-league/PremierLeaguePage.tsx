@@ -1,38 +1,26 @@
 // components/premier-league/PremierLeaguePage.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
 import {
-  useLeagues,
+  useLeague,
   useLeagueMatches,
   useLeagueStandings,
   useLeagueTeams,
 } from "@/lib/hooks/public/useLeagues";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
   Calendar,
   ChevronLeft,
-  ChevronRight,
-  Eye,
   Users,
   Trophy,
   Activity,
-  Target,
-  Star,
   Menu,
   Bell,
   Search,
-  Settings,
-  User,
-  Zap,
-  Globe,
-  Clock,
   MapPin,
-  TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -45,40 +33,39 @@ import MatchesTab from "@/components/shared/tabs/MatchesTab";
 import TableTab from "@/components/shared/tabs/TableTab";
 import TeamsTab from "@/components/shared/tabs/TeamsTab";
 
-function PremierLeaguePageContent() {
+interface PremierLeaguePageContentProps {
+  leagueId: string;
+}
+
+function PremierLeaguePageContent({ leagueId }: PremierLeaguePageContentProps) {
   const [activeTab, setActiveTab] = useState("overview");
-  const [currentMatchday, setCurrentMatchday] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Fetch all leagues to find Premier League
+  // Use the provided leagueId to fetch the specific league
   const {
-    data: leagues,
-    isLoading: leaguesLoading,
-    error: leaguesError,
-  } = useLeagues();
-
-  const league = leagues?.find((l) => l.slug === "premier-league");
-  const premierLeagueId = league?.id || "";
+    data: league,
+    isLoading: leagueLoading,
+    error: leagueError,
+  } = useLeague(leagueId);
 
   const { data: matches, isLoading: matchesLoading } = useLeagueMatches(
-    premierLeagueId,
+    leagueId,
     { limit: 10 }
   );
 
   const { data: standings, isLoading: standingsLoading } = useLeagueStandings(
-    premierLeagueId,
+    leagueId,
     { limit: 10 }
   );
 
-  const { data: teams, isLoading: teamsLoading } =
-    useLeagueTeams(premierLeagueId);
+  const { data: teams, isLoading: teamsLoading } = useLeagueTeams(leagueId);
 
   // Handle loading state
   const isLoading =
-    leaguesLoading || matchesLoading || standingsLoading || teamsLoading;
+    leagueLoading || matchesLoading || standingsLoading || teamsLoading;
 
   // Handle error state
-  if (leaguesError) {
+  if (leagueError) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-8 max-w-md mx-auto text-center">
@@ -579,15 +566,15 @@ function PremierLeaguePageContent() {
           </TabsContent>
 
           <TabsContent value="matches" className="mt-0">
-            <MatchesTab leagueId={premierLeagueId} />
+            <MatchesTab leagueId={leagueId} />
           </TabsContent>
 
           <TabsContent value="table" className="mt-0">
-            <TableTab leagueId={premierLeagueId} />
+            <TableTab leagueId={leagueId} />
           </TabsContent>
 
           <TabsContent value="teams" className="mt-0">
-            <TeamsTab leagueId={premierLeagueId} />
+            <TeamsTab leagueId={leagueId} />
           </TabsContent>
         </Tabs>
       </div>
@@ -595,7 +582,13 @@ function PremierLeaguePageContent() {
   );
 }
 
-export default function PremierLeaguePage() {
+interface PremierLeaguePageProps {
+  leagueId: string;
+}
+
+export default function PremierLeaguePage({
+  leagueId,
+}: PremierLeaguePageProps) {
   return (
     <Suspense
       fallback={
@@ -604,7 +597,7 @@ export default function PremierLeaguePage() {
         </div>
       }
     >
-      <PremierLeaguePageContent />
+      <PremierLeaguePageContent leagueId={leagueId} />
     </Suspense>
   );
 }

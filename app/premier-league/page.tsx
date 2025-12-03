@@ -1,7 +1,12 @@
 // app/premier-league/page.tsx
+
 import { notFound } from "next/navigation";
 import PremierLeaguePage from "@/components/premier-league/PremierLeaguePage";
+import LeagueNotFound from "@/components/premier-league/LeagueNotFound";
 import { Suspense } from "react";
+
+// Mark this route as dynamic to prevent static generation issues
+export const dynamic = "force-dynamic";
 
 async function getPremierLeagueId() {
   try {
@@ -34,28 +39,17 @@ export default async function Page() {
   const leagueId = await getPremierLeagueId();
 
   if (!leagueId) {
-    return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-8 max-w-md mx-auto text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">Premier League Not Found</h2>
-          <p className="text-zinc-400 mb-6">The Premier League data is not available at the moment. Please try again later.</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-md"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
+    return <LeagueNotFound />;
   }
 
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zinc-800"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zinc-800"></div>
+        </div>
+      }
+    >
       <PremierLeaguePage leagueId={leagueId} />
     </Suspense>
   );
