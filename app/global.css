@@ -57,11 +57,9 @@
   --popover: oklch(0.12 0.01 285.823);
   --popover-foreground: oklch(0.985 0 0);
 
-  /* Primary - Light yellow for dark mode */
-  --primary: oklch(0.85 0.18 75); /* Light yellow matching logo */
-  --primary-foreground: oklch(
-    0.09 0.01 285.823
-  ); /* Dark text on light yellow */
+  /* Primary - Sunlit Clay (#E9A84C) for dark mode */
+  --primary: oklch(0.76 0.12 65); /* Sunlit Clay brand color */
+  --primary-foreground: oklch(0.09 0.01 285.823); /* Dark text on Sunlit Clay */
 
   /* Secondary - Darker gray */
   --secondary: oklch(0.16 0.01 285.823);
@@ -71,19 +69,19 @@
   --muted: oklch(0.18 0.01 285.823);
   --muted-foreground: oklch(0.705 0.015 286.067);
 
-  /* Accent - Light yellow */
-  --accent: oklch(0.75 0.15 75); /* Light yellow for dark mode */
+  /* Accent - Sunlit Clay variant */
+  --accent: oklch(0.7 0.11 65); /* Sunlit Clay variant for dark mode */
   --accent-foreground: oklch(0.985 0 0);
 
   /* Destructive - Brighter red for dark mode */
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%); /* Subtle border */
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.85 0.18 75); /* Light yellow ring */
+  --ring: oklch(0.76 0.12 65); /* Sunlit Clay ring */
 
   /* Chart colors - Dark theme */
-  --chart-1: oklch(0.85 0.18 75); /* Light yellow matching logo */
-  --chart-2: oklch(0.75 0.15 75); /* Light yellow matching logo */
+  --chart-1: oklch(0.76 0.12 65); /* Sunlit Clay brand color */
+  --chart-2: oklch(0.7 0.11 65); /* Sunlit Clay variant */
   --chart-3: oklch(0.705 0.015 286.067); /* Gray */
   --chart-4: oklch(0.985 0 0); /* White */
   --chart-5: oklch(0.18 0.01 285.823); /* Dark muted */
@@ -91,12 +89,12 @@
   /* Sidebar colors - Dark theme */
   --sidebar: oklch(0.12 0.01 285.823);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.85 0.18 75); /* Light yellow matching logo */
+  --sidebar-primary: oklch(0.76 0.12 65); /* Sunlit Clay brand color */
   --sidebar-primary-foreground: oklch(0.09 0.01 285.823);
   --sidebar-accent: oklch(0.16 0.01 285.823);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.85 0.18 75); /* Light yellow matching logo */
+  --sidebar-ring: oklch(0.76 0.12 65); /* Sunlit Clay brand color */
 }
 
 @layer base {
@@ -198,9 +196,9 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.09 0.01 285.823);
 
-  /* Primary - Dark yellow for light mode */
-  --primary: oklch(0.65 0.18 75); /* Darker yellow */
-  --primary-foreground: oklch(1 0 0); /* White text on yellow */
+  /* Primary - Sunlit Clay (#E9A84C) for light mode */
+  --primary: oklch(0.68 0.13 65); /* Sunlit Clay darker variant */
+  --primary-foreground: oklch(1 0 0); /* White text on Sunlit Clay */
 
   /* Secondary - Light gray */
   --secondary: oklch(0.96 0.01 285.823);
@@ -210,19 +208,19 @@
   --muted: oklch(0.94 0.01 285.823);
   --muted-foreground: oklch(0.45 0.01 285.823);
 
-  /* Accent - Medium yellow */
-  --accent: oklch(0.75 0.15 75);
+  /* Accent - Sunlit Clay variant */
+  --accent: oklch(0.72 0.12 65);
   --accent-foreground: oklch(0.09 0.01 285.823);
 
   /* Destructive - Red for light mode */
   --destructive: oklch(0.604 0.191 22.216);
   --border: oklch(0.09 0.01 285.823 / 10%); /* Subtle border */
   --input: oklch(0.09 0.01 285.823 / 15%);
-  --ring: oklch(0.65 0.18 75); /* Darker yellow ring */
+  --ring: oklch(0.68 0.13 65); /* Sunlit Clay ring */
 
   /* Chart colors - Light theme */
-  --chart-1: oklch(0.65 0.18 75); /* Darker yellow */
-  --chart-2: oklch(0.75 0.15 75); /* Medium yellow */
+  --chart-1: oklch(0.68 0.13 65); /* Sunlit Clay darker variant */
+  --chart-2: oklch(0.72 0.12 65); /* Sunlit Clay variant */
   --chart-3: oklch(0.45 0.01 285.823); /* Gray */
   --chart-4: oklch(0.09 0.01 285.823); /* Dark */
   --chart-5: oklch(0.94 0.01 285.823); /* Light muted */
@@ -230,12 +228,12 @@
   /* Sidebar colors - Light theme */
   --sidebar: oklch(0.98 0 0); /* Very light gray */
   --sidebar-foreground: oklch(0.09 0.01 285.823);
-  --sidebar-primary: oklch(0.65 0.18 75); /* Darker yellow */
+  --sidebar-primary: oklch(0.68 0.13 65); /* Sunlit Clay darker variant */
   --sidebar-primary-foreground: oklch(1 0 0);
   --sidebar-accent: oklch(0.96 0.01 285.823);
   --sidebar-accent-foreground: oklch(0.09 0.01 285.823);
   --sidebar-border: oklch(0.09 0.01 285.823 / 10%);
-  --sidebar-ring: oklch(0.65 0.18 75); /* Darker yellow */
+  --sidebar-ring: oklch(0.68 0.13 65); /* Sunlit Clay darker variant */
 }
 
 .cms-light-theme body {
