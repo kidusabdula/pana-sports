@@ -12,7 +12,7 @@ export async function GET() {
         *,
         home_team:teams!matches_home_team_id_fkey(id, name_en, name_am, slug, logo_url),
         away_team:teams!matches_away_team_id_fkey(id, name_en, name_am, slug, logo_url),
-        league:leagues(id, name_en, name_am, slug, category),
+        league:leagues(id, name_en, name_am, slug, category, logo_url),
         venue:venues(id, name_en, name_am, city, capacity)
       `)
       .eq("status", "live")
