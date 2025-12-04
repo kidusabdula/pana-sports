@@ -28,7 +28,8 @@ export type Team = {
   slug: string;
   logo_url: string;
   founded: number;
-  stadium: string;
+  stadium_en: string;
+  stadium_am: string;
   city: string;
   capacity: number;
 };

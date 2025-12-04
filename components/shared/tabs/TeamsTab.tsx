@@ -113,7 +113,7 @@ export default function TeamsTab({ leagueId }: TeamsTabProps) {
                   </p>
                   <div className="flex items-center gap-1 text-xs text-zinc-500">
                     <MapPin className="h-3 w-3" />
-                    {team.city || "N/A"}
+                    {team.stadium_en || "N/A"}
                   </div>
                 </div>
               ))}
@@ -171,7 +171,7 @@ export default function TeamsTab({ leagueId }: TeamsTabProps) {
                     </div>
                     <div className="flex items-center gap-2 text-xs text-zinc-500">
                       <MapPin className="h-3 w-3" />
-                      {team.city || "N/A"}
+                      {team.stadium_en || "N/A"}
                     </div>
                   </div>
                   <div className="mt-auto px-3 pb-3 pt-0">
