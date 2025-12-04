@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,6 +23,7 @@ import {
   User,
   Calendar,
   ChevronDown,
+  Shield,
   Hash,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -78,14 +78,15 @@ export default function PlayerTable() {
       loading: `Deleting "${name}"...`,
       success: `Player "${name}" deleted successfully`,
       error: (error) => {
-        return error instanceof Error ? error.message : "Failed to delete player";
+        return error instanceof Error
+          ? error.message
+          : "Failed to delete player";
       },
     });
 
     try {
       await promise;
     } catch (error) {
-      // Error is handled by toast.promise
       console.error(error);
     }
   };
@@ -112,7 +113,6 @@ export default function PlayerTable() {
       </Card>
     );
 
-  // Extract unique teams for filter
   const teams = [
     { value: "all", label: "All Teams" },
     ...(players?.map((player) => ({
@@ -121,7 +121,6 @@ export default function PlayerTable() {
     })) || []),
   ];
 
-  // Extract unique positions for filter
   const positions = [
     { value: "all", label: "All Positions" },
     { value: "Goalkeeper", label: "Goalkeeper" },
@@ -131,35 +130,35 @@ export default function PlayerTable() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-linear-to-br from-primary/5 to-primary/10 border-primary/20">
-          <CardContent className="p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   Total Players
                 </p>
-                <p className="text-3xl font-bold text-foreground mt-1">
+                <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
                   {players?.length || 0}
                 </p>
               </div>
-              <div className="p-3 bg-primary/10 rounded-full">
-                <User className="h-6 w-6 text-primary" />
+              <div className="p-2 sm:p-3 bg-primary/10 rounded-full">
+                <User className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-linear-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   Active This Month
                 </p>
-                <p className="text-3xl font-bold text-foreground mt-1">
+                <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
                   {players?.filter((p) => {
                     const createdAt = new Date(p.created_at);
                     const now = new Date();
@@ -170,26 +169,26 @@ export default function PlayerTable() {
                   }).length || 0}
                 </p>
               </div>
-              <div className="p-3 bg-blue-500/10 rounded-full">
-                <Calendar className="h-6 w-6 text-blue-500" />
+              <div className="p-2 sm:p-3 bg-blue-500/10 rounded-full">
+                <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-linear-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20 sm:col-span-2 lg:col-span-1">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   With Photos
                 </p>
-                <p className="text-3xl font-bold text-foreground mt-1">
+                <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
                   {players?.filter((p) => p.photo_url).length || 0}
                 </p>
               </div>
-              <div className="p-3 bg-green-500/10 rounded-full">
-                <User className="h-6 w-6 text-green-500" />
+              <div className="p-2 sm:p-3 bg-green-500/10 rounded-full">
+                <User className="h-5 w-5 sm:h-6 sm:w-6 text-green-500" />
               </div>
             </div>
           </CardContent>
@@ -198,58 +197,72 @@ export default function PlayerTable() {
 
       {/* Main Content Card */}
       <Card className="shadow-sm border border-border/50 bg-card rounded-xl overflow-hidden">
-        <CardHeader className="bg-background/50 border-b border-border/50 px-6 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <CardTitle className="text-xl font-bold text-foreground flex items-center gap-2">
+        <CardHeader className="bg-background/50 border-b border-border/50 px-4 sm:px-6 py-4">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg sm:text-xl font-bold text-foreground">
                 Players ({players?.length || 0})
               </CardTitle>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 h-9 bg-background border-input focus:border-primary w-64 rounded-lg transition-all"
-                />
-              </div>
-              <Select value={filterTeam} onValueChange={setFilterTeam}>
-                <SelectTrigger className="h-9 w-40">
-                  <SelectValue placeholder="Filter by team" />
-                </SelectTrigger>
-                <SelectContent>
-                  {teams.map((team) => (
-                    <SelectItem key={team.value} value={team.value}>
-                      {team.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={filterPosition} onValueChange={setFilterPosition}>
-                <SelectTrigger className="h-9 w-40">
-                  <SelectValue placeholder="Filter by position" />
-                </SelectTrigger>
-                <SelectContent>
-                  {positions.map((position) => (
-                    <SelectItem key={position.value} value={position.value}>
-                      {position.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Link href="/cms/players/create">
+              <Link href="/cms/players/create" className="sm:hidden">
                 <Button size="sm" className="h-9 gap-2 rounded-lg shadow-sm">
                   <Plus className="h-4 w-4" />
-                  Add Player
                 </Button>
               </Link>
+            </div>
+            <div className="flex flex-col gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search players..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 h-9 bg-background border-input focus:border-primary w-full rounded-lg transition-all"
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <Select value={filterTeam} onValueChange={setFilterTeam}>
+                  <SelectTrigger className="h-9 w-full sm:w-40">
+                    <SelectValue placeholder="Filter by team" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {teams.map((team) => (
+                      <SelectItem key={team.value} value={team.value}>
+                        {team.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={filterPosition}
+                  onValueChange={setFilterPosition}
+                >
+                  <SelectTrigger className="h-9 w-full sm:w-40">
+                    <SelectValue placeholder="Filter by position" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {positions.map((position) => (
+                      <SelectItem key={position.value} value={position.value}>
+                        {position.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Link
+                  href="/cms/players/create"
+                  className="hidden sm:block ml-auto"
+                >
+                  <Button size="sm" className="h-9 gap-2 rounded-lg shadow-sm">
+                    <Plus className="h-4 w-4" />
+                    Add Player
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </CardHeader>
 
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto">
           <Table>
             <TableHeader className="bg-muted/30">
               <TableRow className="hover:bg-transparent border-b border-border/50">
@@ -301,14 +314,14 @@ export default function PlayerTable() {
                         className="rounded border-muted-foreground/30 text-primary focus:ring-primary"
                       />
                     </TableCell>
-                    <TableCell className="pl-6">
+                    <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                        <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                           {player.photo_url ? (
                             <img
                               src={player.photo_url}
                               alt={player.name_en}
-                              className="w-full h-full object-contain"
+                              className="w-full h-full object-cover rounded-full"
                             />
                           ) : (
                             <span className="text-primary font-bold text-xs">
@@ -316,11 +329,11 @@ export default function PlayerTable() {
                             </span>
                           )}
                         </div>
-                        <div className="flex flex-col">
-                          <span className="font-medium text-foreground text-sm">
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-medium text-foreground text-sm truncate max-w-[200px]">
                             {player.name_en}
                           </span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                             {player.teams?.name_en || "No Team"}
                           </span>
                         </div>
@@ -332,10 +345,10 @@ export default function PlayerTable() {
                           <img
                             src={player.teams.logo_url}
                             alt={player.teams.name_en}
-                            className="h-5 w-5 object-contain"
+                            className="h-5 w-5 object-contain shrink-0"
                           />
                         )}
-                        <span className="text-sm text-foreground">
+                        <span className="text-sm text-foreground truncate max-w-[150px]">
                           {player.teams?.name_en || "No Team"}
                         </span>
                       </div>
@@ -351,7 +364,7 @@ export default function PlayerTable() {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm text-foreground">
+                      <span className="text-sm text-foreground truncate max-w-[120px] block">
                         {player.nationality || "N/A"}
                       </span>
                     </TableCell>
@@ -408,9 +421,122 @@ export default function PlayerTable() {
           </Table>
         </div>
 
+        {/* Mobile/Tablet Card View */}
+        <div className="lg:hidden">
+          {filteredPlayers.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 px-4">
+              <User className="h-12 w-12 text-muted-foreground/20 mb-3" />
+              <p className="text-muted-foreground">No players found.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border/50">
+              {filteredPlayers.map((player) => (
+                <div
+                  key={player.id}
+                  className="p-4 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      {player.photo_url ? (
+                        <img
+                          src={player.photo_url}
+                          alt={player.name_en}
+                          className="w-full h-full object-cover rounded-full"
+                        />
+                      ) : (
+                        <span className="text-primary font-bold">
+                          {player.name_en.charAt(0)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-medium text-foreground text-sm truncate">
+                            {player.name_en}
+                          </h3>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {player.teams?.name_en || "No Team"}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Link href={`/cms/players/${player.id}/edit`}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-full"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Delete Player
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete &quot;
+                                  {player.name_en}&quot;? This action cannot be
+                                  undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                                <AlertDialogCancel className="m-0">
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() =>
+                                    handleDelete(player.id, player.name_en)
+                                  }
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 m-0"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <Shield className="h-3 w-3 text-muted-foreground shrink-0" />
+                          <span className="text-muted-foreground">
+                            {player.position_en || "N/A"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Hash className="h-3 w-3 text-muted-foreground shrink-0" />
+                          <span className="text-muted-foreground">
+                            {player.jersey_number || "N/A"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 truncate">
+                          <span className="text-muted-foreground truncate">
+                            {player.nationality || "N/A"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Pagination Info */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-border/50 bg-background/50">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-4 border-t border-border/50 bg-background/50 gap-4">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
             <span>Show</span>
             <Select defaultValue="10">
               <SelectTrigger className="h-8 w-16">
@@ -422,7 +548,7 @@ export default function PlayerTable() {
                 <SelectItem value="50">50</SelectItem>
               </SelectContent>
             </Select>
-            <span>players per page</span>
+            <span className="hidden sm:inline">players per page</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -446,22 +572,24 @@ export default function PlayerTable() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 rounded-lg p-0"
+                className="h-8 w-8 rounded-lg p-0 hidden sm:flex"
               >
                 2
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 rounded-lg p-0"
+                className="h-8 w-8 rounded-lg p-0 hidden sm:flex"
               >
                 3
               </Button>
-              <span className="text-muted-foreground px-1">...</span>
+              <span className="text-muted-foreground px-1 hidden sm:inline">
+                ...
+              </span>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 rounded-lg p-0"
+                className="h-8 w-8 rounded-lg p-0 hidden sm:flex"
               >
                 12
               </Button>

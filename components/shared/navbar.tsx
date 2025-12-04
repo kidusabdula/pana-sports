@@ -278,28 +278,41 @@ export default function Navbar() {
       >
         {/* Top Row */}
         <div className="container mx-auto px-4 h-16 flex items-center justify-between relative z-10">
-          {/* Logo Section */}
-          <Link href="/" className="flex items-center group">
-            <Image
-              src="/logo1.png"
-              alt="Pana Sports"
-              width={120}
-              height={48}
-              className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-              priority
-            />
-          </Link>
+          {/* Logo Section with Live Button for Mobile */}
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center group">
+              <Image
+                src="/logo1.png"
+                alt="Pana Sports"
+                width={120}
+                height={48}
+                className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                priority
+              />
+            </Link>
+            
+            {/* Mobile Live Button - Only show on mobile and when there are live matches */}
+            {hasLiveMatches && (
+              <Link
+                href="/live"
+                className="md:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-all duration-300"
+              >
+                <Radio className="w-3.5 h-3.5 text-red-500 animate-pulse" />
+                <span className="text-sm font-medium text-red-400">Live</span>
+              </Link>
+            )}
+          </div>
 
           {/* Desktop Actions */}
           <div className="flex items-center gap-3">
             {/* Desktop Search */}
-            <div className="hidden lg:flex items-center relative group">
+            {/* <div className="hidden lg:flex items-center relative group">
               <Search className="absolute left-3 w-4 h-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
               <Input
                 placeholder="Search news, stats..."
                 className="pl-9 pr-4 w-64 h-9 bg-zinc-900/50 border-zinc-800 rounded-full focus:bg-black focus:border-primary/50 focus:ring-primary/20 transition-all duration-300 text-sm"
               />
-            </div>
+            </div> */}
 
             <div className="h-6 w-px bg-zinc-800 mx-1 hidden lg:block" />
 
@@ -361,14 +374,14 @@ export default function Navbar() {
 
             {/* Mobile Toggles */}
             <div className="flex md:hidden items-center gap-2">
-              <Button
+              {/* <Button
                 variant="ghost"
                 size="icon"
                 className="text-zinc-400 hover:text-white hover:bg-white/10"
                 onClick={() => setSearchOpen(!searchOpen)}
               >
                 <Search className="w-5 h-5" />
-              </Button>
+              </Button> */}
 
               <Button
                 variant="ghost"
@@ -510,18 +523,6 @@ export default function Navbar() {
                 )}
               </div>
             ))}
-
-            {/* Conditional Live Menu for Mobile */}
-            {hasLiveMatches && (
-              <Link
-                href="/live"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2 text-lg font-medium text-red-400"
-              >
-                <Radio className="w-4 h-4 animate-pulse" />
-                Live Matches
-              </Link>
-            )}
 
             {/* Mobile Admin Link */}
             {isAdmin && (

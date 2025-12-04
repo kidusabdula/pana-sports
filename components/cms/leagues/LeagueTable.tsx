@@ -5,7 +5,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -25,7 +25,7 @@ import {
   Calendar,
   Filter,
   ChevronDown,
-  Image as ImageIcon,
+  Tag,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -50,7 +50,9 @@ import {
 export default function LeagueTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
-  const [filterActive, setFilterActive] = useState<boolean | undefined>(undefined);
+  const [filterActive, setFilterActive] = useState<boolean | undefined>(
+    undefined
+  );
   const { data: leagues, isLoading, error } = useLeagues();
   const deleteLeagueMutation = useDeleteLeague();
 
@@ -88,7 +90,6 @@ export default function LeagueTable() {
     try {
       await promise;
     } catch (error) {
-      // Error is handled by toast.promise
       console.error(error);
     }
   };
@@ -120,53 +121,53 @@ export default function LeagueTable() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   Total Leagues
                 </p>
-                <p className="text-3xl font-bold text-foreground mt-1">
+                <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
                   {leagues?.length || 0}
                 </p>
               </div>
-              <div className="p-3 bg-primary/10 rounded-full">
-                <Trophy className="h-6 w-6 text-primary" />
+              <div className="p-2 sm:p-3 bg-primary/10 rounded-full">
+                <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   Categories
                 </p>
-                <p className="text-3xl font-bold text-foreground mt-1">
+                <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
                   {categories.length}
                 </p>
               </div>
-              <div className="p-3 bg-blue-500/10 rounded-full">
-                <Filter className="h-6 w-6 text-blue-500" />
+              <div className="p-2 sm:p-3 bg-blue-500/10 rounded-full">
+                <Filter className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20 sm:col-span-2 lg:col-span-1">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   Active This Month
                 </p>
-                <p className="text-3xl font-bold text-foreground mt-1">
+                <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
                   {leagues?.filter((l) => {
                     const createdAt = new Date(l.created_at);
                     const now = new Date();
@@ -177,8 +178,8 @@ export default function LeagueTable() {
                   }).length || 0}
                 </p>
               </div>
-              <div className="p-3 bg-green-500/10 rounded-full">
-                <Calendar className="h-6 w-6 text-green-500" />
+              <div className="p-2 sm:p-3 bg-green-500/10 rounded-full">
+                <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-green-500" />
               </div>
             </div>
           </CardContent>
@@ -187,42 +188,50 @@ export default function LeagueTable() {
 
       {/* Main Content Card */}
       <Card className="shadow-sm border border-border/50 bg-card rounded-xl overflow-hidden">
-        <CardHeader className="bg-background/50 border-b border-border/50 px-6 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <CardTitle className="text-xl font-bold text-foreground flex items-center gap-2">
+        <CardHeader className="bg-background/50 border-b border-border/50 px-4 sm:px-6 py-4">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg sm:text-xl font-bold text-foreground">
                 Leagues ({leagues?.length || 0})
               </CardTitle>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 h-9 bg-background border-input focus:border-primary w-64 rounded-lg transition-all"
-                />
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-9 gap-2 rounded-lg"
-              >
-                <Filter className="h-4 w-4" />
-                Filter
-              </Button>
-              <Link href="/cms/leagues/create">
+              <Link href="/cms/leagues/create" className="sm:hidden">
                 <Button size="sm" className="h-9 gap-2 rounded-lg shadow-sm">
                   <Plus className="h-4 w-4" />
-                  Add League
                 </Button>
               </Link>
+            </div>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="relative flex-1 sm:flex-initial">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search leagues..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 h-9 bg-background border-input focus:border-primary w-full sm:w-64 rounded-lg transition-all"
+                />
+              </div>
+              <div className="hidden sm:flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 gap-2 rounded-lg"
+                >
+                  <Filter className="h-4 w-4" />
+                  Filter
+                </Button>
+                <Link href="/cms/leagues/create">
+                  <Button size="sm" className="h-9 gap-2 rounded-lg shadow-sm">
+                    <Plus className="h-4 w-4" />
+                    Add League
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </CardHeader>
 
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto">
           <Table>
             <TableHeader className="bg-muted/30">
               <TableRow className="hover:bg-transparent border-b border-border/50">
@@ -277,16 +286,17 @@ export default function LeagueTable() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         {league.logo_url ? (
-                          <div className="h-9 w-9 rounded-full overflow-hidden bg-muted flex items-center justify-center">
+                          <div className="h-9 w-9 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0">
                             <img
                               src={league.logo_url}
                               alt={league.name_en}
                               className="h-full w-full object-cover"
                               onError={(e) => {
-                                // Fallback to placeholder if image fails to load
                                 const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                                target.nextElementSibling?.classList.remove('hidden');
+                                target.style.display = "none";
+                                target.nextElementSibling?.classList.remove(
+                                  "hidden"
+                                );
                               }}
                             />
                             <div className="hidden h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
@@ -294,15 +304,15 @@ export default function LeagueTable() {
                             </div>
                           </div>
                         ) : (
-                          <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                          <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
                             {league.name_en.charAt(0)}
                           </div>
                         )}
-                        <div className="flex flex-col">
-                          <span className="font-medium text-foreground text-sm">
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-medium text-foreground text-sm truncate max-w-[200px]">
                             {league.name_en}
                           </span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                             {league.name_am || league.slug}
                           </span>
                         </div>
@@ -319,14 +329,24 @@ export default function LeagueTable() {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">
                         {format(new Date(league.created_at), "MMM dd, yyyy")}
                       </span>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <span className={`h-2 w-2 rounded-full ${league.is_active ? "bg-green-500" : "bg-gray-400"}`}></span>
-                        <span className={`text-sm font-medium ${league.is_active ? "text-green-600" : "text-gray-500"}`}>
+                        <span
+                          className={`h-2 w-2 rounded-full shrink-0 ${
+                            league.is_active ? "bg-green-500" : "bg-gray-400"
+                          }`}
+                        ></span>
+                        <span
+                          className={`text-sm font-medium whitespace-nowrap ${
+                            league.is_active
+                              ? "text-green-600"
+                              : "text-gray-500"
+                          }`}
+                        >
                           {league.is_active ? "Active" : "Inactive"}
                         </span>
                       </div>
@@ -383,9 +403,146 @@ export default function LeagueTable() {
           </Table>
         </div>
 
+        {/* Mobile/Tablet Card View */}
+        <div className="lg:hidden">
+          {filteredLeagues.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 px-4">
+              <Trophy className="h-12 w-12 text-muted-foreground/20 mb-3" />
+              <p className="text-muted-foreground">No leagues found.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border/50">
+              {filteredLeagues.map((league) => (
+                <div
+                  key={league.id}
+                  className="p-4 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-start gap-3">
+                    {league.logo_url ? (
+                      <div className="h-12 w-12 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0">
+                        <img
+                          src={league.logo_url}
+                          alt={league.name_en}
+                          className="h-full w-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = "none";
+                            target.nextElementSibling?.classList.remove(
+                              "hidden"
+                            );
+                          }}
+                        />
+                        <div className="hidden h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                          {league.name_en.charAt(0)}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold shrink-0">
+                        {league.name_en.charAt(0)}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-medium text-foreground text-sm truncate">
+                            {league.name_en}
+                          </h3>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {league.name_am || league.slug}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Link href={`/cms/leagues/${league.id}/edit`}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-full"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Delete League
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "
+                                  {league.name_en}"? This action cannot be
+                                  undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                                <AlertDialogCancel className="m-0">
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() =>
+                                    handleDelete(league.id, league.name_en)
+                                  }
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 m-0"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <Tag className="h-3 w-3 text-muted-foreground shrink-0" />
+                          <span className="text-muted-foreground truncate">
+                            {league.category || "Football"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className={`h-2 w-2 rounded-full shrink-0 ${
+                              league.is_active ? "bg-green-500" : "bg-gray-400"
+                            }`}
+                          ></span>
+                          <span
+                            className={`font-medium ${
+                              league.is_active
+                                ? "text-green-600"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            {league.is_active ? "Active" : "Inactive"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="h-3 w-3 text-muted-foreground shrink-0" />
+                          <span className="text-muted-foreground whitespace-nowrap">
+                            {format(
+                              new Date(league.created_at),
+                              "MMM dd, yyyy"
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Pagination Info */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-border/50 bg-background/50">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-4 border-t border-border/50 bg-background/50 gap-4">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
             <span>Show</span>
             <Select defaultValue="10">
               <SelectTrigger className="h-8 w-16">
@@ -397,7 +554,7 @@ export default function LeagueTable() {
                 <SelectItem value="50">50</SelectItem>
               </SelectContent>
             </Select>
-            <span>leagues per page</span>
+            <span className="hidden sm:inline">leagues per page</span>
           </div>
 
           <div className="flex items-center gap-1">
@@ -421,15 +578,17 @@ export default function LeagueTable() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 rounded-lg p-0"
+                className="h-8 w-8 rounded-lg p-0 hidden sm:flex"
               >
                 2
               </Button>
-              <span className="text-muted-foreground px-1">...</span>
+              <span className="text-muted-foreground px-1 hidden sm:inline">
+                ...
+              </span>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 rounded-lg p-0"
+                className="h-8 w-8 rounded-lg p-0 hidden sm:flex"
               >
                 12
               </Button>

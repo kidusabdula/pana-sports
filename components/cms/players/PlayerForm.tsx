@@ -73,7 +73,11 @@ interface PlayerFormProps {
   onCancel?: () => void;
 }
 
-export default function PlayerForm({ player, onSuccess, onCancel }: PlayerFormProps) {
+export default function PlayerForm({
+  player,
+  onSuccess,
+  onCancel,
+}: PlayerFormProps) {
   const isEditing = !!player;
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState("");
@@ -91,14 +95,16 @@ export default function PlayerForm({ player, onSuccess, onCancel }: PlayerFormPr
       position_en: player?.position_en || "",
       position_am: player?.position_am || "",
       jersey_number: player?.jersey_number || undefined,
-      dob: player?.dob ? new Date(player.dob).toISOString().split('T')[0] : "",
+      dob: player?.dob ? new Date(player.dob).toISOString().split("T")[0] : "",
       nationality: player?.nationality || "",
       height_cm: player?.height_cm || undefined,
       weight_kg: player?.weight_kg || undefined,
       bio_en: player?.bio_en || "",
       bio_am: player?.bio_am || "",
       photo_url: player?.photo_url ?? "",
-      contract_until: player?.contract_until ? new Date(player.contract_until).toISOString().split('T')[0] : "",
+      contract_until: player?.contract_until
+        ? new Date(player.contract_until).toISOString().split("T")[0]
+        : "",
       market_value: player?.market_value || "",
       is_active: player?.is_active ?? true,
     },
@@ -286,7 +292,8 @@ export default function PlayerForm({ player, onSuccess, onCancel }: PlayerFormPr
                             />
                           </FormControl>
                           <FormDescription>
-                            Unique identifier for the player (auto-generated from name)
+                            Unique identifier for the player (auto-generated
+                            from name)
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -344,9 +351,13 @@ export default function PlayerForm({ player, onSuccess, onCancel }: PlayerFormPr
                               <SelectValue placeholder="Select a position" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Goalkeeper">Goalkeeper</SelectItem>
+                              <SelectItem value="Goalkeeper">
+                                Goalkeeper
+                              </SelectItem>
                               <SelectItem value="Defender">Defender</SelectItem>
-                              <SelectItem value="Midfielder">Midfielder</SelectItem>
+                              <SelectItem value="Midfielder">
+                                Midfielder
+                              </SelectItem>
                               <SelectItem value="Forward">Forward</SelectItem>
                             </SelectContent>
                           </Select>
@@ -414,7 +425,7 @@ export default function PlayerForm({ player, onSuccess, onCancel }: PlayerFormPr
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <FormField
                       control={form.control}
                       name="dob"
@@ -526,7 +537,7 @@ export default function PlayerForm({ player, onSuccess, onCancel }: PlayerFormPr
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <FormField
                       control={form.control}
                       name="photo_url"
@@ -754,7 +765,8 @@ export default function PlayerForm({ player, onSuccess, onCancel }: PlayerFormPr
                             />
                           </FormControl>
                           <FormDescription>
-                            Unique identifier for the player (auto-generated from name)
+                            Unique identifier for the player (auto-generated
+                            from name)
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
