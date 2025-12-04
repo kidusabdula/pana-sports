@@ -134,7 +134,7 @@ export default function MatchForm({
 
     try {
       await promise;
-      // Small delay to ensure the toast is visible before redirecting
+      // Small delay to ensure toast is visible before redirecting
       setTimeout(() => {
         onSuccess?.();
       }, 500);
@@ -145,20 +145,20 @@ export default function MatchForm({
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
       {/* Header Card */}
       <Card className="shadow-sm border border-border/50 bg-card rounded-xl overflow-hidden">
-        <CardHeader className="text-center py-8 bg-muted/20">
+        <CardHeader className="text-center py-6 sm:py-8 bg-muted/20">
           <div className="mx-auto p-3 bg-primary/10 rounded-full w-fit mb-4">
             <Calendar className="h-8 w-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold text-foreground">
+          <CardTitle className="text-xl sm:text-2xl font-bold text-foreground">
             {isEditing ? "Edit Match" : "Create New Match"}
           </CardTitle>
-          <CardDescription className="text-base text-muted-foreground max-w-md mx-auto">
+          <CardDescription className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto px-4">
             {isEditing
               ? "Update match information below."
-              : "Fill in the details to schedule a new match."}
+              : "Fill in the details to create a new match."}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -167,7 +167,7 @@ export default function MatchForm({
       <Card className="shadow-sm border border-border/50 bg-card rounded-xl overflow-hidden">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="p-8 space-y-6">
+            <CardContent className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
               {/* Basic Match Information */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
@@ -175,7 +175,7 @@ export default function MatchForm({
                   Basic Information
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <FormField
                     control={form.control}
                     name="league_id"
@@ -329,7 +329,7 @@ export default function MatchForm({
                   Match Details
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <FormField
                     control={form.control}
                     name="status"
@@ -450,7 +450,7 @@ export default function MatchForm({
                   Score Information
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                   <FormField
                     control={form.control}
                     name="score_home"
@@ -540,7 +540,7 @@ export default function MatchForm({
                   Additional Information
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <FormField
                     control={form.control}
                     name="attendance"
@@ -592,7 +592,7 @@ export default function MatchForm({
                           />
                         </FormControl>
                         <FormDescription>
-                          Match day number in the league
+                          Match day number in league
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -626,13 +626,13 @@ export default function MatchForm({
               </div>
             </CardContent>
 
-            <CardFooter className="bg-muted/20 px-8 py-6 border-t border-border/50">
-              <div className="flex justify-between w-full">
+            <CardFooter className="bg-muted/20 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-t border-border/50">
+              <div className="flex flex-col sm:flex-row justify-between w-full gap-3 sm:gap-0">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={onCancel}
-                  className="h-11 px-6 hover:bg-muted transition-colors rounded-lg"
+                  className="h-10 sm:h-11 px-4 sm:px-6 hover:bg-muted transition-colors rounded-lg w-full sm:w-auto"
                 >
                   <X className="mr-2 h-4 w-4" />
                   Cancel
@@ -640,7 +640,7 @@ export default function MatchForm({
                 <Button
                   type="submit"
                   disabled={form.formState.isSubmitting}
-                  className="h-11 px-6 shadow-sm hover:shadow-md transition-all duration-200 rounded-lg"
+                  className="h-10 sm:h-11 px-4 sm:px-6 shadow-sm hover:shadow-md transition-all duration-200 rounded-lg w-full sm:w-auto"
                 >
                   {form.formState.isSubmitting ? (
                     <>

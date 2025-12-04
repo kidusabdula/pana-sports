@@ -16,10 +16,6 @@ import {
   TrendingUp,
   Shield,
   ChevronRight,
-  Goal,
-  Square,
-  Triangle,
-  Circle,
 } from "lucide-react";
 import { useTeamDetail } from "@/lib/hooks/public/useTeamDetail";
 import { useRouter } from "next/navigation";
@@ -138,22 +134,6 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
     }
   };
 
-  // Get event icon based on event type
-  const getEventIcon = (eventType: string) => {
-    switch (eventType.toLowerCase()) {
-      case "goal":
-        return <Goal className="h-3 w-3 text-green-400" />;
-      case "yellow_card":
-        return <Square className="h-3 w-3 text-yellow-400" />;
-      case "red_card":
-        return <Square className="h-3 w-3 text-red-400" />;
-      case "substitution":
-        return <Triangle className="h-3 w-3 text-blue-400" />;
-      default:
-        return <Circle className="h-3 w-3 text-zinc-400" />;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       {/* Header */}
@@ -177,12 +157,12 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
           <CardHeader className="pb-3 border-b border-white/5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-20 h-20 rounded-full bg-linear-to-br from-white/10 to-transparent border border-white/20 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-full bg-linear-to-br from-white/10 to-transparent border border-white/20 flex items-center justify-center">
                   <Image
                     src={team?.logo_url || ""}
                     alt={team?.name_en || ""}
-                    width={80}
-                    height={80}
+                    width={64}
+                    height={64}
                     className="object-contain"
                   />
                 </div>
@@ -211,7 +191,7 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-white">
@@ -297,7 +277,7 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-zinc-800/40 backdrop-blur-sm border border-white/5 p-1 rounded-xl">
+          <TabsList className="grid w-full grid-cols-3 bg-zinc-800/40 backdrop-blur-sm border border-white/5 p-0.5 rounded-xl">
             <TabsTrigger
               value="overview"
               className="data-[state=active]:bg-zinc-800 text-white data-[state=active]:shadow-lg"
@@ -322,14 +302,14 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
           </TabsList>
 
           {/* Overview Tab */}
-          <TabsContent value="overview" className="mt-6 space-y-6">
+          <TabsContent value="overview" className="mt-4 space-y-4">
             <Card className="bg-zinc-900/40 backdrop-blur-xl border-white/5 overflow-hidden">
               <CardHeader className="pb-3 border-b border-white/5">
                 <CardTitle className="text-lg text-white">
                   Team Overview
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <div className="prose prose-invert max-w-none">
                   <p className="text-zinc-300">
                     {team?.description_en || "No description available."}
@@ -371,7 +351,7 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
 
                       return (
                         <div key={match.id} className="flex flex-col">
-                          <div className="flex items-center justify-between p-4 border-b border-zinc-800 last:border-0 hover:bg-zinc-800/30 transition-colors">
+                          <div className="flex items-center justify-between p-3 border-b border-zinc-800 last:border-0 hover:bg-zinc-800/30 transition-colors">
                             <div className="flex items-center gap-3 flex-1">
                               <div className="w-10 h-10 rounded-full overflow-hidden border border-zinc-700">
                                 <Image
@@ -447,7 +427,7 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
           </TabsContent>
 
           {/* Players Tab */}
-          <TabsContent value="players" className="mt-6">
+          <TabsContent value="players" className="mt-4">
             <Card className="bg-zinc-900/40 backdrop-blur-xl border-white/5 overflow-hidden">
               <CardHeader className="pb-3 border-b border-white/5">
                 <CardTitle className="text-base sm:text-lg text-white flex items-center gap-2">
@@ -463,7 +443,7 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
                       {team.players.map((player) => (
                         <div
                           key={player.id}
-                          className="p-4 hover:bg-zinc-800/30 active:bg-zinc-800/50 cursor-pointer transition-colors"
+                          className="p-3 hover:bg-zinc-800/30 active:bg-zinc-800/50 cursor-pointer transition-colors"
                           onClick={() => router.push(`/players/${player.id}`)}
                         >
                           <div className="flex items-start gap-3">
@@ -530,19 +510,19 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
                       <table className="w-full">
                         <thead>
                           <tr className="border-b border-zinc-800">
-                            <th className="text-left p-3 sm:p-4 text-zinc-400 font-medium text-xs sm:text-sm">
+                            <th className="text-left p-2 sm:p-3 text-zinc-400 font-medium text-xs sm:text-sm">
                               #
                             </th>
-                            <th className="text-left p-3 sm:p-4 text-zinc-400 font-medium text-xs sm:text-sm">
+                            <th className="text-left p-2 sm:p-3 text-zinc-400 font-medium text-xs sm:text-sm">
                               Name
                             </th>
-                            <th className="text-left p-3 sm:p-4 text-zinc-400 font-medium text-xs sm:text-sm">
+                            <th className="text-left p-2 sm:p-3 text-zinc-400 font-medium text-xs sm:text-sm">
                               Position
                             </th>
-                            <th className="text-left p-3 sm:p-4 text-zinc-400 font-medium text-xs sm:text-sm">
+                            <th className="text-left p-2 sm:p-3 text-zinc-400 font-medium text-xs sm:text-sm">
                               Age
                             </th>
-                            <th className="text-left p-3 sm:p-4 text-zinc-400 font-medium text-xs sm:text-sm">
+                            <th className="text-left p-2 sm:p-3 text-zinc-400 font-medium text-xs sm:text-sm">
                               Nationality
                             </th>
                           </tr>
@@ -556,14 +536,14 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
                                 router.push(`/players/${player.id}`)
                               }
                             >
-                              <td className="p-3 sm:p-4">
+                              <td className="p-2 sm:p-3">
                                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 flex items-center justify-center group-hover:border-primary/40 transition-colors">
                                   <span className="text-xs sm:text-sm font-bold text-primary">
                                     {player.jersey_number || "-"}
                                   </span>
                                 </div>
                               </td>
-                              <td className="p-3 sm:p-4">
+                              <td className="p-2 sm:p-3">
                                 <div className="flex items-center gap-2 sm:gap-3">
                                   {player.photo_url && (
                                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border border-zinc-700 shrink-0 group-hover:border-primary/30 transition-colors">
@@ -581,13 +561,13 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
                                   </span>
                                 </div>
                               </td>
-                              <td className="p-3 sm:p-4 text-xs sm:text-sm text-zinc-300">
+                              <td className="p-2 sm:p-3 text-xs sm:text-sm text-zinc-300">
                                 {player.position_en || "N/A"}
                               </td>
-                              <td className="p-3 sm:p-4 text-xs sm:text-sm text-zinc-300 tabular-nums">
+                              <td className="p-2 sm:p-3 text-xs sm:text-sm text-zinc-300 tabular-nums">
                                 {player.dob ? calculateAge(player.dob) : "N/A"}
                               </td>
-                              <td className="p-3 sm:p-4 text-xs sm:text-sm text-zinc-300">
+                              <td className="p-2 sm:p-3 text-xs sm:text-sm text-zinc-300">
                                 {player.nationality || "N/A"}
                               </td>
                             </tr>
@@ -606,7 +586,7 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
           </TabsContent>
 
           {/* Matches Tab */}
-          <TabsContent value="matches" className="mt-6 space-y-6">
+          <TabsContent value="matches" className="mt-4 space-y-4">
             {/* Home Matches */}
             <Card className="bg-zinc-900/40 backdrop-blur-xl border-white/5 overflow-hidden">
               <CardHeader className="pb-3 border-b border-white/5">

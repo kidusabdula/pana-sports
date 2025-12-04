@@ -96,7 +96,7 @@ export default function TeamTable() {
   if (error)
     return (
       <Card className="border-destructive/50 bg-destructive/5">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex items-center space-x-2 text-destructive">
             <Shield className="h-5 w-5" />
             <span>
@@ -118,35 +118,35 @@ export default function TeamTable() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-linear-to-br from-primary/5 to-primary/10 border-primary/20">
-          <CardContent className="p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   Total Teams
                 </p>
-                <p className="text-3xl font-bold text-foreground mt-1">
+                <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
                   {teams?.length || 0}
                 </p>
               </div>
-              <div className="p-3 bg-primary/10 rounded-full">
-                <Shield className="h-6 w-6 text-primary" />
+              <div className="p-2 sm:p-3 bg-primary/10 rounded-full">
+                <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-linear-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   Active This Month
                 </p>
-                <p className="text-3xl font-bold text-foreground mt-1">
+                <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
                   {teams?.filter((t) => {
                     const createdAt = new Date(t.created_at);
                     const now = new Date();
@@ -157,26 +157,26 @@ export default function TeamTable() {
                   }).length || 0}
                 </p>
               </div>
-              <div className="p-3 bg-blue-500/10 rounded-full">
-                <Calendar className="h-6 w-6 text-blue-500" />
+              <div className="p-2 sm:p-3 bg-blue-500/10 rounded-full">
+                <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-linear-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20 sm:col-span-2 lg:col-span-1">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   With Stadiums
                 </p>
-                <p className="text-3xl font-bold text-foreground mt-1">
+                <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
                   {teams?.filter((t) => t.stadium_en).length || 0}
                 </p>
               </div>
-              <div className="p-3 bg-green-500/10 rounded-full">
-                <MapPin className="h-6 w-6 text-green-500" />
+              <div className="p-2 sm:p-3 bg-green-500/10 rounded-full">
+                <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-green-500" />
               </div>
             </div>
           </CardContent>
@@ -185,46 +185,54 @@ export default function TeamTable() {
 
       {/* Main Content Card */}
       <Card className="shadow-sm border border-border/50 bg-card rounded-xl overflow-hidden">
-        <CardHeader className="bg-background/50 border-b border-border/50 px-6 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <CardTitle className="text-xl font-bold text-foreground flex items-center gap-2">
+        <CardHeader className="bg-background/50 border-b border-border/50 px-4 sm:px-6 py-4">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg sm:text-xl font-bold text-foreground">
                 Teams ({teams?.length || 0})
               </CardTitle>
+              <Link href="/cms/teams/create" className="sm:hidden">
+                <Button size="sm" className="h-9 gap-2 rounded-lg shadow-sm">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </Link>
             </div>
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="relative flex-1 sm:flex-initial">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search..."
+                  placeholder="Search teams..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9 h-9 bg-background border-input focus:border-primary w-full sm:w-64 rounded-lg transition-all"
                 />
               </div>
-              <Select value={filterLeague} onValueChange={setFilterLeague}>
-                <SelectTrigger className="h-9 w-full sm:w-40">
-                  <SelectValue placeholder="Filter by league" />
-                </SelectTrigger>
-                <SelectContent>
-                  {leagues.map((league) => (
-                    <SelectItem key={league.value} value={league.value}>
-                      {league.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Link href="/cms/teams/create">
-                <Button size="sm" className="h-9 gap-2 rounded-lg shadow-sm w-full sm:w-auto">
-                  <Plus className="h-4 w-4" />
-                  Add Team
-                </Button>
-              </Link>
+              <div className="hidden sm:flex items-center gap-3">
+                <Select value={filterLeague} onValueChange={setFilterLeague}>
+                  <SelectTrigger className="h-9 w-full sm:w-40">
+                    <SelectValue placeholder="Filter by league" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {leagues.map((league) => (
+                      <SelectItem key={league.value} value={league.value}>
+                        {league.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Link href="/cms/teams/create">
+                  <Button size="sm" className="h-9 gap-2 rounded-lg shadow-sm">
+                    <Plus className="h-4 w-4" />
+                    Add Team
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </CardHeader>
 
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto">
           <Table>
             <TableHeader className="bg-muted/30">
               <TableRow className="hover:bg-transparent border-b border-border/50">
@@ -237,16 +245,16 @@ export default function TeamTable() {
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
                   Team
                 </TableHead>
-                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider hidden md:table-cell">
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
                   League
                 </TableHead>
-                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider hidden lg:table-cell">
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
                   Founded
                 </TableHead>
-                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider hidden lg:table-cell">
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
                   Stadium
                 </TableHead>
-                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider hidden md:table-cell">
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
                   Created Date
                 </TableHead>
                 <TableHead className="text-right font-medium text-muted-foreground text-xs uppercase tracking-wider pr-6">
@@ -276,48 +284,58 @@ export default function TeamTable() {
                         className="rounded border-muted-foreground/30 text-primary focus:ring-primary"
                       />
                     </TableCell>
-                    <TableCell className="pl-6">
+                    <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                          {team.logo_url ? (
+                        {team.logo_url ? (
+                          <div className="h-9 w-9 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0">
                             <img
                               src={team.logo_url}
                               alt={team.name_en}
-                              className="w-full h-full object-contain"
+                              className="h-full w-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = "none";
+                                target.nextElementSibling?.classList.remove(
+                                  "hidden"
+                                );
+                              }}
                             />
-                          ) : (
-                            <span className="text-primary font-bold text-xs">
+                            <div className="hidden h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
                               {team.name_en.charAt(0)}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-medium text-foreground text-sm">
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+                            {team.name_en.charAt(0)}
+                          </div>
+                        )}
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-medium text-foreground text-sm truncate max-w-[200px]">
                             {team.name_en}
                           </span>
-                          <span className="text-xs text-muted-foreground">
-                            {team.league?.name_en || "No League"}
+                          <span className="text-xs text-muted-foreground truncate max-w-[200px]">
+                            {team.name_am || team.slug}
                           </span>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">
+                    <TableCell>
                       <Badge variant="outline" className="bg-muted/20">
                         {team.league?.slug || "Unassigned"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="hidden lg:table-cell">
+                    <TableCell>
                       <span className="text-sm text-foreground">
                         {team.founded || "N/A"}
                       </span>
                     </TableCell>
-                    <TableCell className="hidden lg:table-cell">
-                      <span className="text-sm text-foreground">
+                    <TableCell>
+                      <span className="text-sm text-foreground truncate max-w-[150px]">
                         {team.stadium_en || "N/A"}
                       </span>
                     </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <span className="text-sm text-muted-foreground">
+                    <TableCell>
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">
                         {format(new Date(team.created_at), "MMM dd, yyyy")}
                       </span>
                     </TableCell>
@@ -343,22 +361,21 @@ export default function TeamTable() {
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent>
+                          <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete Team</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete &quot;
-                                {team.name_en}&quot;? This action cannot be
-                                undone.
+                                Are you sure you want to delete "
+                                {team.name_en}"? This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                              <AlertDialogCancel className="m-0">Cancel</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() =>
                                   handleDelete(team.id, team.name_en)
                                 }
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 m-0"
                               >
                                 Delete
                               </AlertDialogAction>
@@ -374,9 +391,137 @@ export default function TeamTable() {
           </Table>
         </div>
 
+        {/* Mobile/Tablet Card View */}
+        <div className="lg:hidden">
+          {filteredTeams.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 px-4">
+              <Shield className="h-12 w-12 text-muted-foreground/20 mb-3" />
+              <p className="text-muted-foreground">No teams found.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border/50">
+              {filteredTeams.map((team) => (
+                <div
+                  key={team.id}
+                  className="p-4 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-start gap-3">
+                    {team.logo_url ? (
+                      <div className="h-12 w-12 rounded-full overflow-hidden bg-muted flex items-center justify-center shrink-0">
+                        <img
+                          src={team.logo_url}
+                          alt={team.name_en}
+                          className="h-full w-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = "none";
+                            target.nextElementSibling?.classList.remove(
+                              "hidden"
+                            );
+                          }}
+                        />
+                        <div className="hidden h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                          {team.name_en.charAt(0)}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold shrink-0">
+                        {team.name_en.charAt(0)}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-medium text-foreground text-sm truncate">
+                            {team.name_en}
+                          </h3>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {team.name_am || team.slug}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Link href={`/cms/teams/${team.id}/edit`}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-full"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Delete Team
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "
+                                  {team.name_en}"? This action cannot be
+                                  undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                                <AlertDialogCancel className="m-0">
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() =>
+                                    handleDelete(team.id, team.name_en)
+                                  }
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 m-0"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <Shield className="h-3 w-3 text-muted-foreground shrink-0" />
+                          <span className="text-muted-foreground truncate">
+                            {team.league?.name_en || "No League"}
+                          </span>
+                        </div>
+                        {team.founded && (
+                          <div className="flex items-center gap-1.5">
+                            <Calendar className="h-3 w-3 text-muted-foreground shrink-0" />
+                            <span className="text-muted-foreground whitespace-nowrap">
+                              {team.founded}
+                            </span>
+                          </div>
+                        )}
+                        {team.stadium_en && (
+                          <div className="flex items-center gap-1.5">
+                            <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
+                            <span className="text-muted-foreground truncate">
+                              {team.stadium_en}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Pagination Info */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-border/50 bg-background/50">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-4 border-t border-border/50 bg-background/50 gap-4">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
             <span>Show</span>
             <Select defaultValue="10">
               <SelectTrigger className="h-8 w-16">
@@ -388,10 +533,10 @@ export default function TeamTable() {
                 <SelectItem value="50">50</SelectItem>
               </SelectContent>
             </Select>
-            <span>teams per page</span>
+            <span className="hidden sm:inline">teams per page</span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Button
               variant="outline"
               size="icon"
@@ -412,22 +557,24 @@ export default function TeamTable() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 rounded-lg p-0"
+                className="h-8 w-8 rounded-lg p-0 hidden sm:flex"
               >
                 2
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 rounded-lg p-0"
+                className="h-8 w-8 rounded-lg p-0 hidden sm:flex"
               >
                 3
               </Button>
-              <span className="text-muted-foreground px-1">...</span>
+              <span className="text-muted-foreground px-1 hidden sm:inline">
+                ...
+              </span>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 rounded-lg p-0"
+                className="h-8 w-8 rounded-lg p-0 hidden sm:flex"
               >
                 12
               </Button>

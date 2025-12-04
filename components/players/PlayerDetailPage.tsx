@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Calendar,
-  MapPin,
   Target,
   TrendingUp,
   Award,
@@ -23,7 +22,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+
 import Link from "next/link";
 
 interface PlayerDetailPageProps {
@@ -114,12 +113,12 @@ export function PlayerDetailPage({ playerId }: PlayerDetailPageProps) {
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
               {/* Player Photo */}
               <div className="relative">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-white/10 bg-linear-to-br from-white/10 to-transparent">
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-2 border-white/10 bg-linear-to-br from-white/10 to-transparent">
                   <Image
                     src={player.photo_url || ""}
                     alt={player.name_en}
-                    width={160}
-                    height={160}
+                    width={128}
+                    height={128}
                     className="object-cover"
                   />
                 </div>
@@ -189,7 +188,7 @@ export function PlayerDetailPage({ playerId }: PlayerDetailPageProps) {
             </div>
           </CardHeader>
 
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Personal Information */}
               <div className="space-y-4">
@@ -282,7 +281,7 @@ export function PlayerDetailPage({ playerId }: PlayerDetailPageProps) {
           </CardHeader>
           <CardContent className="p-0">
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-zinc-800/40 backdrop-blur-sm border border-white/5 p-1 rounded-xl">
+              <TabsList className="grid w-full grid-cols-2 bg-zinc-800/40 backdrop-blur-sm border border-white/5 p-0.5 rounded-xl">
                 <TabsTrigger
                   value="overview"
                   className="data-[state=active]:bg-zinc-800 text-white data-[state=active]:shadow-lg"
@@ -299,9 +298,9 @@ export function PlayerDetailPage({ playerId }: PlayerDetailPageProps) {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="overview" className="mt-6 p-6">
+              <TabsContent value="overview" className="mt-4 p-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="bg-zinc-800/30 rounded-lg p-6 text-center hover:bg-zinc-800/50 transition-colors border border-white/5">
+                  <div className="bg-zinc-800/30 rounded-lg p-4 text-center hover:bg-zinc-800/50 transition-colors border border-white/5">
                     <div className="flex items-center justify-center gap-2 mb-2">
                       <Target className="h-8 w-8 text-primary" />
                       <span className="text-3xl font-bold text-white">
@@ -310,7 +309,7 @@ export function PlayerDetailPage({ playerId }: PlayerDetailPageProps) {
                     </div>
                     <div className="text-sm text-zinc-400">Total Goals</div>
                   </div>
-                  <div className="bg-zinc-800/30 rounded-lg p-6 text-center hover:bg-zinc-800/50 transition-colors border border-white/5">
+                  <div className="bg-zinc-800/30 rounded-lg p-4 text-center hover:bg-zinc-800/50 transition-colors border border-white/5">
                     <div className="flex items-center justify-center gap-2 mb-2">
                       <TrendingUp className="h-8 w-8 text-primary" />
                       <span className="text-3xl font-bold text-white">
@@ -319,7 +318,7 @@ export function PlayerDetailPage({ playerId }: PlayerDetailPageProps) {
                     </div>
                     <div className="text-sm text-zinc-400">Total Assists</div>
                   </div>
-                  <div className="bg-zinc-800/30 rounded-lg p-6 text-center hover:bg-zinc-800/50 transition-colors border border-white/5">
+                  <div className="bg-zinc-800/30 rounded-lg p-4 text-center hover:bg-zinc-800/50 transition-colors border border-white/5">
                     <div className="flex items-center justify-center gap-2 mb-2">
                       <Award className="h-8 w-8 text-primary" />
                       <span className="text-3xl font-bold text-white">
@@ -334,14 +333,14 @@ export function PlayerDetailPage({ playerId }: PlayerDetailPageProps) {
                 </div>
               </TabsContent>
 
-              <TabsContent value="seasons" className="mt-6 p-6">
+              <TabsContent value="seasons" className="mt-4 p-4">
                 <div className="space-y-4">
                   {topScorerStats && topScorerStats.length > 0 ? (
                     <div className="space-y-4">
                       {topScorerStats.map((stat) => (
                         <div
                           key={stat.id}
-                          className="bg-zinc-800/30 rounded-lg p-4 hover:bg-zinc-800/50 transition-colors border border-white/5"
+                          className="bg-zinc-800/30 rounded-lg p-3 hover:bg-zinc-800/50 transition-colors border border-white/5"
                         >
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">

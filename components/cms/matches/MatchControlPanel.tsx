@@ -405,23 +405,23 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Match Status Card */}
       <Card className="shadow-sm border border-border/50 bg-card rounded-xl overflow-hidden">
-        <CardHeader className="bg-muted/20">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-xl font-bold text-foreground flex items-center gap-2">
+        <CardHeader className="bg-muted/20 px-4 sm:px-6 py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <CardTitle className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
               <Trophy className="h-5 w-5 text-primary" />
               Match Status
             </CardTitle>
             <StatusBadge status={match.status} />
           </div>
         </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <CardContent className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Teams and Score */}
-            <div className="col-span-2">
-              <div className="flex items-center justify-between mb-4">
+            <div className="lg:col-span-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
                 <div className="flex items-center gap-3">
                   {match.home_team?.logo_url && (
                     <img
@@ -431,7 +431,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                     />
                   )}
                   <div>
-                    <h3 className="font-bold text-lg">
+                    <h3 className="font-bold text-lg truncate max-w-[150px] sm:max-w-none">
                       {match.home_team?.name_en}
                     </h3>
                     <p className="text-sm text-muted-foreground">Home</p>
@@ -439,14 +439,13 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                 </div>
 
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-foreground">
+                  <div className="text-2xl sm:text-3xl font-bold text-foreground">
                     {match.score_home} - {match.score_away}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {match.status === "live" && (
                       <Badge variant="outline" className="mt-1">
-                        {match.minute}'
- 
+                        {match.minute}&apos;
                       </Badge>
                     )}
                   </div>
@@ -454,7 +453,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
 
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <h3 className="font-bold text-lg">
+                    <h3 className="font-bold text-lg truncate max-w-[150px] sm:max-w-none">
                       {match.away_team?.name_en}
                     </h3>
                     <p className="text-sm text-muted-foreground">Away</p>
@@ -523,16 +522,16 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
             {/* Match Details */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
                 <span>{new Date(match.date).toLocaleDateString()}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span>{match.venue?.name_en || "TBD"}</span>
+                <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="truncate">{match.venue?.name_en || "TBD"}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
-                <Trophy className="h-4 w-4 text-muted-foreground" />
-                <span>{match.league?.name_en || "No League"}</span>
+                <Trophy className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="truncate">{match.league?.name_en || "No League"}</span>
               </div>
 
               {/* Minute Control */}
@@ -564,24 +563,24 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
 
       {/* Main Control Panel */}
       <Card className="shadow-sm border border-border/50 bg-card rounded-xl overflow-hidden">
-        <CardHeader>
-          <CardTitle className="text-xl font-bold text-foreground">
+        <CardHeader className="px-4 sm:px-6 py-4">
+          <CardTitle className="text-lg sm:text-xl font-bold text-foreground">
             Match Control Panel
           </CardTitle>
           <CardDescription>
             Manage events and control match flow
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="control">Control</TabsTrigger>
               <TabsTrigger value="events">Events</TabsTrigger>
               <TabsTrigger value="lineups">Lineups</TabsTrigger>
             </TabsList>
-            <TabsContent value="control" className="space-y-6">
+            <TabsContent value="control" className="space-y-4 sm:space-y-6">
               {/* Event Controls */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 {/* Team and Player Selection */}
                 <div className="space-y-4">
                   <div>
@@ -674,7 +673,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
 
               {/* Substitution Dialog */}
               <Dialog open={isSubstitution} onOpenChange={setIsSubstitution}>
-                <DialogContent>
+                <DialogContent className="max-w-[90vw] sm:max-w-md">
                   <DialogHeader>
                     <DialogTitle>Substitution</DialogTitle>
                     <DialogDescription>
@@ -725,7 +724,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                       </Select>
                     </div>
                   </div>
-                  <DialogFooter>
+                  <DialogFooter className="flex-col sm:flex-row gap-2">
                     <Button onClick={addSubstitution} className="gap-2">
                       <UserPlus className="h-4 w-4" />
                       Make Substitution
@@ -759,35 +758,35 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                       key={event.id}
                       className="flex items-center gap-3 p-3 rounded-lg border"
                     >
-                      <div className="text-sm font-medium text-muted-foreground w-12">
+                      <div className="text-sm font-medium text-muted-foreground w-12 shrink-0">
                         {event.minute}'
                       </div>
 
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           {event.type === "goal" && (
-                            <Goal className="h-4 w-4 text-green-600" />
+                            <Goal className="h-4 w-4 text-green-600 shrink-0" />
                           )}
                           {event.type === "yellow" && (
-                            <CreditCard className="h-4 w-4 text-yellow-600" />
+                            <CreditCard className="h-4 w-4 text-yellow-600 shrink-0" />
                           )}
                           {event.type === "red" && (
-                            <XCircle className="h-4 w-4 text-red-600" />
+                            <XCircle className="h-4 w-4 text-red-600 shrink-0" />
                           )}
                           {event.type === "sub" && (
-                            <UserMinus className="h-4 w-4 text-blue-600" />
+                            <UserMinus className="h-4 w-4 text-blue-600 shrink-0" />
                           )}
                           {event.type === "half_time" && (
-                            <Timer className="h-4 w-4 text-gray-600" />
+                            <Timer className="h-4 w-4 text-gray-600 shrink-0" />
                           )}
                           {event.type === "second_half" && (
-                            <Timer className="h-4 w-4 text-gray-600" />
+                            <Timer className="h-4 w-4 text-gray-600 shrink-0" />
                           )}
                           {event.type === "match_end" && (
-                            <Square className="h-4 w-4 text-gray-600" />
+                            <Square className="h-4 w-4 text-gray-600 shrink-0" />
                           )}
 
-                          <span className="font-medium">
+                          <span className="font-medium truncate">
                             {event.player?.name_en || "Match Event"}
                           </span>
 
@@ -795,22 +794,22 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                             <img
                               src={event.team.logo_url}
                               alt={event.team.name_en}
-                              className="h-5 w-5 object-contain"
+                              className="h-5 w-5 object-contain shrink-0"
                             />
                           )}
                         </div>
 
                         {event.description_en && (
-                          <p className="text-sm text-muted-foreground mt-1">
+                          <p className="text-sm text-muted-foreground mt-1 truncate">
                             {event.description_en}
                           </p>
                         )}
 
                         {event.type === "sub" && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                            <span>{event.subbed_out_player?.name_en}</span>
+                            <span className="truncate">{event.subbed_out_player?.name_en}</span>
                             <span>→</span>
-                            <span>{event.subbed_in_player?.name_en}</span>
+                            <span className="truncate">{event.subbed_in_player?.name_en}</span>
                           </div>
                         )}
                       </div>
@@ -837,7 +836,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                         Manage Lineups
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-4xl">
+                    <DialogContent className="max-w-[90vw] sm:max-w-4xl">
                       <DialogHeader>
                         <DialogTitle>Manage Match Lineups</DialogTitle>
                         <DialogDescription>
@@ -851,7 +850,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                           <h4 className="font-semibold">
                             {match.home_team?.name_en}
                           </h4>
-                          <div className="space-y-2">
+                          <div className="space-y-2 max-h-60 overflow-y-auto">
                             {homeTeamPlayers.map((player) => (
                               <div
                                 key={player.id}
@@ -884,10 +883,10 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                                     }
                                   }}
                                 />
-                                <span>
+                                <span className="truncate">
                                   {player.jersey_number} - {player.name_en}
                                 </span>
-                                <span className="text-sm text-muted-foreground">
+                                <span className="text-sm text-muted-foreground shrink-0">
                                   ({player.position_en})
                                 </span>
                               </div>
@@ -900,7 +899,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                           <h4 className="font-semibold">
                             {match.away_team?.name_en}
                           </h4>
-                          <div className="space-y-2">
+                          <div className="space-y-2 max-h-60 overflow-y-auto">
                             {awayTeamPlayers.map((player) => (
                               <div
                                 key={player.id}
@@ -933,10 +932,10 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                                     }
                                   }}
                                 />
-                                <span>
+                                <span className="truncate">
                                   {player.jersey_number} - {player.name_en}
                                 </span>
-                                <span className="text-sm text-muted-foreground">
+                                <span className="text-sm text-muted-foreground shrink-0">
                                   ({player.position_en})
                                 </span>
                               </div>
@@ -945,7 +944,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                         </div>
                       </div>
 
-                      <DialogFooter>
+                      <DialogFooter className="flex-col sm:flex-row gap-2">
                         <Button variant="outline" onClick={clearLineups}>
                           Clear All
                         </Button>
@@ -975,7 +974,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                           <span className="font-medium">
                             {lineup.jersey_number}
                           </span>
-                          <span>{lineup.player?.name_en}</span>
+                          <span className="truncate">{lineup.player?.name_en}</span>
                           <Badge variant="outline">{lineup.position}</Badge>
                         </div>
                       ))}
@@ -996,7 +995,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                           <span className="font-medium">
                             {lineup.jersey_number}
                           </span>
-                          <span>{lineup.player?.name_en}</span>
+                          <span className="truncate">{lineup.player?.name_en}</span>
                           <Badge variant="outline">{lineup.position}</Badge>
                         </div>
                       ))}
