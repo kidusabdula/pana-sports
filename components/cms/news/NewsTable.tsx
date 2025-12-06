@@ -438,7 +438,7 @@ export default function NewsTable() {
           <Table>
             <TableHeader className="bg-muted/30">
               <TableRow className="hover:bg-transparent border-b border-border/50">
-                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider pl-6">
                   Title
                 </TableHead>
                 <TableHead className="font-medium text-muted-foreground text-xs uppercase tracking-wider">
@@ -483,26 +483,26 @@ export default function NewsTable() {
                     key={item.id}
                     className="hover:bg-muted/30 transition-colors border-b border-border/40"
                   >
-                    <TableCell>
+                    <TableCell className="pl-6">
                       <div className="flex items-center gap-3">
                         {item.thumbnail_url && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={item.thumbnail_url}
                             alt=""
-                            className="h-10 w-16 object-cover rounded"
+                            className="h-10 w-16 object-cover rounded shrink-0"
                           />
                         )}
-                        <div className="flex flex-col max-w-md">
+                        <div className="flex flex-col min-w-0 max-w-[250px] xl:max-w-[350px]">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-foreground text-sm line-clamp-1">
+                            <span className="font-medium text-foreground text-sm truncate">
                               {item.title_en}
                             </span>
                             {item.is_featured && (
-                              <Star className="h-3 w-3 text-amber-500 fill-current" />
+                              <Star className="h-3 w-3 text-amber-500 fill-current shrink-0" />
                             )}
                           </div>
-                          <span className="text-xs text-muted-foreground line-clamp-1">
+                          <span className="text-xs text-muted-foreground truncate">
                             {item.title_am}
                           </span>
                         </div>
@@ -512,7 +512,7 @@ export default function NewsTable() {
                       {item.category && (
                         <Badge
                           variant="outline"
-                          className="capitalize"
+                          className="capitalize whitespace-nowrap"
                           style={{
                             backgroundColor: item.category.color
                               ? `${item.category.color}20`
@@ -525,17 +525,17 @@ export default function NewsTable() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-muted-foreground truncate max-w-[120px] block">
                         {item.author?.name || "-"}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-muted-foreground truncate max-w-[120px] block">
                         {item.league?.name_en || "-"}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">
                         {item.published_at
                           ? format(new Date(item.published_at), "MMM dd, yyyy")
                           : "-"}
@@ -556,7 +556,7 @@ export default function NewsTable() {
                     <TableCell className="text-center">
                       <Badge
                         variant={item.is_published ? "default" : "secondary"}
-                        className="text-xs"
+                        className="text-xs whitespace-nowrap"
                       >
                         {item.is_published ? "Published" : "Draft"}
                       </Badge>
@@ -583,7 +583,7 @@ export default function NewsTable() {
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent>
+                          <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
                             <AlertDialogHeader>
                               <AlertDialogTitle>
                                 Delete Article
@@ -594,13 +594,15 @@ export default function NewsTable() {
                                 undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                              <AlertDialogCancel className="m-0">
+                                Cancel
+                              </AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() =>
                                   handleDelete(item.id, item.title_en)
                                 }
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 m-0"
                               >
                                 Delete
                               </AlertDialogAction>

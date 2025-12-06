@@ -486,8 +486,8 @@ export default function TopScorersTable() {
                                   Delete Top Scorer
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete "
-                                  {topScorer.player?.name_en}"? This action
+                                  Are you sure you want to delete &quot;
+                                  {topScorer.player?.name_en}&quot;? This action
                                   cannot be undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
