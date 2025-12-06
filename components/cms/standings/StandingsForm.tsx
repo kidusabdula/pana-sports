@@ -1,8 +1,7 @@
-// components/cms/standings/StandingsForm.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -31,18 +30,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import {
-  Trophy,
-  Save,
-  X,
-  Calculator,
-} from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Trophy, Save, X, Calculator } from "lucide-react";
 import {
   createStandingInputSchema,
   updateStandingInputSchema,
@@ -50,7 +39,10 @@ import {
   CreateStanding,
   UpdateStanding,
 } from "@/lib/schemas/standing";
-import { useCreateStanding, useUpdateStanding } from "@/lib/hooks/cms/useStandings";
+import {
+  useCreateStanding,
+  useUpdateStanding,
+} from "@/lib/hooks/cms/useStandings";
 import { useLeagues } from "@/lib/hooks/cms/useLeagues";
 import { useTeams } from "@/lib/hooks/cms/useTeams";
 
@@ -60,49 +52,57 @@ interface StandingFormProps {
   onCancel?: () => void;
 }
 
-export default function StandingForm({ standing, onSuccess, onCancel }: StandingFormProps) {
+export default function StandingForm({
+  standing,
+  onSuccess,
+  onCancel,
+}: StandingFormProps) {
   const isEditing = !!standing;
   const [activeTab, setActiveTab] = useState("basic");
-  
-const form = useForm<CreateStanding | UpdateStanding>({
-  resolver: zodResolver(
-    isEditing ? updateStandingInputSchema : createStandingInputSchema
-  ),
-  defaultValues: {
-    league_id: standing?.league_id || "",
-    team_id: standing?.team_id || "",
-    season: standing?.season || "",
-    played: standing?.played || 0,
-    won: standing?.won || 0,
-    draw: standing?.draw || 0,
-    lost: standing?.lost || 0,
-    goals_for: standing?.goals_for || 0,
-    goals_against: standing?.goals_against || 0,
-    gd: standing?.gd || 0, // Add overall goal difference
-    points: standing?.points || 0,
-    rank: standing?.rank || 0,
-    home_played: standing?.home_played || 0,
-    home_won: standing?.home_won || 0,
-    home_draw: standing?.home_draw || 0,
-    home_lost: standing?.home_lost || 0,
-    home_goals_for: standing?.home_goals_for || 0,
-    home_goals_against: standing?.home_goals_against || 0,
-    home_gd: standing?.home_gd || 0, // Add home goal difference
-    away_played: standing?.away_played || 0,
-    away_won: standing?.away_won || 0,
-    away_draw: standing?.away_draw || 0,
-    away_lost: standing?.away_lost || 0,
-    away_goals_for: standing?.away_goals_for || 0,
-    away_goals_against: standing?.away_goals_against || 0,
-    away_gd: standing?.away_gd || 0, // Add away goal difference
-  },
-});
+
+  const form = useForm<CreateStanding | UpdateStanding>({
+    resolver: zodResolver(
+      isEditing ? updateStandingInputSchema : createStandingInputSchema
+    ),
+    defaultValues: {
+      league_id: standing?.league_id || "",
+      team_id: standing?.team_id || "",
+      season: standing?.season || "",
+      played: standing?.played || 0,
+      won: standing?.won || 0,
+      draw: standing?.draw || 0,
+      lost: standing?.lost || 0,
+      goals_for: standing?.goals_for || 0,
+      goals_against: standing?.goals_against || 0,
+      gd: standing?.gd || 0, // Add overall goal difference
+      points: standing?.points || 0,
+      rank: standing?.rank || 0,
+      home_played: standing?.home_played || 0,
+      home_won: standing?.home_won || 0,
+      home_draw: standing?.home_draw || 0,
+      home_lost: standing?.home_lost || 0,
+      home_goals_for: standing?.home_goals_for || 0,
+      home_goals_against: standing?.home_goals_against || 0,
+      home_gd: standing?.home_gd || 0, // Add home goal difference
+      away_played: standing?.away_played || 0,
+      away_won: standing?.away_won || 0,
+      away_draw: standing?.away_draw || 0,
+      away_lost: standing?.away_lost || 0,
+      away_goals_for: standing?.away_goals_for || 0,
+      away_goals_against: standing?.away_goals_against || 0,
+      away_gd: standing?.away_gd || 0, // Add away goal difference
+    },
+  });
 
   const { data: leagues } = useLeagues();
   const { data: teams } = useTeams();
-  
-  const selectedLeagueId = form.watch("league_id");
-  const filteredTeams = teams?.filter((team) => team.league_id === selectedLeagueId) || [];
+
+  const selectedLeagueId = useWatch({
+    control: form.control,
+    name: "league_id",
+  });
+  const filteredTeams =
+    teams?.filter((team) => team.league_id === selectedLeagueId) || [];
 
   const createStandingMutation = useCreateStanding();
   const updateStandingMutation = useUpdateStanding();
@@ -112,7 +112,7 @@ const form = useForm<CreateStanding | UpdateStanding>({
     const cleanedData = Object.fromEntries(
       Object.entries(data).filter(([_, value]) => value !== undefined)
     );
-    
+
     const promise =
       isEditing && standing
         ? updateStandingMutation.mutateAsync({
@@ -137,7 +137,7 @@ const form = useForm<CreateStanding | UpdateStanding>({
 
     try {
       await promise;
-      // Small delay to ensure the toast is visible before redirecting
+      // Small delay to ensure toast is visible before redirecting
       setTimeout(() => {
         onSuccess?.();
       }, 500);
@@ -148,97 +148,172 @@ const form = useForm<CreateStanding | UpdateStanding>({
   };
 
   // Auto-calculate GD and points based on wins/draws/losses
+  const [won, draw, lost, goals_for, goals_against] = useWatch({
+    control: form.control,
+    name: ["won", "draw", "lost", "goals_for", "goals_against"],
+  });
+
   const watchedValues = {
-    won: form.watch("won"),
-    draw: form.watch("draw"),
-    lost: form.watch("lost"),
-    goals_for: form.watch("goals_for"),
-    goals_against: form.watch("goals_against")
+    won,
+    draw,
+    lost,
+    goals_for,
+    goals_against,
   };
 
   useEffect(() => {
-    if (watchedValues.won !== undefined && watchedValues.draw !== undefined && watchedValues.lost !== undefined) {
-      const played = (watchedValues.won || 0) + (watchedValues.draw || 0) + (watchedValues.lost || 0);
-      const points = (watchedValues.won || 0) * 3 + (watchedValues.draw || 0) * 1;
-      
+    if (
+      watchedValues.won !== undefined &&
+      watchedValues.draw !== undefined &&
+      watchedValues.lost !== undefined
+    ) {
+      const played =
+        (watchedValues.won || 0) +
+        (watchedValues.draw || 0) +
+        (watchedValues.lost || 0);
+      const points =
+        (watchedValues.won || 0) * 3 + (watchedValues.draw || 0) * 1;
+
       form.setValue("played", played);
       form.setValue("points", points);
     }
   }, [watchedValues.won, watchedValues.draw, watchedValues.lost, form]);
 
   // Auto-calculate home/away stats
+  const [home_won, home_draw, home_lost] = useWatch({
+    control: form.control,
+    name: ["home_won", "home_draw", "home_lost"],
+  });
+
   const watchedHomeValues = {
-    home_won: form.watch("home_won"),
-    home_draw: form.watch("home_draw"),
-    home_lost: form.watch("home_lost")
+    home_won,
+    home_draw,
+    home_lost,
   };
 
   useEffect(() => {
-    if (watchedHomeValues.home_won !== undefined && watchedHomeValues.home_draw !== undefined && watchedHomeValues.home_lost !== undefined) {
-      const homePlayed = (watchedHomeValues.home_won || 0) + (watchedHomeValues.home_draw || 0) + (watchedHomeValues.home_lost || 0);
+    if (
+      watchedHomeValues.home_won !== undefined &&
+      watchedHomeValues.home_draw !== undefined &&
+      watchedHomeValues.home_lost !== undefined
+    ) {
+      const homePlayed =
+        (watchedHomeValues.home_won || 0) +
+        (watchedHomeValues.home_draw || 0) +
+        (watchedHomeValues.home_lost || 0);
       form.setValue("home_played", homePlayed);
     }
-  }, [watchedHomeValues.home_won, watchedHomeValues.home_draw, watchedHomeValues.home_lost, form]);
+  }, [
+    watchedHomeValues.home_won,
+    watchedHomeValues.home_draw,
+    watchedHomeValues.home_lost,
+    form,
+  ]);
 
   // Auto-calculate away stats
+  const [away_won, away_draw, away_lost] = useWatch({
+    control: form.control,
+    name: ["away_won", "away_draw", "away_lost"],
+  });
+
   const watchedAwayValues = {
-    away_won: form.watch("away_won"),
-    away_draw: form.watch("away_draw"),
-    away_lost: form.watch("away_lost")
+    away_won,
+    away_draw,
+    away_lost,
   };
 
   useEffect(() => {
-    if (watchedAwayValues.away_won !== undefined && watchedAwayValues.away_draw !== undefined && watchedAwayValues.away_lost !== undefined) {
-      const awayPlayed = (watchedAwayValues.away_won || 0) + (watchedAwayValues.away_draw || 0) + (watchedAwayValues.away_lost || 0);
+    if (
+      watchedAwayValues.away_won !== undefined &&
+      watchedAwayValues.away_draw !== undefined &&
+      watchedAwayValues.away_lost !== undefined
+    ) {
+      const awayPlayed =
+        (watchedAwayValues.away_won || 0) +
+        (watchedAwayValues.away_draw || 0) +
+        (watchedAwayValues.away_lost || 0);
       form.setValue("away_played", awayPlayed);
     }
-  }, [watchedAwayValues.away_won, watchedAwayValues.away_draw, watchedAwayValues.away_lost, form]);
+  }, [
+    watchedAwayValues.away_won,
+    watchedAwayValues.away_draw,
+    watchedAwayValues.away_lost,
+    form,
+  ]);
 
   useEffect(() => {
-  if (watchedValues.goals_for !== undefined && watchedValues.goals_against !== undefined) {
-    const gd = (watchedValues.goals_for || 0) - (watchedValues.goals_against || 0);
-    form.setValue("gd", gd);
-  }
-}, [watchedValues.goals_for, watchedValues.goals_against, form]);
+    if (goals_for !== undefined && goals_against !== undefined) {
+      const gd = (goals_for || 0) - (goals_against || 0);
+      form.setValue("gd", gd);
+    }
+  }, [goals_for, goals_against, form]);
 
-// Calculate home goal difference
-const watchedHomeGoalsValues = {
-  home_goals_for: form.watch("home_goals_for"),
-  home_goals_against: form.watch("home_goals_against")
-};
+  // Calculate home goal difference
+  const [home_goals_for, home_goals_against] = useWatch({
+    control: form.control,
+    name: ["home_goals_for", "home_goals_against"],
+  });
 
-useEffect(() => {
-  if (watchedHomeGoalsValues.home_goals_for !== undefined && watchedHomeGoalsValues.home_goals_against !== undefined) {
-    const homeGd = (watchedHomeGoalsValues.home_goals_for || 0) - (watchedHomeGoalsValues.home_goals_against || 0);
-    form.setValue("home_gd", homeGd);
-  }
-}, [watchedHomeGoalsValues.home_goals_for, watchedHomeGoalsValues.home_goals_against, form]);
+  const watchedHomeGoalsValues = {
+    home_goals_for,
+    home_goals_against,
+  };
 
-// Calculate away goal difference
-const watchedAwayGoalsValues = {
-  away_goals_for: form.watch("away_goals_for"),
-  away_goals_against: form.watch("away_goals_against")
-};
+  useEffect(() => {
+    if (
+      watchedHomeGoalsValues.home_goals_for !== undefined &&
+      watchedHomeGoalsValues.home_goals_against !== undefined
+    ) {
+      const homeGd =
+        (watchedHomeGoalsValues.home_goals_for || 0) -
+        (watchedHomeGoalsValues.home_goals_against || 0);
+      form.setValue("home_gd", homeGd);
+    }
+  }, [
+    watchedHomeGoalsValues.home_goals_for,
+    watchedHomeGoalsValues.home_goals_against,
+    form,
+  ]);
 
-useEffect(() => {
-  if (watchedAwayGoalsValues.away_goals_for !== undefined && watchedAwayGoalsValues.away_goals_against !== undefined) {
-    const awayGd = (watchedAwayGoalsValues.away_goals_for || 0) - (watchedAwayGoalsValues.away_goals_against || 0);
-    form.setValue("away_gd", awayGd);
-  }
-}, [watchedAwayGoalsValues.away_goals_for, watchedAwayGoalsValues.away_goals_against, form]);
+  // Calculate away goal difference
+  const [away_goals_for, away_goals_against] = useWatch({
+    control: form.control,
+    name: ["away_goals_for", "away_goals_against"],
+  });
+
+  const watchedAwayGoalsValues = {
+    away_goals_for,
+    away_goals_against,
+  };
+
+  useEffect(() => {
+    if (
+      watchedAwayGoalsValues.away_goals_for !== undefined &&
+      watchedAwayGoalsValues.away_goals_against !== undefined
+    ) {
+      const awayGd =
+        (watchedAwayGoalsValues.away_goals_for || 0) -
+        (watchedAwayGoalsValues.away_goals_against || 0);
+      form.setValue("away_gd", awayGd);
+    }
+  }, [
+    watchedAwayGoalsValues.away_goals_for,
+    watchedAwayGoalsValues.away_goals_against,
+    form,
+  ]);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
       {/* Header Card */}
       <Card className="shadow-sm border border-border/50 bg-card rounded-xl overflow-hidden">
-        <CardHeader className="text-center py-8 bg-muted/20">
+        <CardHeader className="text-center py-6 sm:py-8 bg-muted/20">
           <div className="mx-auto p-3 bg-primary/10 rounded-full w-fit mb-4">
             <Trophy className="h-8 w-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold text-foreground">
+          <CardTitle className="text-xl sm:text-2xl font-bold text-foreground">
             {isEditing ? "Edit Standing" : "Create New Standing"}
           </CardTitle>
-          <CardDescription className="text-base text-muted-foreground max-w-md mx-auto">
+          <CardDescription className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto px-4">
             {isEditing
               ? "Update team standing information below."
               : "Fill in details to create a new team standing."}
@@ -250,21 +325,27 @@ useEffect(() => {
       <Card className="shadow-sm border border-border/50 bg-card rounded-xl overflow-hidden">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="p-8">
+            <CardContent className="p-4 sm:p-6 lg:p-8">
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-2 mb-8 bg-muted/50 p-1 rounded-lg">
-                  <TabsTrigger value="basic" className="rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                <TabsList className="grid w-full grid-cols-2 mb-6 sm:mb-8 bg-muted/50 p-1 rounded-lg">
+                  <TabsTrigger
+                    value="basic"
+                    className="rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                  >
                     <Trophy className="mr-2 h-4 w-4" />
                     Basic Info
                   </TabsTrigger>
-                  <TabsTrigger value="detailed" className="rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <TabsTrigger
+                    value="detailed"
+                    className="rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                  >
                     <Calculator className="mr-2 h-4 w-4" />
                     Detailed Stats
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="basic" className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <TabsContent value="basic" className="space-y-4 sm:space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <FormField
                       control={form.control}
                       name="league_id"
@@ -303,7 +384,9 @@ useEffect(() => {
                       name="team_id"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="font-medium text-foreground">Team</FormLabel>
+                          <FormLabel className="font-medium text-foreground">
+                            Team
+                          </FormLabel>
                           <Select
                             onValueChange={field.onChange}
                             defaultValue={field.value}
@@ -311,7 +394,13 @@ useEffect(() => {
                             disabled={!selectedLeagueId}
                           >
                             <SelectTrigger className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg">
-                              <SelectValue placeholder={selectedLeagueId ? "Select a team" : "Select a league first"} />
+                              <SelectValue
+                                placeholder={
+                                  selectedLeagueId
+                                    ? "Select a team"
+                                    : "Select a league first"
+                                }
+                              />
                             </SelectTrigger>
                             <SelectContent>
                               {filteredTeams.map((team) => (
@@ -330,13 +419,15 @@ useEffect(() => {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <FormField
                       control={form.control}
                       name="season"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="font-medium text-foreground">Season</FormLabel>
+                          <FormLabel className="font-medium text-foreground">
+                            Season
+                          </FormLabel>
                           <FormControl>
                             <Input
                               placeholder="2023/2024"
@@ -357,7 +448,9 @@ useEffect(() => {
                       name="rank"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="font-medium text-foreground">Rank</FormLabel>
+                          <FormLabel className="font-medium text-foreground">
+                            Rank
+                          </FormLabel>
                           <FormControl>
                             <Input
                               type="number"
@@ -366,7 +459,9 @@ useEffect(() => {
                               value={field.value || ""}
                               onChange={(e) => {
                                 const value = e.target.value;
-                                field.onChange(value === "" ? undefined : Number(value));
+                                field.onChange(
+                                  value === "" ? undefined : Number(value)
+                                );
                               }}
                               className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                             />
@@ -381,16 +476,23 @@ useEffect(() => {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="detailed" className="space-y-6">
+                <TabsContent
+                  value="detailed"
+                  className="space-y-4 sm:space-y-6"
+                >
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-foreground">Overall Performance</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <h3 className="text-lg font-semibold text-foreground">
+                      Overall Performance
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                       <FormField
                         control={form.control}
                         name="played"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Played</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Played
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -399,7 +501,9 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
@@ -417,7 +521,9 @@ useEffect(() => {
                         name="points"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Points</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Points
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -426,7 +532,9 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
@@ -440,13 +548,15 @@ useEffect(() => {
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                       <FormField
                         control={form.control}
                         name="won"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Won</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Won
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -455,14 +565,14 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
                             </FormControl>
-                            <FormDescription>
-                              Matches won
-                            </FormDescription>
+                            <FormDescription>Matches won</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -473,7 +583,9 @@ useEffect(() => {
                         name="draw"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Draw</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Draw
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -482,14 +594,14 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
                             </FormControl>
-                            <FormDescription>
-                              Matches drawn
-                            </FormDescription>
+                            <FormDescription>Matches drawn</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -500,7 +612,9 @@ useEffect(() => {
                         name="lost"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Lost</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Lost
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -509,27 +623,29 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
                             </FormControl>
-                            <FormDescription>
-                              Matches lost
-                            </FormDescription>
+                            <FormDescription>Matches lost</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                       <FormField
                         control={form.control}
                         name="goals_for"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Goals For</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Goals For
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -538,7 +654,9 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
@@ -556,7 +674,9 @@ useEffect(() => {
                         name="goals_against"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Goals Against</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Goals Against
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -565,7 +685,9 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
@@ -581,14 +703,18 @@ useEffect(() => {
                   </div>
 
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-foreground">Home Performance</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <h3 className="text-lg font-semibold text-foreground">
+                      Home Performance
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                       <FormField
                         control={form.control}
                         name="home_played"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Played</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Played
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -597,7 +723,9 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
@@ -615,7 +743,9 @@ useEffect(() => {
                         name="home_won"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Won</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Won
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -624,14 +754,14 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
                             </FormControl>
-                            <FormDescription>
-                              Home matches won
-                            </FormDescription>
+                            <FormDescription>Home matches won</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -642,7 +772,9 @@ useEffect(() => {
                         name="home_draw"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Draw</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Draw
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -651,7 +783,9 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
@@ -665,13 +799,15 @@ useEffect(() => {
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                       <FormField
                         control={form.control}
                         name="home_lost"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Lost</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Lost
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -680,14 +816,14 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
                             </FormControl>
-                            <FormDescription>
-                              Home matches lost
-                            </FormDescription>
+                            <FormDescription>Home matches lost</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -698,7 +834,9 @@ useEffect(() => {
                         name="home_goals_for"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Goals For</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Goals For
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -707,14 +845,14 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
                             </FormControl>
-                            <FormDescription>
-                              Home goals scored
-                            </FormDescription>
+                            <FormDescription>Home goals scored</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -725,7 +863,9 @@ useEffect(() => {
                         name="home_goals_against"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Goals Against</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Goals Against
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -734,7 +874,9 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
@@ -750,14 +892,18 @@ useEffect(() => {
                   </div>
 
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-foreground">Away Performance</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <h3 className="text-lg font-semibold text-foreground">
+                      Away Performance
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                       <FormField
                         control={form.control}
                         name="away_played"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Played</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Played
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -766,7 +912,9 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
@@ -784,7 +932,9 @@ useEffect(() => {
                         name="away_won"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Won</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Won
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -793,14 +943,14 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
                             </FormControl>
-                            <FormDescription>
-                              Away matches won
-                            </FormDescription>
+                            <FormDescription>Away matches won</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -811,7 +961,9 @@ useEffect(() => {
                         name="away_draw"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Draw</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Draw
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -820,7 +972,9 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
@@ -834,13 +988,15 @@ useEffect(() => {
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                       <FormField
                         control={form.control}
                         name="away_lost"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Lost</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Lost
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -849,14 +1005,14 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
                             </FormControl>
-                            <FormDescription>
-                              Away matches lost
-                            </FormDescription>
+                            <FormDescription>Away matches lost</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -867,7 +1023,9 @@ useEffect(() => {
                         name="away_goals_for"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Goals For</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Goals For
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -876,14 +1034,14 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
                             </FormControl>
-                            <FormDescription>
-                              Away goals scored
-                            </FormDescription>
+                            <FormDescription>Away goals scored</FormDescription>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -894,7 +1052,9 @@ useEffect(() => {
                         name="away_goals_against"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="font-medium text-foreground">Goals Against</FormLabel>
+                            <FormLabel className="font-medium text-foreground">
+                              Goals Against
+                            </FormLabel>
                             <FormControl>
                               <Input
                                 type="number"
@@ -903,7 +1063,9 @@ useEffect(() => {
                                 value={field.value || ""}
                                 onChange={(e) => {
                                   const value = e.target.value;
-                                  field.onChange(value === "" ? undefined : Number(value));
+                                  field.onChange(
+                                    value === "" ? undefined : Number(value)
+                                  );
                                 }}
                                 className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
                               />
@@ -921,13 +1083,13 @@ useEffect(() => {
               </Tabs>
             </CardContent>
 
-            <CardFooter className="bg-muted/20 px-8 py-6 border-t border-border/50">
-              <div className="flex justify-between w-full">
+            <CardFooter className="bg-muted/20 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-t border-border/50">
+              <div className="flex flex-col sm:flex-row justify-between w-full gap-3 sm:gap-0">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={onCancel}
-                  className="h-11 px-6 hover:bg-muted transition-colors rounded-lg"
+                  className="h-10 sm:h-11 px-4 sm:px-6 hover:bg-muted transition-colors rounded-lg w-full sm:w-auto"
                 >
                   <X className="mr-2 h-4 w-4" />
                   Cancel
@@ -935,7 +1097,7 @@ useEffect(() => {
                 <Button
                   type="submit"
                   disabled={form.formState.isSubmitting}
-                  className="h-11 px-6 shadow-sm hover:shadow-md transition-all duration-200 rounded-lg"
+                  className="h-10 sm:h-11 px-4 sm:px-6 shadow-sm hover:shadow-md transition-all duration-200 rounded-lg w-full sm:w-auto"
                 >
                   {form.formState.isSubmitting ? (
                     <>

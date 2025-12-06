@@ -105,7 +105,7 @@ export default function StandingsTable() {
   if (error)
     return (
       <Card className="border-destructive/50 bg-destructive/5">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex items-center space-x-2 text-destructive">
             <Trophy className="h-5 w-5" />
             <span>
@@ -124,76 +124,76 @@ export default function StandingsTable() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="bg-linear-to-br from-primary/5 to-primary/10 border-primary/20">
-          <CardContent className="p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   Total Teams
                 </p>
-                <p className="text-3xl font-bold text-foreground mt-1">
+                <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
                   {standings?.length || 0}
                 </p>
               </div>
-              <div className="p-3 bg-primary/10 rounded-full">
-                <Shield className="h-6 w-6 text-primary" />
+              <div className="p-2 sm:p-3 bg-primary/10 rounded-full">
+                <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-linear-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-green-500/5 to-green-500/10 border-green-500/20">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   Current Season
                 </p>
-                <p className="text-3xl font-bold text-foreground mt-1">
+                <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
                   {filterSeason === "all" ? "All" : filterSeason}
                 </p>
               </div>
-              <div className="p-3 bg-green-500/10 rounded-full">
-                <TrendingUp className="h-6 w-6 text-green-500" />
+              <div className="p-2 sm:p-3 bg-green-500/10 rounded-full">
+                <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-green-500" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-linear-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-blue-500/5 to-blue-500/10 border-blue-500/20">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   Active Leagues
                 </p>
-                <p className="text-3xl font-bold text-foreground mt-1">
+                <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
                   {new Set(standings?.map(s => s.league?.id)).size || 0}
                 </p>
               </div>
-              <div className="p-3 bg-blue-500/10 rounded-full">
-                <Trophy className="h-6 w-6 text-blue-500" />
+              <div className="p-2 sm:p-3 bg-blue-500/10 rounded-full">
+                <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-linear-gradient-to-br from-purple-500/5 to-purple-500/10 border-purple-500/20">
-          <CardContent className="p-6">
+        <Card className="bg-gradient-to-br from-purple-500/5 to-purple-500/10 border-purple-500/20 sm:col-span-2 lg:col-span-1">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   Total Goals
                 </p>
-                <p className="text-3xl font-bold text-foreground mt-1">
+                <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
                   {standings?.reduce((sum, s) => sum + (s.goals_for || 0), 0) || 0}
                 </p>
               </div>
-              <div className="p-3 bg-purple-500/10 rounded-full">
-                <TrendingUp className="h-6 w-6 text-purple-500" />
+              <div className="p-2 sm:p-3 bg-purple-500/10 rounded-full">
+                <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
               </div>
             </div>
           </CardContent>
@@ -202,60 +202,68 @@ export default function StandingsTable() {
 
       {/* Main Content Card */}
       <Card className="shadow-sm border border-border/50 bg-card rounded-xl overflow-hidden">
-        <CardHeader className="bg-background/50 border-b border-border/50 px-6 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <CardTitle className="text-xl font-bold text-foreground flex items-center gap-2">
+        <CardHeader className="bg-background/50 border-b border-border/50 px-4 sm:px-6 py-4">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
                 <Trophy className="h-5 w-5 text-primary" />
                 Standings ({standings?.length || 0})
               </CardTitle>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 h-9 bg-background border-input focus:border-primary w-64 rounded-lg transition-all"
-                />
-              </div>
-              <Select value={filterLeague} onValueChange={setFilterLeague}>
-                <SelectTrigger className="h-9 w-40">
-                  <SelectValue placeholder="Filter by league" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Leagues</SelectItem>
-                  {leagues?.map((league) => (
-                    <SelectItem key={league.id} value={league.id}>
-                      {league.name_en}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={filterSeason} onValueChange={setFilterSeason}>
-                <SelectTrigger className="h-9 w-40">
-                  <SelectValue placeholder="Filter by season" />
-                </SelectTrigger>
-                <SelectContent>
-                  {seasons.map((season) => (
-                    <SelectItem key={season.value} value={season.value}>
-                      {season.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Link href="/cms/standings/create">
+              <Link href="/cms/standings/create" className="sm:hidden">
                 <Button size="sm" className="h-9 gap-2 rounded-lg shadow-sm">
                   <Plus className="h-4 w-4" />
-                  Add Standing
                 </Button>
               </Link>
+            </div>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="relative flex-1 sm:flex-initial">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search teams..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 h-9 bg-background border-input focus:border-primary w-full sm:w-64 rounded-lg transition-all"
+                />
+              </div>
+              <div className="hidden sm:flex items-center gap-3">
+                <Select value={filterLeague} onValueChange={setFilterLeague}>
+                  <SelectTrigger className="h-9 w-full sm:w-40">
+                    <SelectValue placeholder="Filter by league" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Leagues</SelectItem>
+                    {leagues?.map((league) => (
+                      <SelectItem key={league.id} value={league.id}>
+                        {league.name_en}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={filterSeason} onValueChange={setFilterSeason}>
+                  <SelectTrigger className="h-9 w-full sm:w-40">
+                    <SelectValue placeholder="Filter by season" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {seasons.map((season) => (
+                      <SelectItem key={season.value} value={season.value}>
+                        {season.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Link href="/cms/standings/create">
+                  <Button size="sm" className="h-9 gap-2 rounded-lg shadow-sm">
+                    <Plus className="h-4 w-4" />
+                    Add Standing
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </CardHeader>
 
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto">
           <Table>
             <TableHeader className="bg-muted/30">
               <TableRow className="hover:bg-transparent border-b border-border/50">
@@ -335,10 +343,10 @@ export default function StandingsTable() {
                           />
                         )}
                         <div className="flex flex-col">
-                          <span className="font-medium text-foreground">
+                          <span className="font-medium text-foreground truncate max-w-[200px]">
                             {standing.team?.name_en}
                           </span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-muted-foreground truncate max-w-[200px]">
                             {standing.league?.name_en}
                           </span>
                         </div>
@@ -408,7 +416,7 @@ export default function StandingsTable() {
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent>
+                          <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete Standing</AlertDialogTitle>
                               <AlertDialogDescription>
@@ -417,8 +425,8 @@ export default function StandingsTable() {
                                 undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                              <AlertDialogCancel className="m-0">Cancel</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() =>
                                   handleDelete(
@@ -426,7 +434,7 @@ export default function StandingsTable() {
                                     standing.team?.name_en || ""
                                   )
                                 }
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 m-0"
                               >
                                 Delete
                               </AlertDialogAction>
@@ -442,9 +450,140 @@ export default function StandingsTable() {
           </Table>
         </div>
 
+        {/* Mobile/Tablet Card View */}
+        <div className="lg:hidden">
+          {filteredStandings.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 px-4">
+              <Trophy className="h-12 w-12 text-muted-foreground/20 mb-3" />
+              <p className="text-muted-foreground">No standings found.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border/50">
+              {filteredStandings.map((standing) => (
+                <div
+                  key={standing.id}
+                  className="p-4 hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 shrink-0">
+                      <span className="text-lg font-bold text-primary">
+                        {standing.rank}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-medium text-foreground text-sm truncate">
+                            {standing.team?.name_en}
+                          </h3>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {standing.league?.name_en}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Link href={`/cms/standings/${standing.id}/edit`}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-full"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Delete Standing
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete the standing for &quot;
+                                  {standing.team?.name_en}&quot;? This action
+                                  cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                                <AlertDialogCancel className="m-0">
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() =>
+                                    handleDelete(
+                                      standing.id,
+                                      standing.team?.name_en || ""
+                                    )
+                                  }
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 m-0"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-muted-foreground">Played:</span>
+                          <span className="font-medium text-foreground">
+                            {standing.played}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-muted-foreground">Points:</span>
+                          <span className="font-medium text-foreground">
+                            {standing.points}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-muted-foreground">W-D-L:</span>
+                          <span className="font-medium text-foreground">
+                            {standing.won}-{standing.draw}-{standing.lost}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-muted-foreground">GD:</span>
+                          <Badge
+                            variant={standing.gd > 0 ? "default" : standing.gd < 0 ? "destructive" : "secondary"}
+                            className="font-medium text-xs"
+                          >
+                            {standing.gd > 0 ? "+" : ""}
+                            {standing.gd}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-muted-foreground">Goals:</span>
+                          <span className="font-medium text-foreground">
+                            {standing.goals_for}-{standing.goals_against}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-muted-foreground">Season:</span>
+                          <span className="font-medium text-foreground">
+                            {standing.season}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Pagination Info */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-border/50 bg-background/50">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-4 border-t border-border/50 bg-background/50 gap-4">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
             <span>Show</span>
             <Select defaultValue="10">
               <SelectTrigger className="h-8 w-16">
@@ -456,10 +595,10 @@ export default function StandingsTable() {
                 <SelectItem value="50">50</SelectItem>
               </SelectContent>
             </Select>
-            <span>standings per page</span>
+            <span className="hidden sm:inline">standings per page</span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Button
               variant="outline"
               size="icon"
@@ -480,22 +619,24 @@ export default function StandingsTable() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 rounded-lg p-0"
+                className="h-8 w-8 rounded-lg p-0 hidden sm:flex"
               >
                 2
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 rounded-lg p-0"
+                className="h-8 w-8 rounded-lg p-0 hidden sm:flex"
               >
                 3
               </Button>
-              <span className="text-muted-foreground px-1">...</span>
+              <span className="text-muted-foreground px-1 hidden sm:inline">
+                ...
+              </span>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 rounded-lg p-0"
+                className="h-8 w-8 rounded-lg p-0 hidden sm:flex"
               >
                 12
               </Button>
