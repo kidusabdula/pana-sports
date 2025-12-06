@@ -117,17 +117,17 @@ export default function TopScorerForm({ topScorer, onSuccess, onCancel }: TopSco
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
       {/* Header Card */}
       <Card className="shadow-sm border border-border/50 bg-card rounded-xl overflow-hidden">
-        <CardHeader className="text-center py-8 bg-muted/20">
+        <CardHeader className="text-center py-6 sm:py-8 bg-muted/20">
           <div className="mx-auto p-3 bg-primary/10 rounded-full w-fit mb-4">
             <Trophy className="h-8 w-8 text-primary" />
           </div>
-          <CardTitle className="text-2xl font-bold text-foreground">
+          <CardTitle className="text-xl sm:text-2xl font-bold text-foreground">
             {isEditing ? "Edit Top Scorer" : "Create New Top Scorer"}
           </CardTitle>
-          <CardDescription className="text-base text-muted-foreground max-w-md mx-auto">
+          <CardDescription className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto px-4">
             {isEditing
               ? "Update player top scorer statistics below."
               : "Fill in the details to create a new top scorer entry."}
@@ -139,8 +139,8 @@ export default function TopScorerForm({ topScorer, onSuccess, onCancel }: TopSco
       <Card className="shadow-sm border border-border/50 bg-card rounded-xl overflow-hidden">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <CardContent className="p-8 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CardContent className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <FormField
                   control={form.control}
                   name="league_id"
@@ -206,7 +206,7 @@ export default function TopScorerForm({ topScorer, onSuccess, onCancel }: TopSco
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <FormField
                   control={form.control}
                   name="player_id"
@@ -262,7 +262,7 @@ export default function TopScorerForm({ topScorer, onSuccess, onCancel }: TopSco
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <FormField
                   control={form.control}
                   name="goals"
@@ -322,13 +322,13 @@ export default function TopScorerForm({ topScorer, onSuccess, onCancel }: TopSco
               </div>
             </CardContent>
 
-            <CardFooter className="bg-muted/20 px-8 py-6 border-t border-border/50">
-              <div className="flex justify-between w-full">
+            <CardFooter className="bg-muted/20 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 border-t border-border/50">
+              <div className="flex flex-col sm:flex-row justify-between w-full gap-3 sm:gap-0">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={onCancel}
-                  className="h-11 px-6 hover:bg-muted transition-colors rounded-lg"
+                  className="h-10 sm:h-11 px-4 sm:px-6 hover:bg-muted transition-colors rounded-lg w-full sm:w-auto"
                 >
                   <X className="mr-2 h-4 w-4" />
                   Cancel
@@ -336,7 +336,7 @@ export default function TopScorerForm({ topScorer, onSuccess, onCancel }: TopSco
                 <Button
                   type="submit"
                   disabled={form.formState.isSubmitting}
-                  className="h-11 px-6 shadow-sm hover:shadow-md transition-all duration-200 rounded-lg"
+                  className="h-10 sm:h-11 px-4 sm:px-6 shadow-sm hover:shadow-md transition-all duration-200 rounded-lg w-full sm:w-auto"
                 >
                   {form.formState.isSubmitting ? (
                     <>
