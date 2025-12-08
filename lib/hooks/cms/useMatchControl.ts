@@ -1,3 +1,4 @@
+// lib/hooks/cms/useMatchControl.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Match } from '@/lib/schemas/match'
 
@@ -26,6 +27,9 @@ export function useMatchControl(matchId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['matches', matchId] })
       queryClient.invalidateQueries({ queryKey: ['matches'] })
+    },
+    onError: (error) => {
+      console.error('Match control error:', error)
     },
   })
 }

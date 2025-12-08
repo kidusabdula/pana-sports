@@ -1,11 +1,11 @@
 // lib/hooks/public/useMatchDetail.ts
-import { useQuery } from '@tanstack/react-query'
+import { useQuery } from "@tanstack/react-query";
 
 // Define types
 export type MatchEvent = {
   id: string;
   match_id: string;
-  player_id: string;
+  player_id: string | null;
   team_id: string;
   minute: number;
   type: string;
@@ -18,7 +18,7 @@ export type MatchEvent = {
     slug: string;
     jersey_number: number;
     photo_url: string;
-  };
+  } | null;
   team: {
     id: string;
     name_en: string;
@@ -78,19 +78,19 @@ export type MatchDetailResponse = {
 
 // API helper function
 async function fetchMatchDetail(id: string) {
-  const res = await fetch(`/api/public/matches/${id}`)
+  const res = await fetch(`/api/public/matches/${id}`);
   if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to fetch match details')
+    const error = await res.json();
+    throw new Error(error.error || "Failed to fetch match details");
   }
-  return res.json() as Promise<MatchDetailResponse>
+  return res.json() as Promise<MatchDetailResponse>;
 }
 
 // React Query hook
 export function useMatchDetail(id: string) {
   return useQuery({
-    queryKey: ['match-detail', id],
+    queryKey: ["match-detail", id],
     queryFn: () => fetchMatchDetail(id),
     enabled: !!id,
-  })
+  });
 }

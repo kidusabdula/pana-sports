@@ -121,7 +121,7 @@ function PremierLeaguePageContent({ leagueId }: PremierLeaguePageContentProps) {
       <header className="bg-zinc-900/80 backdrop-blur-md border-b border-zinc-800/50 sticky top-0 z-40">
         <div className="container mx-auto px-3 sm:px-4">
           {/* Top Navigation Bar */}
-          <div className="flex items-center justify-between py-2">
+          <div className="flex items-center justify-between py-4">
             {/* Left Section */}
             <div className="flex items-center gap-2 sm:gap-3">
               <Link href="/">

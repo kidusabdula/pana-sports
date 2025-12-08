@@ -95,7 +95,7 @@ const TimelineEvent = ({
               isSub && "text-green-400"
             )}
           >
-            {event.player.name_en}
+            {event.player?.name_en || "Unknown Player"}
           </div>
           {isSub && (
             <div className="text-[10px] text-red-400 font-medium">
@@ -152,7 +152,6 @@ const StatCard = ({
   value,
   color = "text-primary",
 }: {
-  
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: any;
   label: string;

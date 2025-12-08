@@ -65,6 +65,15 @@ import {
   XCircle,
   Save,
   RefreshCw,
+  Clock,
+  Zap,
+  Eye,
+  EyeOff,
+  Flag,
+  Triangle,
+  Circle,
+  Minus,
+  MoreHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -88,6 +97,13 @@ const StatusBadge = ({ status }: { status: string }) => {
       icon: XCircle,
       variant: "destructive" as const,
     },
+    half_time: { label: "Half Time", icon: Timer, variant: "outline" as const },
+    extra_time: {
+      label: "Extra Time",
+      icon: Clock,
+      variant: "outline" as const,
+    },
+    penalties: { label: "Penalties", icon: Flag, variant: "outline" as const },
   };
 
   const config =
@@ -101,6 +117,33 @@ const StatusBadge = ({ status }: { status: string }) => {
     </Badge>
   );
 };
+
+// Formation types
+const formations = [
+  { id: "4-4-2", name: "4-4-2" },
+  { id: "4-3-3", name: "4-3-3" },
+  { id: "3-5-2", name: "3-5-2" },
+  { id: "5-3-2", name: "5-3-2" },
+  { id: "4-2-3-1", name: "4-2-3-1" },
+  { id: "3-4-3", name: "3-4-3" },
+];
+
+// Position types
+const positions = [
+  { id: "GK", name: "Goalkeeper" },
+  { id: "LB", name: "Left Back" },
+  { id: "RB", name: "Right Back" },
+  { id: "CB", name: "Center Back" },
+  { id: "LM", name: "Left Midfielder" },
+  { id: "RM", name: "Right Midfielder" },
+  { id: "CM", name: "Central Midfielder" },
+  { id: "CDM", name: "Defensive Midfielder" },
+  { id: "CAM", name: "Attacking Midfielder" },
+  { id: "LW", name: "Left Winger" },
+  { id: "RW", name: "Right Winger" },
+  { id: "ST", name: "Striker" },
+  { id: "CF", name: "Center Forward" },
+];
 
 interface MatchControlPanelProps {
   match: Match;
@@ -118,15 +161,58 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
   const [homeLineup, setHomeLineup] = useState<MatchLineup[]>([]);
   const [awayLineup, setAwayLineup] = useState<MatchLineup[]>([]);
   const [isSubstitution, setIsSubstitution] = useState(false);
+  const [homeFormation, setHomeFormation] = useState("4-4-2");
+  const [awayFormation, setAwayFormation] = useState("4-4-2");
+  const [isClockRunning, setIsClockRunning] = useState(false);
+  const [extraTime, setExtraTime] = useState({ firstHalf: 0, secondHalf: 0 });
+  const [varDialogOpen, setVarDialogOpen] = useState(false);
+  const [varType, setVarType] = useState("");
+  const [penaltyDialogOpen, setPenaltyDialogOpen] = useState(false);
+  const [penaltyTeam, setPenaltyTeam] = useState("");
+  const [penaltyResult, setPenaltyResult] = useState("");
+  const [matchMinute, setMatchMinute] = useState(0);
+  const [matchSecond, setMatchSecond] = useState(0);
+  const [isExtraTime, setIsExtraTime] = useState(false);
+  const [isPenaltyShootout, setIsPenaltyShootout] = useState(false);
 
   const supabase = createClient();
-  const { data: events, isLoading, refetch: refetchEvents } = useMatchEvents(match.id);
+  const {
+    data: events,
+    isLoading,
+    refetch: refetchEvents,
+  } = useMatchEvents(match.id);
   const createEventMutation = useCreateMatchEvent(match.id);
   const matchControlMutation = useMatchControl(match.id);
   const { data: lineups, refetch: refetchLineups } = useMatchLineups(match.id);
   const createLineupsMutation = useCreateMatchLineups(match.id);
   const deleteLineupsMutation = useDeleteMatchLineups(match.id);
   const { data: teams } = useTeams();
+
+  // Real-time clock effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (isClockRunning && match.status === "live") {
+      interval = setInterval(() => {
+        setMatchSecond((prevSecond) => {
+          if (prevSecond >= 59) {
+            setMatchMinute((prevMinute) => prevMinute + 1);
+            return 0;
+          }
+          return prevSecond + 1;
+        });
+      }, 1000);
+    }
+
+    return () => clearInterval(interval);
+  }, [isClockRunning, match.status]);
+
+  // Initialize match minute from match data
+  useEffect(() => {
+    if (match.minute) {
+      setMatchMinute(match.minute);
+    }
+  }, [match.minute]);
 
   // Set up real-time subscription for match events
   useEffect(() => {
@@ -181,7 +267,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
     if (lineups) {
       const homeTeamId = match.home_team_id;
       const awayTeamId = match.away_team_id;
-      
+
       // Use setTimeout to avoid calling setState synchronously within effect
       setTimeout(() => {
         setHomeLineup(lineups.filter((l) => l.team_id === homeTeamId));
@@ -196,11 +282,36 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
   const awayTeamPlayers =
     teams?.find((t) => t.id === match.away_team_id)?.players || [];
 
+  // Format time display
+  const formatTime = (minute: number, second: number) => {
+    return `${minute.toString().padStart(2, "0")}:${second
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
   // Match control functions
   const startMatch = () => {
     matchControlMutation.mutate({
       status: "live",
       minute: 0,
+    });
+    setIsClockRunning(true);
+    setMatchMinute(0);
+    setMatchSecond(0);
+    setIsExtraTime(false);
+    setIsPenaltyShootout(false);
+
+    // Create match start event
+    createEventMutation.mutate({
+      match_id: match.id,
+      type: "match_start",
+      minute: 0,
+      description_en: "Match started",
+      description_am: "ጨዋት ጀመረ",
+      player_id: null,
+      team_id: null,
+      is_assist: false,
+      confirmed: false,
     });
   };
 
@@ -208,21 +319,50 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
     matchControlMutation.mutate({
       status: "postponed",
     });
+    setIsClockRunning(false);
+
+    // Create pause event
+    createEventMutation.mutate({
+      match_id: match.id,
+      type: "match_pause",
+      minute: matchMinute,
+      description_en: "Match paused",
+      description_am: "ጨዋት ቆመ",
+      player_id: null,
+      team_id: null,
+      is_assist: false,
+      confirmed: false,
+    });
   };
 
   const resumeMatch = () => {
     matchControlMutation.mutate({
       status: "live",
     });
+    setIsClockRunning(true);
+
+    // Create resume event
+    createEventMutation.mutate({
+      match_id: match.id,
+      type: "match_resume",
+      minute: matchMinute,
+      description_en: "Match resumed",
+      description_am: "ጨዋት ተመለሰ",
+      player_id: null,
+      team_id: null,
+      is_assist: false,
+      confirmed: false,
+    });
   };
 
   const halfTime = () => {
     matchControlMutation.mutate({
-      status: "live",
+      status: "half_time",
       minute: 45,
     });
+    setIsClockRunning(false);
 
-    // Create half-time event with proper typing
+    // Create half-time event
     createEventMutation.mutate({
       match_id: match.id,
       type: "half_time",
@@ -241,8 +381,9 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
       status: "live",
       minute: 46,
     });
+    setIsClockRunning(true);
 
-    // Create second half event with proper typing
+    // Create second half event
     createEventMutation.mutate({
       match_id: match.id,
       type: "second_half",
@@ -261,8 +402,9 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
       status: "completed",
       minute: 90,
     });
+    setIsClockRunning(false);
 
-    // Create full-time event with proper typing
+    // Create full-time event
     createEventMutation.mutate({
       match_id: match.id,
       type: "match_end",
@@ -276,7 +418,92 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
     });
   };
 
-  // Event creation functions with proper typing
+  const startExtraTime = () => {
+    matchControlMutation.mutate({
+      status: "extra_time",
+      minute: 91,
+    });
+    setIsClockRunning(true);
+    setIsExtraTime(true);
+
+    // Create extra time event
+    createEventMutation.mutate({
+      match_id: match.id,
+      type: "extra_time_start",
+      minute: 91,
+      description_en: "Extra time started",
+      description_am: "ተጨማሪ ጊዜ ጀመረ",
+      player_id: null,
+      team_id: null,
+      is_assist: false,
+      confirmed: false,
+    });
+  };
+
+  const endExtraTime = () => {
+    matchControlMutation.mutate({
+      status: "completed",
+      minute: 120,
+    });
+    setIsClockRunning(false);
+
+    // Create extra time end event
+    createEventMutation.mutate({
+      match_id: match.id,
+      type: "extra_time_end",
+      minute: 120,
+      description_en: "Extra time ended",
+      description_am: "ተጨማሪ ጊዜ ወጣ",
+      player_id: null,
+      team_id: null,
+      is_assist: false,
+      confirmed: false,
+    });
+  };
+
+  const startPenaltyShootout = () => {
+    matchControlMutation.mutate({
+      status: "penalties",
+      minute: 120,
+    });
+    setIsClockRunning(false);
+    setIsPenaltyShootout(true);
+
+    // Create penalty shootout event
+    createEventMutation.mutate({
+      match_id: match.id,
+      type: "penalty_shootout_start",
+      minute: 120,
+      description_en: "Penalty shootout started",
+      description_am: "የፔናልቲ ውስጥ ውድድር ጀመረ",
+      player_id: null,
+      team_id: null,
+      is_assist: false,
+      confirmed: false,
+    });
+  };
+
+  const endPenaltyShootout = () => {
+    matchControlMutation.mutate({
+      status: "completed",
+      minute: 120,
+    });
+
+    // Create penalty shootout end event
+    createEventMutation.mutate({
+      match_id: match.id,
+      type: "penalty_shootout_end",
+      minute: 120,
+      description_en: "Penalty shootout ended",
+      description_am: "የፔናልቲ ውስጥ ውድድር ወጣ",
+      player_id: null,
+      team_id: null,
+      is_assist: false,
+      confirmed: false,
+    });
+  };
+
+  // Event creation functions
   const addGoal = () => {
     if (!selectedPlayer || !selectedTeam) {
       toast.error("Please select a player and team");
@@ -287,7 +514,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
       match_id: match.id,
       player_id: selectedPlayer,
       team_id: selectedTeam,
-      minute: eventMinute,
+      minute: matchMinute,
       type: "goal",
       description_en: eventDescription,
       is_assist: false,
@@ -306,6 +533,86 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
     setEventDescription("");
   };
 
+  const addOwnGoal = () => {
+    if (!selectedPlayer || !selectedTeam) {
+      toast.error("Please select a player and team");
+      return;
+    }
+
+    createEventMutation.mutate({
+      match_id: match.id,
+      player_id: selectedPlayer,
+      team_id: selectedTeam,
+      minute: matchMinute,
+      type: "own_goal",
+      description_en: eventDescription,
+      is_assist: false,
+      confirmed: false,
+    });
+
+    // Update score based on team (own goal scores for opposite team)
+    const isHomeTeam = selectedTeam === match.home_team_id;
+    matchControlMutation.mutate({
+      score_home: !isHomeTeam ? (match.score_home || 0) + 1 : match.score_home,
+      score_away: isHomeTeam ? (match.score_away || 0) + 1 : match.score_away,
+    });
+
+    // Reset form
+    setSelectedPlayer("");
+    setEventDescription("");
+  };
+
+  const addPenaltyGoal = () => {
+    if (!selectedPlayer || !selectedTeam) {
+      toast.error("Please select a player and team");
+      return;
+    }
+
+    createEventMutation.mutate({
+      match_id: match.id,
+      player_id: selectedPlayer,
+      team_id: selectedTeam,
+      minute: matchMinute,
+      type: "penalty_goal",
+      description_en: eventDescription,
+      is_assist: false,
+      confirmed: false,
+    });
+
+    // Update score based on team
+    const isHomeTeam = selectedTeam === match.home_team_id;
+    matchControlMutation.mutate({
+      score_home: isHomeTeam ? (match.score_home || 0) + 1 : match.score_home,
+      score_away: !isHomeTeam ? (match.score_away || 0) + 1 : match.score_away,
+    });
+
+    // Reset form
+    setSelectedPlayer("");
+    setEventDescription("");
+  };
+
+  const addMissedPenalty = () => {
+    if (!selectedPlayer || !selectedTeam) {
+      toast.error("Please select a player and team");
+      return;
+    }
+
+    createEventMutation.mutate({
+      match_id: match.id,
+      player_id: selectedPlayer,
+      team_id: selectedTeam,
+      minute: matchMinute,
+      type: "penalty_miss",
+      description_en: eventDescription,
+      is_assist: false,
+      confirmed: false,
+    });
+
+    // Reset form
+    setSelectedPlayer("");
+    setEventDescription("");
+  };
+
   const addYellowCard = () => {
     if (!selectedPlayer || !selectedTeam) {
       toast.error("Please select a player and team");
@@ -316,7 +623,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
       match_id: match.id,
       player_id: selectedPlayer,
       team_id: selectedTeam,
-      minute: eventMinute,
+      minute: matchMinute,
       type: "yellow",
       description_en: eventDescription,
       is_assist: false,
@@ -338,8 +645,30 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
       match_id: match.id,
       player_id: selectedPlayer,
       team_id: selectedTeam,
-      minute: eventMinute,
+      minute: matchMinute,
       type: "red",
+      description_en: eventDescription,
+      is_assist: false,
+      confirmed: false,
+    });
+
+    // Reset form
+    setSelectedPlayer("");
+    setEventDescription("");
+  };
+
+  const addSecondYellow = () => {
+    if (!selectedPlayer || !selectedTeam) {
+      toast.error("Please select a player and team");
+      return;
+    }
+
+    createEventMutation.mutate({
+      match_id: match.id,
+      player_id: selectedPlayer,
+      team_id: selectedTeam,
+      minute: matchMinute,
+      type: "second_yellow",
       description_en: eventDescription,
       is_assist: false,
       confirmed: false,
@@ -359,14 +688,14 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
     createEventMutation.mutate({
       match_id: match.id,
       team_id: selectedTeam,
-      minute: eventMinute,
+      minute: matchMinute,
       type: "sub",
       description_en: eventDescription,
       subbed_in_player_id: selectedSubInPlayer,
       subbed_out_player_id: selectedSubOutPlayer,
       is_assist: false,
       confirmed: false,
-      player_id: null, // Add missing player_id field
+      player_id: null,
     });
 
     // Reset form
@@ -375,14 +704,180 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
     setEventDescription("");
   };
 
+  const addVarCheck = () => {
+    if (!varType) {
+      toast.error("Please select a VAR check type");
+      return;
+    }
+
+    createEventMutation.mutate({
+      match_id: match.id,
+      minute: matchMinute,
+      type: "var_check",
+      description_en: `VAR check for ${varType}`,
+      description_am: `የVAR ምርመራ ለ ${varType}`,
+      player_id: null,
+      team_id: null,
+      is_assist: false,
+      confirmed: false,
+    });
+
+    // Reset form
+    setVarType("");
+    setVarDialogOpen(false);
+  };
+
+  const addVarDecision = (decision: "goal" | "no_goal") => {
+    createEventMutation.mutate({
+      match_id: match.id,
+      minute: matchMinute,
+      type: decision === "goal" ? "var_goal" : "var_no_goal",
+      description_en:
+        decision === "goal" ? "VAR: Goal confirmed" : "VAR: Goal disallowed",
+      description_am: decision === "goal" ? "VAR: ጎል ተረጋገጠ" : "VAR: ጎል ተወገደ",
+      player_id: null,
+      team_id: null,
+      is_assist: false,
+      confirmed: false,
+    });
+
+    // Update score if VAR confirms a goal
+    if (decision === "goal" && selectedPlayer && selectedTeam) {
+      const isHomeTeam = selectedTeam === match.home_team_id;
+      matchControlMutation.mutate({
+        score_home: isHomeTeam ? (match.score_home || 0) + 1 : match.score_home,
+        score_away: !isHomeTeam
+          ? (match.score_away || 0) + 1
+          : match.score_away,
+      });
+    }
+
+    setVarDialogOpen(false);
+  };
+
+  const addPenaltyShootoutResult = () => {
+    if (!penaltyTeam || !penaltyResult) {
+      toast.error("Please select a team and result");
+      return;
+    }
+
+    createEventMutation.mutate({
+      match_id: match.id,
+      team_id: penaltyTeam,
+      minute: 120,
+      type:
+        penaltyResult === "scored"
+          ? "penalty_shootout_scored"
+          : "penalty_shootout_missed",
+      description_en:
+        penaltyResult === "scored" ? "Penalty scored" : "Penalty missed",
+      description_am: penaltyResult === "scored" ? "ፔናልቲ ገባ" : "ፔናልቲ አልገባም",
+      player_id: null,
+      is_assist: false,
+      confirmed: false,
+    });
+
+    // Reset form
+    setPenaltyTeam("");
+    setPenaltyResult("");
+    setPenaltyDialogOpen(false);
+  };
+
+  const addCornerKick = () => {
+    if (!selectedTeam) {
+      toast.error("Please select a team");
+      return;
+    }
+
+    createEventMutation.mutate({
+      match_id: match.id,
+      team_id: selectedTeam,
+      minute: matchMinute,
+      type: "corner",
+      description_en: eventDescription,
+      is_assist: false,
+      confirmed: false,
+      player_id: null,
+    });
+
+    // Reset form
+    setEventDescription("");
+  };
+
+  const addFreeKick = () => {
+    if (!selectedTeam) {
+      toast.error("Please select a team");
+      return;
+    }
+
+    createEventMutation.mutate({
+      match_id: match.id,
+      team_id: selectedTeam,
+      minute: matchMinute,
+      type: "free_kick",
+      description_en: eventDescription,
+      is_assist: false,
+      confirmed: false,
+      player_id: null,
+    });
+
+    // Reset form
+    setEventDescription("");
+  };
+
+  const addOffside = () => {
+    if (!selectedTeam) {
+      toast.error("Please select a team");
+      return;
+    }
+
+    createEventMutation.mutate({
+      match_id: match.id,
+      team_id: selectedTeam,
+      minute: matchMinute,
+      type: "offside",
+      description_en: eventDescription,
+      is_assist: false,
+      confirmed: false,
+      player_id: null,
+    });
+
+    // Reset form
+    setEventDescription("");
+  };
+
+  const addInjuryTime = (half: "first" | "second", minutes: number) => {
+    createEventMutation.mutate({
+      match_id: match.id,
+      minute: half === "first" ? 45 : 90,
+      type: "injury_time",
+      description_en: `${minutes} minutes of injury time added to ${half} half`,
+      description_am: `${minutes} ደቂቃዎች የጉዳት ጊዜ ተጨምሮ ተጨማለረ ${
+        half === "first" ? "መጀመሪያ" : "ሁለት"
+      } ጊዜ`,
+      player_id: null,
+      team_id: null,
+      is_assist: false,
+      confirmed: false,
+    });
+
+    // Update extra time state
+    if (half === "first") {
+      setExtraTime({ ...extraTime, firstHalf: minutes });
+    } else {
+      setExtraTime({ ...extraTime, secondHalf: minutes });
+    }
+  };
+
   const updateMinute = (newMinute: number) => {
     matchControlMutation.mutate({
       minute: newMinute,
     });
-    setEventMinute(newMinute);
+    setMatchMinute(newMinute);
+    setMatchSecond(0);
   };
 
-  // Lineup management with proper typing
+  // Lineup management
   const saveLineups = () => {
     // Transform lineup data to match expected schema
     const allLineups = [...homeLineup, ...awayLineup].map((lineup) => ({
@@ -445,7 +940,9 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                   <div className="text-sm text-muted-foreground">
                     {match.status === "live" && (
                       <Badge variant="outline" className="mt-1">
-                        {match.minute}&apos;
+                        {formatTime(matchMinute, matchSecond)}
+                        {isExtraTime && " (ET)"}
+                        {isPenaltyShootout && " (PEN)"}
                       </Badge>
                     )}
                   </div>
@@ -480,12 +977,21 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                 {match.status === "live" && (
                   <>
                     <Button
-                      onClick={pauseMatch}
+                      onClick={isClockRunning ? pauseMatch : resumeMatch}
                       variant="outline"
                       className="gap-2"
                     >
-                      <Pause className="h-4 w-4" />
-                      Pause
+                      {isClockRunning ? (
+                        <>
+                          <Pause className="h-4 w-4" />
+                          Pause
+                        </>
+                      ) : (
+                        <>
+                          <Play className="h-4 w-4" />
+                          Resume
+                        </>
+                      )}
                     </Button>
                     <Button
                       onClick={halfTime}
@@ -503,9 +1009,75 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                       <RotateCcw className="h-4 w-4" />
                       Second Half
                     </Button>
+                    <Button
+                      onClick={startExtraTime}
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      <Clock className="h-4 w-4" />
+                      Extra Time
+                    </Button>
+                    <Button
+                      onClick={startPenaltyShootout}
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      <Flag className="h-4 w-4" />
+                      Penalties
+                    </Button>
                     <Button onClick={fullTime} className="gap-2">
                       <Square className="h-4 w-4" />
                       Full Time
+                    </Button>
+                  </>
+                )}
+
+                {match.status === "half_time" && (
+                  <Button onClick={secondHalf} className="gap-2">
+                    <RotateCcw className="h-4 w-4" />
+                    Start Second Half
+                  </Button>
+                )}
+
+                {match.status === "extra_time" && (
+                  <>
+                    <Button
+                      onClick={isClockRunning ? pauseMatch : resumeMatch}
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      {isClockRunning ? (
+                        <>
+                          <Pause className="h-4 w-4" />
+                          Pause
+                        </>
+                      ) : (
+                        <>
+                          <Play className="h-4 w-4" />
+                          Resume
+                        </>
+                      )}
+                    </Button>
+                    <Button onClick={endExtraTime} className="gap-2">
+                      <Square className="h-4 w-4" />
+                      End Extra Time
+                    </Button>
+                  </>
+                )}
+
+                {match.status === "penalties" && (
+                  <>
+                    <Button
+                      onClick={() => setPenaltyDialogOpen(true)}
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      <Flag className="h-4 w-4" />
+                      Record Penalty
+                    </Button>
+                    <Button onClick={endPenaltyShootout} className="gap-2">
+                      <Square className="h-4 w-4" />
+                      End Penalties
                     </Button>
                   </>
                 )}
@@ -527,11 +1099,15 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="truncate">{match.venue?.name_en || "TBD"}</span>
+                <span className="truncate">
+                  {match.venue?.name_en || "TBD"}
+                </span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Trophy className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="truncate">{match.league?.name_en || "No League"}</span>
+                <span className="truncate">
+                  {match.league?.name_en || "No League"}
+                </span>
               </div>
 
               {/* Minute Control */}
@@ -543,19 +1119,56 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                   <Input
                     id="minute"
                     type="number"
-                    value={eventMinute}
-                    onChange={(e) => setEventMinute(Number(e.target.value))}
+                    value={matchMinute}
+                    onChange={(e) => setMatchMinute(Number(e.target.value))}
                     className="w-20"
                   />
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => updateMinute(eventMinute)}
+                    onClick={() => updateMinute(matchMinute)}
                   >
                     Update
                   </Button>
                 </div>
               </div>
+
+              {/* Extra Time Controls */}
+              {match.status === "live" && (
+                <div className="pt-4">
+                  <Label className="text-sm font-medium">Injury Time</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => addInjuryTime("first", 1)}
+                    >
+                      +1' 1st Half
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => addInjuryTime("first", 2)}
+                    >
+                      +2' 1st Half
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => addInjuryTime("second", 1)}
+                    >
+                      +1' 2nd Half
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => addInjuryTime("second", 2)}
+                    >
+                      +2' 2nd Half
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
@@ -573,10 +1186,11 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
         </CardHeader>
         <CardContent className="p-4 sm:p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="control">Control</TabsTrigger>
               <TabsTrigger value="events">Events</TabsTrigger>
               <TabsTrigger value="lineups">Lineups</TabsTrigger>
+              <TabsTrigger value="var">VAR</TabsTrigger>
             </TabsList>
             <TabsContent value="control" className="space-y-4 sm:space-y-6">
               {/* Event Controls */}
@@ -644,12 +1258,44 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                       Goal
                     </Button>
                     <Button
+                      onClick={addOwnGoal}
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      <Goal className="h-4 w-4" />
+                      Own Goal
+                    </Button>
+                    <Button
+                      onClick={addPenaltyGoal}
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      <Flag className="h-4 w-4" />
+                      Penalty Goal
+                    </Button>
+                    <Button
+                      onClick={addMissedPenalty}
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      <XCircle className="h-4 w-4" />
+                      Missed Penalty
+                    </Button>
+                    <Button
                       onClick={addYellowCard}
                       variant="outline"
                       className="gap-2"
                     >
                       <CreditCard className="h-4 w-4" />
                       Yellow Card
+                    </Button>
+                    <Button
+                      onClick={addSecondYellow}
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      <CreditCard className="h-4 w-4" />
+                      Second Yellow
                     </Button>
                     <Button
                       onClick={addRedCard}
@@ -666,6 +1312,38 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                     >
                       <UserMinus className="h-4 w-4" />
                       Substitution
+                    </Button>
+                    <Button
+                      onClick={addCornerKick}
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      <Flag className="h-4 w-4" />
+                      Corner
+                    </Button>
+                    <Button
+                      onClick={addFreeKick}
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      <Zap className="h-4 w-4" />
+                      Free Kick
+                    </Button>
+                    <Button
+                      onClick={addOffside}
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      <Minus className="h-4 w-4" />
+                      Offside
+                    </Button>
+                    <Button
+                      onClick={() => setVarDialogOpen(true)}
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      <Eye className="h-4 w-4" />
+                      VAR Check
                     </Button>
                   </div>
                 </div>
@@ -767,7 +1445,19 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                           {event.type === "goal" && (
                             <Goal className="h-4 w-4 text-green-600 shrink-0" />
                           )}
+                          {event.type === "own_goal" && (
+                            <Goal className="h-4 w-4 text-orange-600 shrink-0" />
+                          )}
+                          {event.type === "penalty_goal" && (
+                            <Flag className="h-4 w-4 text-green-600 shrink-0" />
+                          )}
+                          {event.type === "penalty_miss" && (
+                            <XCircle className="h-4 w-4 text-red-600 shrink-0" />
+                          )}
                           {event.type === "yellow" && (
+                            <CreditCard className="h-4 w-4 text-yellow-600 shrink-0" />
+                          )}
+                          {event.type === "second_yellow" && (
                             <CreditCard className="h-4 w-4 text-yellow-600 shrink-0" />
                           )}
                           {event.type === "red" && (
@@ -784,6 +1474,48 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                           )}
                           {event.type === "match_end" && (
                             <Square className="h-4 w-4 text-gray-600 shrink-0" />
+                          )}
+                          {event.type === "match_start" && (
+                            <Play className="h-4 w-4 text-green-600 shrink-0" />
+                          )}
+                          {event.type === "match_pause" && (
+                            <Pause className="h-4 w-4 text-yellow-600 shrink-0" />
+                          )}
+                          {event.type === "match_resume" && (
+                            <Play className="h-4 w-4 text-green-600 shrink-0" />
+                          )}
+                          {event.type === "extra_time_start" && (
+                            <Clock className="h-4 w-4 text-blue-600 shrink-0" />
+                          )}
+                          {event.type === "extra_time_end" && (
+                            <Clock className="h-4 w-4 text-blue-600 shrink-0" />
+                          )}
+                          {event.type === "penalty_shootout_start" && (
+                            <Flag className="h-4 w-4 text-purple-600 shrink-0" />
+                          )}
+                          {event.type === "penalty_shootout_end" && (
+                            <Flag className="h-4 w-4 text-purple-600 shrink-0" />
+                          )}
+                          {event.type === "var_check" && (
+                            <Eye className="h-4 w-4 text-blue-600 shrink-0" />
+                          )}
+                          {event.type === "var_goal" && (
+                            <Eye className="h-4 w-4 text-green-600 shrink-0" />
+                          )}
+                          {event.type === "var_no_goal" && (
+                            <EyeOff className="h-4 w-4 text-red-600 shrink-0" />
+                          )}
+                          {event.type === "corner" && (
+                            <Flag className="h-4 w-4 text-gray-600 shrink-0" />
+                          )}
+                          {event.type === "free_kick" && (
+                            <Zap className="h-4 w-4 text-gray-600 shrink-0" />
+                          )}
+                          {event.type === "offside" && (
+                            <Minus className="h-4 w-4 text-gray-600 shrink-0" />
+                          )}
+                          {event.type === "injury_time" && (
+                            <Clock className="h-4 w-4 text-orange-600 shrink-0" />
                           )}
 
                           <span className="font-medium truncate">
@@ -807,9 +1539,13 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
 
                         {event.type === "sub" && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                            <span className="truncate">{event.subbed_out_player?.name_en}</span>
+                            <span className="truncate">
+                              {event.subbed_out_player?.name_en}
+                            </span>
                             <span>→</span>
-                            <span className="truncate">{event.subbed_in_player?.name_en}</span>
+                            <span className="truncate">
+                              {event.subbed_in_player?.name_en}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -847,9 +1583,29 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
                         {/* Home Team Lineup */}
                         <div className="space-y-4">
-                          <h4 className="font-semibold">
-                            {match.home_team?.name_en}
-                          </h4>
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-semibold">
+                              {match.home_team?.name_en}
+                            </h4>
+                            <Select
+                              value={homeFormation}
+                              onValueChange={setHomeFormation}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue placeholder="Formation" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {formations.map((formation) => (
+                                  <SelectItem
+                                    key={formation.id}
+                                    value={formation.id}
+                                  >
+                                    {formation.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                           <div className="space-y-2 max-h-60 overflow-y-auto">
                             {homeTeamPlayers.map((player) => (
                               <div
@@ -896,9 +1652,29 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
 
                         {/* Away Team Lineup */}
                         <div className="space-y-4">
-                          <h4 className="font-semibold">
-                            {match.away_team?.name_en}
-                          </h4>
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-semibold">
+                              {match.away_team?.name_en}
+                            </h4>
+                            <Select
+                              value={awayFormation}
+                              onValueChange={setAwayFormation}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue placeholder="Formation" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {formations.map((formation) => (
+                                  <SelectItem
+                                    key={formation.id}
+                                    value={formation.id}
+                                  >
+                                    {formation.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                           <div className="space-y-2 max-h-60 overflow-y-auto">
                             {awayTeamPlayers.map((player) => (
                               <div
@@ -962,7 +1738,12 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Home Team Lineup */}
                 <div className="space-y-4">
-                  <h4 className="font-semibold">{match.home_team?.name_en}</h4>
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-semibold">
+                      {match.home_team?.name_en}
+                    </h4>
+                    <Badge variant="outline">{homeFormation}</Badge>
+                  </div>
                   <div className="space-y-2">
                     {homeLineup
                       .filter((l) => l.is_starting)
@@ -974,7 +1755,9 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                           <span className="font-medium">
                             {lineup.jersey_number}
                           </span>
-                          <span className="truncate">{lineup.player?.name_en}</span>
+                          <span className="truncate">
+                            {lineup.player?.name_en}
+                          </span>
                           <Badge variant="outline">{lineup.position}</Badge>
                         </div>
                       ))}
@@ -983,7 +1766,12 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
 
                 {/* Away Team Lineup */}
                 <div className="space-y-4">
-                  <h4 className="font-semibold">{match.away_team?.name_en}</h4>
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-semibold">
+                      {match.away_team?.name_en}
+                    </h4>
+                    <Badge variant="outline">{awayFormation}</Badge>
+                  </div>
                   <div className="space-y-2">
                     {awayLineup
                       .filter((l) => l.is_starting)
@@ -995,12 +1783,171 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                           <span className="font-medium">
                             {lineup.jersey_number}
                           </span>
-                          <span className="truncate">{lineup.player?.name_en}</span>
+                          <span className="truncate">
+                            {lineup.player?.name_en}
+                          </span>
                           <Badge variant="outline">{lineup.position}</Badge>
                         </div>
                       ))}
                   </div>
                 </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="var" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">VAR Control</h3>
+                <Button
+                  onClick={() => setVarDialogOpen(true)}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <Eye className="h-4 w-4" />
+                  Initiate VAR Check
+                </Button>
+              </div>
+
+              {/* VAR Dialog */}
+              <Dialog open={varDialogOpen} onOpenChange={setVarDialogOpen}>
+                <DialogContent className="max-w-[90vw] sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>VAR Check</DialogTitle>
+                    <DialogDescription>
+                      Select the type of VAR check
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div>
+                      <Label htmlFor="varType">VAR Check Type</Label>
+                      <Select value={varType} onValueChange={setVarType}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select VAR check type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="goal">Goal</SelectItem>
+                          <SelectItem value="penalty">Penalty</SelectItem>
+                          <SelectItem value="red_card">Red Card</SelectItem>
+                          <SelectItem value="offside">Offside</SelectItem>
+                          <SelectItem value="handball">Handball</SelectItem>
+                          <SelectItem value="foul">Foul</SelectItem>
+                          <SelectItem value="mistake">
+                            Referee Mistake
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <DialogFooter className="flex-col sm:flex-row gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setVarDialogOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button onClick={addVarCheck} className="gap-2">
+                      <Eye className="h-4 w-4" />
+                      Initiate VAR Check
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
+              {/* Penalty Shootout Dialog */}
+              <Dialog
+                open={penaltyDialogOpen}
+                onOpenChange={setPenaltyDialogOpen}
+              >
+                <DialogContent className="max-w-[90vw] sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Penalty Shootout</DialogTitle>
+                    <DialogDescription>
+                      Record penalty shootout result
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div>
+                      <Label htmlFor="penaltyTeam">Team</Label>
+                      <Select
+                        value={penaltyTeam}
+                        onValueChange={setPenaltyTeam}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select team" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={match.home_team_id}>
+                            {match.home_team?.name_en}
+                          </SelectItem>
+                          <SelectItem value={match.away_team_id}>
+                            {match.away_team?.name_en}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="penaltyResult">Result</Label>
+                      <Select
+                        value={penaltyResult}
+                        onValueChange={setPenaltyResult}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select result" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="scored">Scored</SelectItem>
+                          <SelectItem value="missed">Missed</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <DialogFooter className="flex-col sm:flex-row gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setPenaltyDialogOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={addPenaltyShootoutResult}
+                      className="gap-2"
+                    >
+                      <Flag className="h-4 w-4" />
+                      Record Penalty
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
+              {/* Display VAR Events */}
+              <div className="space-y-2">
+                {events
+                  ?.filter((e) => e.type.startsWith("var"))
+                  .map((event) => (
+                    <div
+                      key={event.id}
+                      className="flex items-center gap-3 p-3 rounded-lg border bg-blue-50 dark:bg-blue-950/20"
+                    >
+                      <div className="text-sm font-medium text-muted-foreground w-12 shrink-0">
+                        {event.minute}'
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          {event.type === "var_check" && (
+                            <Eye className="h-4 w-4 text-blue-600 shrink-0" />
+                          )}
+                          {event.type === "var_goal" && (
+                            <Eye className="h-4 w-4 text-green-600 shrink-0" />
+                          )}
+                          {event.type === "var_no_goal" && (
+                            <EyeOff className="h-4 w-4 text-red-600 shrink-0" />
+                          )}
+                          <span className="font-medium truncate">
+                            {event.description_en}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
               </div>
             </TabsContent>
           </Tabs>

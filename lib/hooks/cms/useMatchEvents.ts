@@ -1,3 +1,4 @@
+// lib/hooks/cms/useMatchEvents.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MatchEvent, CreateMatchEvent } from "@/lib/schemas/matchEvent";
 import { toast } from "sonner";
@@ -50,20 +51,30 @@ export function useCreateMatchEvent(matchId: string) {
       // Add success toast based on event type
       const eventLabels = {
         goal: "Goal recorded",
+        own_goal: "Own goal recorded",
+        penalty_goal: "Penalty goal recorded",
+        penalty_miss: "Penalty missed recorded",
         yellow: "Yellow card issued",
+        second_yellow: "Second yellow card issued",
         red: "Red card issued",
         sub: "Substitution made",
         half_time: "Half time recorded",
         second_half: "Second half started",
-        match_end: "Match ended",
         match_start: "Match started",
-        own_goal: "Own goal recorded",
-        penalty: "Penalty recorded",
+        match_pause: "Match paused",
+        match_resume: "Match resumed",
+        match_end: "Match ended",
+        extra_time_start: "Extra time started",
+        extra_time_end: "Extra time ended",
+        penalty_shootout_start: "Penalty shootout started",
+        penalty_shootout_end: "Penalty shootout ended",
+        penalty_shootout_scored: "Penalty scored",
+        penalty_shootout_missed: "Penalty missed",
         var_check: "VAR check initiated",
         var_goal: "VAR goal confirmed",
         var_no_goal: "VAR goal disallowed",
-        corner: "Corner kick",
-        free_kick: "Free kick",
+        corner: "Corner kick recorded",
+        free_kick: "Free kick recorded",
         offside: "Offside called",
         injury_time: "Injury time added",
       };
