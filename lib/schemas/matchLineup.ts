@@ -1,3 +1,4 @@
+// lib/schemas/matchLineup.ts
 import { z } from "zod";
 
 // Database entity schema (includes all fields)
@@ -9,7 +10,9 @@ export const matchLineupEntitySchema = z.object({
   is_starting: z.boolean().default(true),
   position: z.string().nullable(),
   jersey_number: z.number().nullable(),
+  captain: z.boolean().default(false),
   created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
 });
 
 // API input schema for creating match lineups
@@ -20,7 +23,12 @@ export const createMatchLineupInputSchema = z.object({
   is_starting: z.boolean().default(true),
   position: z.string().optional(),
   jersey_number: z.number().optional(),
+  captain: z.boolean().default(false),
 });
+
+// API input schema for updating match lineups
+export const updateMatchLineupInputSchema =
+  createMatchLineupInputSchema.partial();
 
 // Schema for match lineups with joined relations
 export const matchLineupWithRelationsSchema = matchLineupEntitySchema.extend({
@@ -48,9 +56,17 @@ export const matchLineupWithRelationsSchema = matchLineupEntitySchema.extend({
 
 // Type exports
 export type MatchLineupEntity = z.infer<typeof matchLineupEntitySchema>;
-export type CreateMatchLineupInput = z.infer<typeof createMatchLineupInputSchema>;
-export type MatchLineupResponse = z.infer<typeof matchLineupWithRelationsSchema>;
+export type CreateMatchLineupInput = z.infer<
+  typeof createMatchLineupInputSchema
+>;
+export type UpdateMatchLineupInput = z.infer<
+  typeof updateMatchLineupInputSchema
+>;
+export type MatchLineupWithRelations = z.infer<
+  typeof matchLineupWithRelationsSchema
+>;
 
 // For backward compatibility
-export type MatchLineup = MatchLineupResponse;
+export type MatchLineup = MatchLineupWithRelations;
 export type CreateMatchLineup = CreateMatchLineupInput;
+export type UpdateMatchLineup = UpdateMatchLineupInput;

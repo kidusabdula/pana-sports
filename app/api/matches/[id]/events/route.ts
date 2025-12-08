@@ -1,10 +1,11 @@
+// app/api/matches/[id]/events/route.ts
 import { createClient } from "@/lib/supabase/server";
 import { createMatchEventInputSchema } from "@/lib/schemas/matchEvent";
 import { requireAdmin } from "@/lib/auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -58,7 +59,7 @@ export async function GET(
 }
 
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -129,7 +130,7 @@ export async function POST(
 
     const supabase = await createClient();
 
-    // Fix: Remove created_by from the insert as it doesn't exist in the table
+    // Fix: Remove created_by from insert as it doesn't exist in table
     const { data, error } = await supabase
       .from("match_events")
       .insert(validatedData)

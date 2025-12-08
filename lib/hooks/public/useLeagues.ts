@@ -1,6 +1,8 @@
 // lib/hooks/public/useLeagues.ts
-import { useQuery } from '@tanstack/react-query'
-import { Match } from './useMatches';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { Match } from "./useMatches";
 
 // Define types
 export type League = {
@@ -53,32 +55,35 @@ export type Standing = {
 
 // API helper functions
 async function fetchLeagues() {
-  const res = await fetch('/api/public/leagues')
+  const res = await fetch("/api/public/leagues");
   if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to fetch leagues')
+    const error = await res.json();
+    throw new Error(error.error || "Failed to fetch leagues");
   }
-  return res.json() as Promise<League[]>
+  return res.json() as Promise<League[]>;
 }
 
 // React Query hooks
 export function useLeagues() {
   return useQuery({
-    queryKey: ['leagues'],
+    queryKey: ["leagues"],
     queryFn: fetchLeagues,
-  })
+  });
 }
 
 async function fetchLeague(id: string) {
-  const res = await fetch(`/api/public/leagues/${id}`)
+  const res = await fetch(`/api/public/leagues/${id}`);
   if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to fetch league')
+    const error = await res.json();
+    throw new Error(error.error || "Failed to fetch league");
   }
-  return res.json() as Promise<League>
+  return res.json() as Promise<League>;
 }
 
-async function fetchLeagueMatches(id: string, params?: { matchday?: string; limit?: number }) {
+async function fetchLeagueMatches(
+  id: string,
+  params?: { matchday?: string; limit?: number }
+) {
   const queryString = new URLSearchParams(
     Object.entries(params || {}).reduce((acc, [key, value]) => {
       if (value !== undefined && value !== null) {
@@ -87,13 +92,15 @@ async function fetchLeagueMatches(id: string, params?: { matchday?: string; limi
       return acc;
     }, {} as Record<string, string>)
   ).toString();
-  
-  const res = await fetch(`/api/public/leagues/${id}/matches${queryString ? '?' + queryString : ''}`)
+
+  const res = await fetch(
+    `/api/public/leagues/${id}/matches${queryString ? "?" + queryString : ""}`
+  );
   if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to fetch league matches')
+    const error = await res.json();
+    throw new Error(error.error || "Failed to fetch league matches");
   }
-  return res.json() as Promise<Match[]>
+  return res.json() as Promise<Match[]>;
 }
 
 async function fetchLeagueStandings(id: string, params?: { season?: string }) {
@@ -105,53 +112,96 @@ async function fetchLeagueStandings(id: string, params?: { season?: string }) {
       return acc;
     }, {} as Record<string, string>)
   ).toString();
-  
-  const res = await fetch(`/api/public/leagues/${id}/standings${queryString ? '?' + queryString : ''}`)
+
+  const res = await fetch(
+    `/api/public/leagues/${id}/standings${queryString ? "?" + queryString : ""}`
+  );
   if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to fetch league standings')
+    const error = await res.json();
+    throw new Error(error.error || "Failed to fetch league standings");
   }
-  return res.json() as Promise<Standing[]>
+  return res.json() as Promise<Standing[]>;
 }
 
 async function fetchLeagueTeams(id: string) {
-  const res = await fetch(`/api/public/leagues/${id}/teams`)
+  const res = await fetch(`/api/public/leagues/${id}/teams`);
   if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to fetch league teams')
+    const error = await res.json();
+    throw new Error(error.error || "Failed to fetch league teams");
   }
-  return res.json() as Promise<Team[]>
+  return res.json() as Promise<Team[]>;
 }
 
 // React Query hooks
 export function useLeague(id: string) {
   return useQuery({
-    queryKey: ['league', id],
+    queryKey: ["league", id],
     queryFn: () => fetchLeague(id),
     enabled: !!id,
-  })
+  });
 }
 
-export function useLeagueMatches(id: string, params?: { matchday?: string; limit?: number }) {
+/**
+ * Hook for fetching league matches with real-time subscriptions.
+ * Automatically updates when match status, score, or minute changes.
+ */
+export function useLeagueMatches(
+  id: string,
+  params?: { matchday?: string; limit?: number }
+) {
+  const queryClient = useQueryClient();
+  const supabase = createClient();
+
+  // Set up real-time subscription for matches in this league
+  useEffect(() => {
+    if (!id) return;
+
+    const channel = supabase
+      .channel(`public-league-matches-${id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // Listen to all changes
+          schema: "public",
+          table: "matches",
+          filter: `league_id=eq.${id}`,
+        },
+        () => {
+          // Invalidate and refetch league matches when any match in this league changes
+          queryClient.invalidateQueries({ queryKey: ["league-matches", id] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, queryClient, supabase]);
+
   return useQuery({
-    queryKey: ['league-matches', id, params],
+    queryKey: ["league-matches", id, params],
     queryFn: () => fetchLeagueMatches(id, params),
     enabled: !!id,
-  })
+    staleTime: 10000, // 10 seconds
+    refetchInterval: 30000, // Fallback polling every 30 seconds
+  });
 }
 
-export function useLeagueStandings(id: string, params?: { season?: string, limit?: number }) {
+export function useLeagueStandings(
+  id: string,
+  params?: { season?: string; limit?: number }
+) {
   return useQuery({
-    queryKey: ['league-standings', id, params],
+    queryKey: ["league-standings", id, params],
     queryFn: () => fetchLeagueStandings(id, params),
     enabled: !!id,
-  })
+  });
 }
 
 export function useLeagueTeams(id: string) {
   return useQuery({
-    queryKey: ['league-teams', id],
+    queryKey: ["league-teams", id],
     queryFn: () => fetchLeagueTeams(id),
     enabled: !!id,
-  })
+  });
 }

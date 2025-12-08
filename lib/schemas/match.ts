@@ -1,3 +1,4 @@
+// lib/schemas/match.ts
 import { z } from "zod";
 
 // Database entity schema (includes all fields)
@@ -7,10 +8,19 @@ export const matchEntitySchema = z.object({
   home_team_id: z.string().uuid(),
   away_team_id: z.string().uuid(),
   date: z.string(),
-  status: z.enum(['scheduled', 'live', 'completed', 'postponed', 'cancelled']),
+  status: z.enum([
+    "scheduled",
+    "live",
+    "completed",
+    "postponed",
+    "cancelled",
+    "half_time",
+    "extra_time",
+    "penalties",
+  ]),
   score_home: z.number().default(0),
   score_away: z.number().default(0),
-  score_detail: z.record(z.any()).optional(),
+  score_detail: z.record(z.string(), z.any()).default({}),
   minute: z.number().default(0),
   venue_id: z.string().uuid().nullable(),
   attendance: z.number().nullable(),
@@ -24,42 +34,47 @@ export const matchEntitySchema = z.object({
 });
 
 // API input schema for creating matches
-export const createMatchInputSchema = z.object({
-  league_id: z.string().uuid("League is required"),
-  home_team_id: z.string().uuid("Home team is required"),
-  away_team_id: z.string().uuid("Away team is required"),
-  date: z.string().optional(),
-  status: z.enum(['scheduled', 'live', 'completed', 'postponed', 'cancelled']).default('scheduled'),
-  score_home: z.number().default(0),
-  score_away: z.number().default(0),
-  score_detail: z.record(z.any()).optional(),
-  minute: z.number().default(0),
-  venue_id: z.string().uuid().optional(),
-  attendance: z.number().optional(),
-  referee: z.string().optional(),
-  match_day: z.number().optional(),
-  season: z.string().optional(),
-  is_featured: z.boolean().default(false),
-}).refine((data) => data.home_team_id !== data.away_team_id, {
-  message: "Home and away teams must be different",
-  path: ["away_team_id"],
-});
+export const createMatchInputSchema = z
+  .object({
+    league_id: z.string().uuid("League is required"),
+    home_team_id: z.string().uuid("Home team is required"),
+    away_team_id: z.string().uuid("Away team is required"),
+    date: z
+      .string()
+      .refine((val) => !val || !isNaN(Date.parse(val)), {
+        message: "Valid date is required",
+      })
+      .optional(),
+    status: z
+      .enum([
+        "scheduled",
+        "live",
+        "completed",
+        "postponed",
+        "cancelled",
+        "half_time",
+        "extra_time",
+        "penalties",
+      ])
+      .default("scheduled"),
+    score_home: z.number().default(0),
+    score_away: z.number().default(0),
+    score_detail: z.record(z.string(), z.any()).optional(),
+    minute: z.number().default(0),
+    venue_id: z.string().uuid().optional(),
+    attendance: z.number().optional(),
+    referee: z.string().optional(),
+    match_day: z.number().optional(),
+    season: z.string().optional(),
+    is_featured: z.boolean().default(false),
+  })
+  .refine((data) => data.home_team_id !== data.away_team_id, {
+    message: "Home and away teams must be different",
+    path: ["away_team_id"],
+  });
 
 // API input schema for updating matches
 export const updateMatchInputSchema = createMatchInputSchema.partial();
-
-// Schema for match events
-export const matchEventSchema = z.object({
-  id: z.string().uuid(),
-  match_id: z.string().uuid(),
-  player_id: z.string().uuid().nullable(),
-  team_id: z.string().uuid().nullable(),
-  minute: z.number(),
-  type: z.enum(['goal', 'yellow', 'red', 'sub', 'assist', 'own_goal', 'penalty']),
-  description_en: z.string().nullable(),
-  description_am: z.string().nullable(),
-  created_at: z.string().datetime(),
-});
 
 // Schema for matches with joined relations
 export const matchWithRelationsSchema = matchEntitySchema.extend({
@@ -71,7 +86,7 @@ export const matchWithRelationsSchema = matchEntitySchema.extend({
       slug: z.string(),
       logo_url: z.string().nullable(),
     })
-    .optional(),
+    .nullable(),
   away_team: z
     .object({
       id: z.string().uuid(),
@@ -80,7 +95,7 @@ export const matchWithRelationsSchema = matchEntitySchema.extend({
       slug: z.string(),
       logo_url: z.string().nullable(),
     })
-    .optional(),
+    .nullable(),
   league: z
     .object({
       id: z.string().uuid(),
@@ -89,7 +104,7 @@ export const matchWithRelationsSchema = matchEntitySchema.extend({
       slug: z.string(),
       category: z.string(),
     })
-    .optional(),
+    .nullable(),
   venue: z
     .object({
       id: z.string().uuid(),
@@ -98,18 +113,16 @@ export const matchWithRelationsSchema = matchEntitySchema.extend({
       city: z.string(),
       capacity: z.number().nullable(),
     })
-    .optional(),
-  match_events: z.array(matchEventSchema).optional(),
+    .nullable(),
 });
 
 // Type exports
 export type MatchEntity = z.infer<typeof matchEntitySchema>;
 export type CreateMatchInput = z.infer<typeof createMatchInputSchema>;
 export type UpdateMatchInput = z.infer<typeof updateMatchInputSchema>;
-export type MatchEvent = z.infer<typeof matchEventSchema>;
-export type MatchResponse = z.infer<typeof matchWithRelationsSchema>;
+export type MatchWithRelations = z.infer<typeof matchWithRelationsSchema>;
 
 // For backward compatibility
-export type Match = MatchResponse;
+export type Match = MatchWithRelations;
 export type CreateMatch = CreateMatchInput;
 export type UpdateMatch = UpdateMatchInput;

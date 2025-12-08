@@ -1,10 +1,11 @@
+// app/api/matches/[id]/control/route.ts
 import { createClient } from "@/lib/supabase/server";
 import { updateMatchInputSchema } from "@/lib/schemas/match";
 import { requireAdmin } from "@/lib/auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -53,7 +54,7 @@ export async function PATCH(
       );
     }
 
-    // Validate only the match control fields
+    // Validate only match control fields
     const { status, score_home, score_away, minute } = body;
     
     const validatedData = {
@@ -65,7 +66,7 @@ export async function PATCH(
 
     const supabase = await createClient();
 
-    // Update the match with the new control data
+    // Update match with new control data
     const { data, error } = await supabase
       .from("matches")
       .update({
@@ -83,10 +84,10 @@ export async function PATCH(
       .single();
 
     if (error) {
-      console.error("Supabase error updating match:", error);
+      console.error("Supabase error updating match control:", error);
       return NextResponse.json(
         {
-          error: "Failed to update match",
+          error: "Failed to update match control",
           details: error.message,
         },
         { status: 500 }
@@ -102,10 +103,10 @@ export async function PATCH(
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Unexpected error updating match:", error);
+    console.error("Unexpected error updating match control:", error);
     return NextResponse.json(
       {
-        error: "Failed to update match",
+        error: "Failed to update match control",
         details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }

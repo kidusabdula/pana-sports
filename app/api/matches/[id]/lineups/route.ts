@@ -1,10 +1,11 @@
+// app/api/matches/[id]/lineups/route.ts
 import { createClient } from "@/lib/supabase/server";
 import { createMatchLineupInputSchema } from "@/lib/schemas/matchLineup";
 import { requireAdmin } from "@/lib/auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -56,7 +57,7 @@ export async function GET(
 }
 
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -123,7 +124,13 @@ export async function POST(
 
     const supabase = await createClient();
 
-    // Create the lineups
+    // Delete existing lineups for this match
+    await supabase
+      .from("match_lineups")
+      .delete()
+      .eq("match_id", id);
+
+    // Create new lineups
     const { data, error } = await supabase
       .from("match_lineups")
       .insert(processedLineups)
@@ -158,7 +165,7 @@ export async function POST(
 }
 
 export async function DELETE(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -172,9 +179,8 @@ export async function DELETE(
     }
     
     // Verify admin authentication
-    let user;
     try {
-      user = await requireAdmin();
+      await requireAdmin();
     } catch (authError) {
       console.error("Authentication error:", authError);
       return NextResponse.json(

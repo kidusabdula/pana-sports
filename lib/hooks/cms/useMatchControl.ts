@@ -28,8 +28,5 @@ export function useMatchControl(matchId: string) {
       queryClient.invalidateQueries({ queryKey: ['matches', matchId] })
       queryClient.invalidateQueries({ queryKey: ['matches'] })
     },
-    onError: (error) => {
-      console.error('Match control error:', error)
-    },
   })
 }

@@ -44,87 +44,264 @@ interface MatchDetailPageProps {
 const TimelineEvent = ({
   event,
   isHome,
+  homeTeamName,
+  awayTeamName,
 }: {
   event: MatchEvent;
   isHome: boolean;
+  homeTeamName: string;
+  awayTeamName: string;
 }) => {
-  const getEventIcon = (type: string) => {
+  // Get icon for event type
+  const getEventIcon = (type: string): React.ReactNode => {
     switch (type) {
+      // Goals
       case "goal":
         return "⚽";
-      case "yellow":
-        return "🟨";
-      case "red":
-        return "🟥";
-      case "sub":
-        return <ArrowRightLeft className="h-3 w-3" />;
-      case "assist":
-        return "🎯";
+      case "penalty_goal":
+        return "⚽";
       case "own_goal":
         return "⚽";
+      // Cards
+      case "yellow":
+      case "yellow_card":
+        return "🟨";
+      case "red":
+      case "red_card":
+        return "🟥";
+      case "second_yellow":
+        return "🟨🟥";
+      // Substitution
+      case "sub":
+      case "substitution":
+        return <ArrowRightLeft className="h-3 w-3" />;
+      // Penalties
       case "penalty":
         return "⚽";
+      case "penalty_miss":
+        return "❌";
+      // VAR
+      case "var_check":
+        return "📺";
+      case "var_goal":
+        return "✅";
+      case "var_no_goal":
+        return "❌";
+      // Other match events visible to fans
+      case "assist":
+        return "🅰️";
+      case "corner":
+        return "🚩";
+      case "free_kick":
+        return "⚡";
+      case "offside":
+        return "🚫";
+      case "injury":
+        return "🏥";
+      case "injury_time":
+        return "⏱️";
+      // Internal CMS events - return null to filter out
+      case "match_start":
+      case "match_end":
+      case "match_pause":
+      case "match_resume":
+      case "half_time":
+      case "second_half":
+      case "extra_time_start":
+      case "extra_time_end":
+      case "penalty_shootout_start":
+      case "penalty_shootout_end":
+        return null; // These are filtered out
       default:
         return "📝";
     }
   };
 
-  const isSub = event.type === "sub";
+  // Get user-friendly label for event type
+  const getEventLabel = (type: string): string => {
+    switch (type) {
+      case "goal":
+        return "Goal";
+      case "penalty_goal":
+        return "Penalty Goal";
+      case "own_goal":
+        return "Own Goal";
+      case "yellow":
+      case "yellow_card":
+        return "Yellow Card";
+      case "red":
+      case "red_card":
+        return "Red Card";
+      case "second_yellow":
+        return "Second Yellow";
+      case "sub":
+      case "substitution":
+        return "Substitution";
+      case "penalty":
+        return "Penalty";
+      case "penalty_miss":
+        return "Penalty Missed";
+      case "var_check":
+        return "VAR Check";
+      case "var_goal":
+        return "VAR: Goal Confirmed";
+      case "var_no_goal":
+        return "VAR: Goal Disallowed";
+      case "assist":
+        return "Assist";
+      case "corner":
+        return "Corner Kick";
+      case "free_kick":
+        return "Free Kick";
+      case "offside":
+        return "Offside";
+      case "injury":
+        return "Injury";
+      case "injury_time":
+        return "Injury Time";
+      default:
+        return "Event";
+    }
+  };
+
+  // Check if event has a player
+  const hasPlayer = event.player && event.player.name_en;
+
+  // Get team name for events without players
+  const teamName = isHome ? homeTeamName : awayTeamName;
+
+  // Skip internal CMS events
+  const icon = getEventIcon(event.type);
+  if (icon === null) return null;
+
+  const isSub = event.type === "sub" || event.type === "substitution";
+  const isGoal = ["goal", "penalty_goal", "own_goal", "penalty"].includes(
+    event.type
+  );
+  const isCard = [
+    "yellow",
+    "yellow_card",
+    "red",
+    "red_card",
+    "second_yellow",
+  ].includes(event.type);
+  const isVAR = event.type.startsWith("var_");
+
+  // Determine primary display text
+  const getPrimaryText = (): string => {
+    if (hasPlayer) {
+      return event.player!.name_en;
+    }
+    // For events without players, show meaningful text
+    if (isVAR) {
+      return event.description_en || getEventLabel(event.type);
+    }
+    if (event.description_en) {
+      return event.description_en;
+    }
+    // Fallback to team name + event type
+    return `${teamName}`;
+  };
+
+  // Determine secondary display text
+  const getSecondaryText = (): string | null => {
+    if (hasPlayer) {
+      // Show description if available, otherwise show event label
+      return event.description_en || getEventLabel(event.type);
+    }
+    // For events without players
+    if (isVAR && event.description_en) {
+      return getEventLabel(event.type);
+    }
+    return getEventLabel(event.type);
+  };
 
   return (
     <div
       className={cn(
-        "flex items-center w-full mb-3 relative",
+        "flex items-center w-full mb-4 relative group",
         isHome ? "flex-row-reverse" : "flex-row"
       )}
     >
       {/* Content Side */}
       <div
         className={cn(
-          "flex-1 flex items-center gap-2",
+          "flex-1 flex items-center gap-3",
           isHome
             ? "justify-start flex-row-reverse text-right"
             : "justify-start flex-row text-left"
         )}
       >
-        {/* Player Info */}
-        <div className="flex flex-col justify-center">
-          <div
-            className={cn(
-              "font-semibold text-xs text-white",
-              isSub && "text-green-400"
-            )}
-          >
-            {event.player?.name_en || "Unknown Player"}
-          </div>
-          {isSub && (
-            <div className="text-[10px] text-red-400 font-medium">
-              {event.description_en || "Player Out"}
-            </div>
+        {/* Icon with colored background */}
+        <div
+          className={cn(
+            "shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-transform group-hover:scale-110",
+            isGoal && "bg-green-500/20 ring-2 ring-green-500/30",
+            isCard &&
+              event.type.includes("red") &&
+              "bg-red-500/20 ring-2 ring-red-500/30",
+            isCard &&
+              !event.type.includes("red") &&
+              "bg-yellow-500/20 ring-2 ring-yellow-500/30",
+            isVAR && "bg-blue-500/20 ring-2 ring-blue-500/30",
+            isSub && "bg-purple-500/20 ring-2 ring-purple-500/30",
+            !isGoal &&
+              !isCard &&
+              !isVAR &&
+              !isSub &&
+              "bg-zinc-800 ring-2 ring-zinc-700"
           )}
-          {!isSub && event.description_en && (
-            <div className="text-[10px] text-zinc-500">
-              {event.description_en}
-            </div>
+        >
+          {typeof icon === "string" ? (
+            <span className="text-lg">{icon}</span>
+          ) : (
+            <div className="text-zinc-300">{icon}</div>
           )}
         </div>
 
-        {/* Icon */}
-        <div className="shrink-0 w-5 h-5 flex items-center justify-center">
-          {typeof getEventIcon(event.type) === "string" ? (
-            <span className="text-base">{getEventIcon(event.type)}</span>
-          ) : (
-            <div className="bg-zinc-800 p-0.5 rounded-full text-zinc-400">
-              {getEventIcon(event.type)}
+        {/* Event Info */}
+        <div className="flex flex-col justify-center min-w-0">
+          <div
+            className={cn(
+              "font-semibold text-sm text-white truncate",
+              isGoal && "text-green-400",
+              isCard && event.type.includes("red") && "text-red-400",
+              isCard && !event.type.includes("red") && "text-yellow-400",
+              isVAR && "text-blue-400",
+              isSub && "text-purple-400"
+            )}
+          >
+            {getPrimaryText()}
+          </div>
+          {getSecondaryText() && (
+            <div className="text-[11px] text-zinc-400 truncate">
+              {getSecondaryText()}
             </div>
           )}
         </div>
       </div>
 
       {/* Center Line & Minute */}
-      <div className="w-10 flex justify-center relative shrink-0 mx-1.5">
-        <div className="w-7 h-7 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center z-10">
-          <span className="text-[10px] font-bold text-white">
+      <div className="w-14 flex justify-center relative shrink-0 mx-2">
+        <div
+          className={cn(
+            "w-9 h-9 rounded-full flex items-center justify-center z-10 transition-all",
+            isGoal && "bg-green-500/30 border-2 border-green-500/50",
+            isCard && "bg-zinc-800 border-2 border-zinc-600",
+            isVAR && "bg-blue-500/30 border-2 border-blue-500/50",
+            !isGoal &&
+              !isCard &&
+              !isVAR &&
+              "bg-zinc-800 border-2 border-zinc-700"
+          )}
+        >
+          <span
+            className={cn(
+              "text-xs font-bold",
+              isGoal && "text-green-400",
+              !isGoal && "text-white"
+            )}
+          >
             {event.minute}&apos;
           </span>
         </div>
@@ -431,152 +608,155 @@ export function MatchDetailPage({ matchId }: MatchDetailPageProps) {
             </div>
           </CardContent>
         </Card>
-
-        {/* Match Conditions */}
+        {/* Match Events Timeline */}
         <Card className="bg-zinc-900/60 backdrop-blur-xl border-zinc-800/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-white flex items-center gap-2">
-              <Activity className="h-4 w-4 text-primary" />
-              Match Conditions
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base text-white flex items-center gap-2">
+              <Zap className="h-4 w-4 text-primary" />
+              Match Events
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-3 pt-0">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <StatCard
-                icon={Thermometer}
-                label="Temperature"
-                value={matchConditions.temperature}
-                color="text-orange-400"
-              />
-              <StatCard
-                icon={Wind}
-                label="Wind"
-                value={matchConditions.wind}
-                color="text-blue-400"
-              />
-              <StatCard
-                icon={Eye}
-                label="Weather"
-                value={matchConditions.weather}
-                color="text-cyan-400"
-              />
-              <StatCard
-                icon={TrendingUp}
-                label="Humidity"
-                value={matchConditions.humidity}
-                color="text-green-400"
-              />
-            </div>
+          <CardContent className="p-4 pt-0 relative">
+            {events.length === 0 ? (
+              <div className="text-center text-zinc-400 py-6 text-sm">
+                No events recorded for this match
+              </div>
+            ) : (
+              <div className="relative">
+                {/* Central Vertical Line */}
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-zinc-800 -translate-x-1/2"></div>
+
+                {/* First Half Events */}
+                {firstHalfEvents.map((event) => (
+                  <TimelineEvent
+                    key={event.id}
+                    event={event}
+                    isHome={event.team_id === match.home_team.id}
+                    homeTeamName={match.home_team.name_en}
+                    awayTeamName={match.away_team.name_en}
+                  />
+                ))}
+
+                {/* HT Separator */}
+                {(firstHalfEvents.length > 0 ||
+                  secondHalfEvents.length > 0) && (
+                  <TimelineSeparator label="Half Time" />
+                )}
+
+                {/* Second Half Events */}
+                {secondHalfEvents.map((event) => (
+                  <TimelineEvent
+                    key={event.id}
+                    event={event}
+                    isHome={event.team_id === match.home_team.id}
+                    homeTeamName={match.home_team.name_en}
+                    awayTeamName={match.away_team.name_en}
+                  />
+                ))}
+
+                {/* FT Separator */}
+                {isCompleted && (
+                  <TimelineSeparator
+                    label={`Full Time ${match.score_home} - ${match.score_away}`}
+                  />
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Match Statistics */}
-          <div className="lg:col-span-2 space-y-4">
-            <Card className="bg-zinc-900/60 backdrop-blur-xl border-zinc-800/50">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base text-white flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4 text-primary" />
-                  Match Statistics
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <TeamStatBar
-                  homeValue={matchStats.possession.home}
-                  awayValue={matchStats.possession.away}
-                  label="Possession %"
-                />
-                <TeamStatBar
-                  homeValue={matchStats.shots.home}
-                  awayValue={matchStats.shots.away}
-                  label="Total Shots"
-                />
-                <TeamStatBar
-                  homeValue={matchStats.shotsOnTarget.home}
-                  awayValue={matchStats.shotsOnTarget.away}
-                  label="Shots on Target"
-                />
-                <TeamStatBar
-                  homeValue={matchStats.corners.home}
-                  awayValue={matchStats.corners.away}
-                  label="Corners"
-                />
-                <TeamStatBar
-                  homeValue={matchStats.passes.home}
-                  awayValue={matchStats.passes.away}
-                  label="Passes"
-                />
-                <TeamStatBar
-                  homeValue={matchStats.passAccuracy.home}
-                  awayValue={matchStats.passAccuracy.away}
-                  label="Pass Accuracy %"
-                />
-                <TeamStatBar
-                  homeValue={matchStats.fouls.home}
-                  awayValue={matchStats.fouls.away}
-                  label="Fouls"
-                />
-                <TeamStatBar
-                  homeValue={matchStats.yellowCards.home}
-                  awayValue={matchStats.yellowCards.away}
-                  label="Yellow Cards"
-                />
-              </CardContent>
-            </Card>
-
-            {/* Match Events Timeline */}
-            <Card className="bg-zinc-900/60 backdrop-blur-xl border-zinc-800/50">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base text-white flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-primary" />
-                  Match Events
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 pt-0 relative">
-                {events.length === 0 ? (
-                  <div className="text-center text-zinc-400 py-6 text-sm">
-                    No events recorded for this match
-                  </div>
-                ) : (
-                  <div className="relative">
-                    {/* Central Vertical Line */}
-                    <div className="absolute left-1/2 top-0 bottom-0 w-px bg-zinc-800 -translate-x-1/2"></div>
-
-                    {/* First Half Events */}
-                    {firstHalfEvents.map((event) => (
-                      <TimelineEvent
-                        key={event.id}
-                        event={event}
-                        isHome={event.team_id === match.home_team.id}
-                      />
-                    ))}
-
-                    {/* HT Separator */}
-                    {(firstHalfEvents.length > 0 ||
-                      secondHalfEvents.length > 0) && (
-                      <TimelineSeparator label="Half Time" />
-                    )}
-
-                    {/* Second Half Events */}
-                    {secondHalfEvents.map((event) => (
-                      <TimelineEvent
-                        key={event.id}
-                        event={event}
-                        isHome={event.team_id === match.home_team.id}
-                      />
-                    ))}
-
-                    {/* FT Separator */}
-                    {isCompleted && (
-                      <TimelineSeparator
-                        label={`Full Time ${match.score_home} - ${match.score_away}`}
-                      />
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+      {/* Match Conditions */}
+      <Card className="bg-zinc-900/60 backdrop-blur-xl border-zinc-800/50">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm text-white flex items-center gap-2">
+            <Activity className="h-4 w-4 text-primary" />
+            Match Conditions
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-3 pt-0">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <StatCard
+              icon={Thermometer}
+              label="Temperature"
+              value={matchConditions.temperature}
+              color="text-orange-400"
+            />
+            <StatCard
+              icon={Wind}
+              label="Wind"
+              value={matchConditions.wind}
+              color="text-blue-400"
+            />
+            <StatCard
+              icon={Eye}
+              label="Weather"
+              value={matchConditions.weather}
+              color="text-cyan-400"
+            />
+            <StatCard
+              icon={TrendingUp}
+              label="Humidity"
+              value={matchConditions.humidity}
+              color="text-green-400"
+            />
           </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Match Statistics */}
+        <div className="lg:col-span-2 space-y-4">
+          <Card className="bg-zinc-900/60 backdrop-blur-xl border-zinc-800/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base text-white flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-primary" />
+                Match Statistics
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+              <TeamStatBar
+                homeValue={matchStats.possession.home}
+                awayValue={matchStats.possession.away}
+                label="Possession %"
+              />
+              <TeamStatBar
+                homeValue={matchStats.shots.home}
+                awayValue={matchStats.shots.away}
+                label="Total Shots"
+              />
+              <TeamStatBar
+                homeValue={matchStats.shotsOnTarget.home}
+                awayValue={matchStats.shotsOnTarget.away}
+                label="Shots on Target"
+              />
+              <TeamStatBar
+                homeValue={matchStats.corners.home}
+                awayValue={matchStats.corners.away}
+                label="Corners"
+              />
+              <TeamStatBar
+                homeValue={matchStats.passes.home}
+                awayValue={matchStats.passes.away}
+                label="Passes"
+              />
+              <TeamStatBar
+                homeValue={matchStats.passAccuracy.home}
+                awayValue={matchStats.passAccuracy.away}
+                label="Pass Accuracy %"
+              />
+              <TeamStatBar
+                homeValue={matchStats.fouls.home}
+                awayValue={matchStats.fouls.away}
+                label="Fouls"
+              />
+              <TeamStatBar
+                homeValue={matchStats.yellowCards.home}
+                awayValue={matchStats.yellowCards.away}
+                label="Yellow Cards"
+              />
+            </CardContent>
+          </Card>
 
           {/* Sidebar */}
           <div className="space-y-4">

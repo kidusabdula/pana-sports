@@ -14,7 +14,8 @@ import {
 } from "@/lib/hooks/cms/useMatchLineups";
 import { useMatch } from "@/lib/hooks/cms/useMatches";
 import { useTeams } from "@/lib/hooks/cms/useTeams";
-import { Match, MatchEvent } from "@/lib/schemas/match";
+import { Match } from "@/lib/schemas/match";
+import { MatchEvent } from "@/lib/schemas/matchEvent";
 import { MatchLineup } from "@/lib/schemas/matchLineup";
 import { Button } from "@/components/ui/button";
 import {
@@ -76,6 +77,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 // Move StatusBadge component outside of render
 const StatusBadge = ({ status }: { status: string }) => {
@@ -163,17 +165,20 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
   const [isSubstitution, setIsSubstitution] = useState(false);
   const [homeFormation, setHomeFormation] = useState("4-4-2");
   const [awayFormation, setAwayFormation] = useState("4-4-2");
-  const [isClockRunning, setIsClockRunning] = useState(false);
+  const [isClockRunning, setIsClockRunning] = useState(match.status === "live");
   const [extraTime, setExtraTime] = useState({ firstHalf: 0, secondHalf: 0 });
   const [varDialogOpen, setVarDialogOpen] = useState(false);
   const [varType, setVarType] = useState("");
   const [penaltyDialogOpen, setPenaltyDialogOpen] = useState(false);
   const [penaltyTeam, setPenaltyTeam] = useState("");
   const [penaltyResult, setPenaltyResult] = useState("");
-  const [matchMinute, setMatchMinute] = useState(0);
+  const [matchMinute, setMatchMinute] = useState(match.minute ?? 0);
   const [matchSecond, setMatchSecond] = useState(0);
   const [isExtraTime, setIsExtraTime] = useState(false);
   const [isPenaltyShootout, setIsPenaltyShootout] = useState(false);
+  // Local score state to prevent stale closure issues with mutations
+  const [localScoreHome, setLocalScoreHome] = useState(match.score_home ?? 0);
+  const [localScoreAway, setLocalScoreAway] = useState(match.score_away ?? 0);
 
   const supabase = createClient();
   const {
@@ -188,7 +193,12 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
   const deleteLineupsMutation = useDeleteMatchLineups(match.id);
   const { data: teams } = useTeams();
 
-  // Real-time clock effect
+  // Clock running state is initialized from match.status in useState above
+
+  // Track last synced minute with a ref to avoid effect re-runs
+  const lastSyncedMinuteRef = useRef(matchMinute);
+
+  // Real-time clock effect with DB sync every 60 seconds
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
@@ -196,7 +206,15 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
       interval = setInterval(() => {
         setMatchSecond((prevSecond) => {
           if (prevSecond >= 59) {
-            setMatchMinute((prevMinute) => prevMinute + 1);
+            setMatchMinute((prevMinute) => {
+              const newMinute = prevMinute + 1;
+              // Sync to DB every minute (when second rolls over)
+              if (newMinute !== lastSyncedMinuteRef.current) {
+                lastSyncedMinuteRef.current = newMinute;
+                matchControlMutation.mutate({ minute: newMinute });
+              }
+              return newMinute;
+            });
             return 0;
           }
           return prevSecond + 1;
@@ -205,14 +223,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
     }
 
     return () => clearInterval(interval);
-  }, [isClockRunning, match.status]);
-
-  // Initialize match minute from match data
-  useEffect(() => {
-    if (match.minute) {
-      setMatchMinute(match.minute);
-    }
-  }, [match.minute]);
+  }, [isClockRunning, match.status, matchControlMutation]);
 
   // Set up real-time subscription for match events
   useEffect(() => {
@@ -521,11 +532,19 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
       confirmed: false,
     });
 
-    // Update score based on team
+    // Update score based on team - use local state to prevent stale closure issues
     const isHomeTeam = selectedTeam === match.home_team_id;
+    const newScoreHome = isHomeTeam ? localScoreHome + 1 : localScoreHome;
+    const newScoreAway = !isHomeTeam ? localScoreAway + 1 : localScoreAway;
+
+    // Update local state first
+    setLocalScoreHome(newScoreHome);
+    setLocalScoreAway(newScoreAway);
+
+    // Then sync to database
     matchControlMutation.mutate({
-      score_home: isHomeTeam ? (match.score_home || 0) + 1 : match.score_home,
-      score_away: !isHomeTeam ? (match.score_away || 0) + 1 : match.score_away,
+      score_home: newScoreHome,
+      score_away: newScoreAway,
     });
 
     // Reset form
@@ -552,9 +571,17 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
 
     // Update score based on team (own goal scores for opposite team)
     const isHomeTeam = selectedTeam === match.home_team_id;
+    const newScoreHome = !isHomeTeam ? localScoreHome + 1 : localScoreHome;
+    const newScoreAway = isHomeTeam ? localScoreAway + 1 : localScoreAway;
+
+    // Update local state first
+    setLocalScoreHome(newScoreHome);
+    setLocalScoreAway(newScoreAway);
+
+    // Then sync to database
     matchControlMutation.mutate({
-      score_home: !isHomeTeam ? (match.score_home || 0) + 1 : match.score_home,
-      score_away: isHomeTeam ? (match.score_away || 0) + 1 : match.score_away,
+      score_home: newScoreHome,
+      score_away: newScoreAway,
     });
 
     // Reset form
@@ -579,11 +606,19 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
       confirmed: false,
     });
 
-    // Update score based on team
+    // Update score based on team - use local state to prevent stale closure issues
     const isHomeTeam = selectedTeam === match.home_team_id;
+    const newScoreHome = isHomeTeam ? localScoreHome + 1 : localScoreHome;
+    const newScoreAway = !isHomeTeam ? localScoreAway + 1 : localScoreAway;
+
+    // Update local state first
+    setLocalScoreHome(newScoreHome);
+    setLocalScoreAway(newScoreAway);
+
+    // Then sync to database
     matchControlMutation.mutate({
-      score_home: isHomeTeam ? (match.score_home || 0) + 1 : match.score_home,
-      score_away: !isHomeTeam ? (match.score_away || 0) + 1 : match.score_away,
+      score_home: newScoreHome,
+      score_away: newScoreAway,
     });
 
     // Reset form
@@ -885,6 +920,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
       team_id: lineup.team_id,
       player_id: lineup.player_id,
       is_starting: lineup.is_starting,
+      captain: lineup.captain ?? false,
       position: lineup.position || undefined,
       jersey_number: lineup.jersey_number || undefined,
     }));
@@ -1095,7 +1131,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm">
                 <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span>{new Date(match.date).toLocaleDateString()}</span>
+                <span>{format(new Date(match.date), "MMM dd, yyyy")}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -1253,14 +1289,25 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                 {/* Event Buttons */}
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-2">
-                    <Button onClick={addGoal} className="gap-2">
+                    <Button
+                      onClick={addGoal}
+                      className="gap-2"
+                      disabled={
+                        createEventMutation.isPending ||
+                        matchControlMutation.isPending
+                      }
+                    >
                       <Goal className="h-4 w-4" />
-                      Goal
+                      {createEventMutation.isPending ? "Adding..." : "Goal"}
                     </Button>
                     <Button
                       onClick={addOwnGoal}
                       variant="outline"
                       className="gap-2"
+                      disabled={
+                        createEventMutation.isPending ||
+                        matchControlMutation.isPending
+                      }
                     >
                       <Goal className="h-4 w-4" />
                       Own Goal
@@ -1269,6 +1316,10 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                       onClick={addPenaltyGoal}
                       variant="outline"
                       className="gap-2"
+                      disabled={
+                        createEventMutation.isPending ||
+                        matchControlMutation.isPending
+                      }
                     >
                       <Flag className="h-4 w-4" />
                       Penalty Goal
@@ -1807,50 +1858,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                 </Button>
               </div>
 
-              {/* VAR Dialog */}
-              <Dialog open={varDialogOpen} onOpenChange={setVarDialogOpen}>
-                <DialogContent className="max-w-[90vw] sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>VAR Check</DialogTitle>
-                    <DialogDescription>
-                      Select the type of VAR check
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div>
-                      <Label htmlFor="varType">VAR Check Type</Label>
-                      <Select value={varType} onValueChange={setVarType}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select VAR check type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="goal">Goal</SelectItem>
-                          <SelectItem value="penalty">Penalty</SelectItem>
-                          <SelectItem value="red_card">Red Card</SelectItem>
-                          <SelectItem value="offside">Offside</SelectItem>
-                          <SelectItem value="handball">Handball</SelectItem>
-                          <SelectItem value="foul">Foul</SelectItem>
-                          <SelectItem value="mistake">
-                            Referee Mistake
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <DialogFooter className="flex-col sm:flex-row gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => setVarDialogOpen(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button onClick={addVarCheck} className="gap-2">
-                      <Eye className="h-4 w-4" />
-                      Initiate VAR Check
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              {/* VAR Dialog is defined outside the Tabs component */}
 
               {/* Penalty Shootout Dialog */}
               <Dialog
@@ -1953,6 +1961,44 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* VAR Dialog - placed at component level to work from any tab */}
+      <Dialog open={varDialogOpen} onOpenChange={setVarDialogOpen}>
+        <DialogContent className="max-w-[90vw] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>VAR Check</DialogTitle>
+            <DialogDescription>Select the type of VAR check</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="varType">VAR Check Type</Label>
+              <Select value={varType} onValueChange={setVarType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select VAR check type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="goal">Goal</SelectItem>
+                  <SelectItem value="penalty">Penalty</SelectItem>
+                  <SelectItem value="red_card">Red Card</SelectItem>
+                  <SelectItem value="offside">Offside</SelectItem>
+                  <SelectItem value="handball">Handball</SelectItem>
+                  <SelectItem value="foul">Foul</SelectItem>
+                  <SelectItem value="mistake">Referee Mistake</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setVarDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={addVarCheck} className="gap-2">
+              <Eye className="h-4 w-4" />
+              Initiate VAR Check
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

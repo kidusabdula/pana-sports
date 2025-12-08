@@ -2,7 +2,7 @@
 // components/live/LiveMatchesPage.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLiveMatches } from "@/lib/hooks/public/useMatches";
 import { Card, CardContent } from "@/components/ui/card";
@@ -33,19 +33,11 @@ import Link from "next/link";
 function LiveMatchesPageContent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [leagueFilter, setLeagueFilter] = useState("all");
-  const [refreshInterval, setRefreshInterval] = useState(30); // seconds
+  const [refreshInterval, setRefreshInterval] = useState(30); // seconds (kept for UI)
   const router = useRouter();
 
+  // Real-time subscriptions are now handled within useLiveMatches hook
   const { data: matches, isLoading, refetch } = useLiveMatches();
-
-  // Auto-refresh live matches
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refetch();
-    }, refreshInterval * 1000);
-
-    return () => clearInterval(interval);
-  }, [refreshInterval, refetch]);
 
   // Filter matches by search term and league
   const filteredMatches = matches
