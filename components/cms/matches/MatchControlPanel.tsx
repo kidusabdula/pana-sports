@@ -13,6 +13,7 @@ import {
   useDeleteMatchLineups,
 } from "@/lib/hooks/cms/useMatchLineups";
 import { useMatch } from "@/lib/hooks/cms/useMatches";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTeams } from "@/lib/hooks/cms/useTeams";
 import { Match } from "@/lib/schemas/match";
 import { MatchEvent } from "@/lib/schemas/matchEvent";
@@ -75,6 +76,10 @@ import {
   Circle,
   Minus,
   MoreHorizontal,
+  CloudSun,
+  Thermometer,
+  ShieldCheck,
+  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -163,8 +168,12 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
   const [homeLineup, setHomeLineup] = useState<MatchLineup[]>([]);
   const [awayLineup, setAwayLineup] = useState<MatchLineup[]>([]);
   const [isSubstitution, setIsSubstitution] = useState(false);
-  const [homeFormation, setHomeFormation] = useState("4-4-2");
-  const [awayFormation, setAwayFormation] = useState("4-4-2");
+  const [homeFormation, setHomeFormation] = useState(
+    match.home_formation ?? "4-4-2"
+  );
+  const [awayFormation, setAwayFormation] = useState(
+    match.away_formation ?? "4-4-2"
+  );
   const [isClockRunning, setIsClockRunning] = useState(match.status === "live");
   const [extraTime, setExtraTime] = useState({ firstHalf: 0, secondHalf: 0 });
   const [varDialogOpen, setVarDialogOpen] = useState(false);
@@ -180,18 +189,80 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
   const [localScoreHome, setLocalScoreHome] = useState(match.score_home ?? 0);
   const [localScoreAway, setLocalScoreAway] = useState(match.score_away ?? 0);
 
+  // Match details state (officials, weather, round)
+  const [matchRound, setMatchRound] = useState(match.round ?? "");
+  const [coachHome, setCoachHome] = useState(match.coach_home ?? "");
+  const [coachAway, setCoachAway] = useState(match.coach_away ?? "");
+  const [assistantReferee1, setAssistantReferee1] = useState(
+    match.assistant_referee_1 ?? ""
+  );
+  const [assistantReferee2, setAssistantReferee2] = useState(
+    match.assistant_referee_2 ?? ""
+  );
+  const [assistantReferee3, setAssistantReferee3] = useState(
+    match.assistant_referee_3 ?? ""
+  );
+  const [fourthOfficial, setFourthOfficial] = useState(
+    match.fourth_official ?? ""
+  );
+  const [matchCommissioner, setMatchCommissioner] = useState(
+    match.match_commissioner ?? ""
+  );
+  const [weather, setWeather] = useState(match.weather ?? "");
+  const [temperature, setTemperature] = useState(match.temperature ?? "");
+  const [humidity, setHumidity] = useState(match.humidity ?? "");
+  const [wind, setWind] = useState(match.wind ?? "");
+  const [surface, setSurface] = useState(match.surface ?? "grass");
+
   const supabase = createClient();
+  const queryClient = useQueryClient();
+
+  // Use useMatch hook to get live match data with refetch capability
+  const {
+    data: liveMatch,
+    refetch: refetchMatch,
+    isFetching: isMatchFetching,
+  } = useMatch(match.id);
+  // Use the live match data if available, otherwise fall back to the initial prop
+  const currentMatch = liveMatch ?? match;
+
+  // State for manual refresh
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const {
     data: events,
     isLoading,
     refetch: refetchEvents,
+    isFetching: isEventsFetching,
   } = useMatchEvents(match.id);
   const createEventMutation = useCreateMatchEvent(match.id);
   const matchControlMutation = useMatchControl(match.id);
-  const { data: lineups, refetch: refetchLineups } = useMatchLineups(match.id);
+  const {
+    data: lineups,
+    refetch: refetchLineups,
+    isFetching: isLineupsFetching,
+  } = useMatchLineups(match.id);
   const createLineupsMutation = useCreateMatchLineups(match.id);
   const deleteLineupsMutation = useDeleteMatchLineups(match.id);
   const { data: teams } = useTeams();
+
+  // Manual refresh function for all data
+  const refreshAllData = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([refetchMatch(), refetchEvents(), refetchLineups()]);
+      toast.success("Data refreshed successfully");
+    } catch (error) {
+      toast.error("Failed to refresh data");
+      console.error("Refresh error:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Combined fetching state
+  const isAnyFetching =
+    isRefreshing || isMatchFetching || isEventsFetching || isLineupsFetching;
 
   // Clock running state is initialized from match.status in useState above
 
@@ -202,7 +273,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    if (isClockRunning && match.status === "live") {
+    if (isClockRunning && currentMatch.status === "live") {
       interval = setInterval(() => {
         setMatchSecond((prevSecond) => {
           if (prevSecond >= 59) {
@@ -223,7 +294,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
     }
 
     return () => clearInterval(interval);
-  }, [isClockRunning, match.status, matchControlMutation]);
+  }, [isClockRunning, currentMatch.status, matchControlMutation]);
 
   // Set up real-time subscription for match events
   useEffect(() => {
@@ -262,8 +333,10 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
           filter: `id=eq.${match.id}`,
         },
         () => {
-          // Match control updated, could trigger a refetch if needed
-          console.log("Match control updated");
+          // Invalidate the cache and refetch match data when updates occur
+          console.log("Match control updated - refetching data");
+          queryClient.invalidateQueries({ queryKey: ["matches", match.id] });
+          refetchMatch();
         }
       )
       .subscribe();
@@ -271,7 +344,24 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, match.id]);
+  }, [supabase, match.id, queryClient, refetchMatch]);
+
+  // Polling fallback for active matches - auto-refresh every 5 seconds
+  useEffect(() => {
+    const activeStatuses = ["live", "extra_time", "penalties", "half_time"];
+    const isActiveMatch = activeStatuses.includes(currentMatch.status);
+
+    if (!isActiveMatch) return;
+
+    const pollInterval = setInterval(() => {
+      // Silent refresh without toast notification
+      Promise.all([refetchMatch(), refetchEvents()]).catch((error) => {
+        console.error("Polling refresh error:", error);
+      });
+    }, 5000); // Poll every 5 seconds for active matches
+
+    return () => clearInterval(pollInterval);
+  }, [currentMatch.status, refetchMatch, refetchEvents]);
 
   // Process lineups into home and away with useEffect to avoid direct setState in render
   useEffect(() => {
@@ -286,6 +376,42 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
       }, 0);
     }
   }, [lineups, match.home_team_id, match.away_team_id]);
+
+  // Sync local state when live match data changes from the database
+  useEffect(() => {
+    if (liveMatch) {
+      // Use setTimeout to avoid calling setState synchronously within effect
+      setTimeout(() => {
+        // Sync match minute from database
+        if (liveMatch.minute !== undefined && liveMatch.minute !== null) {
+          setMatchMinute(liveMatch.minute);
+          lastSyncedMinuteRef.current = liveMatch.minute;
+        }
+
+        // Sync scores from database
+        if (
+          liveMatch.score_home !== undefined &&
+          liveMatch.score_home !== null
+        ) {
+          setLocalScoreHome(liveMatch.score_home);
+        }
+        if (
+          liveMatch.score_away !== undefined &&
+          liveMatch.score_away !== null
+        ) {
+          setLocalScoreAway(liveMatch.score_away);
+        }
+
+        // Sync clock running state based on match status
+        const isLive = liveMatch.status === "live";
+        setIsClockRunning(isLive);
+
+        // Sync extra time and penalty shootout states
+        setIsExtraTime(liveMatch.status === "extra_time");
+        setIsPenaltyShootout(liveMatch.status === "penalties");
+      }, 0);
+    }
+  }, [liveMatch]);
 
   // Get players for each team
   const homeTeamPlayers =
@@ -945,7 +1071,21 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
               <Trophy className="h-5 w-5 text-primary" />
               Match Status
             </CardTitle>
-            <StatusBadge status={match.status} />
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refreshAllData}
+                disabled={isAnyFetching}
+                className="gap-2"
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${isAnyFetching ? "animate-spin" : ""}`}
+                />
+                {isAnyFetching ? "Refreshing..." : "Refresh"}
+              </Button>
+              <StatusBadge status={currentMatch.status} />
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-4 sm:p-6">
@@ -971,10 +1111,10 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
 
                 <div className="text-center">
                   <div className="text-2xl sm:text-3xl font-bold text-foreground">
-                    {match.score_home} - {match.score_away}
+                    {localScoreHome} - {localScoreAway}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {match.status === "live" && (
+                    {currentMatch.status === "live" && (
                       <Badge variant="outline" className="mt-1">
                         {formatTime(matchMinute, matchSecond)}
                         {isExtraTime && " (ET)"}
@@ -1003,14 +1143,14 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
 
               {/* Match Control Buttons */}
               <div className="flex flex-wrap gap-2 mt-6">
-                {match.status === "scheduled" && (
+                {currentMatch.status === "scheduled" && (
                   <Button onClick={startMatch} className="gap-2">
                     <Play className="h-4 w-4" />
                     Start Match
                   </Button>
                 )}
 
-                {match.status === "live" && (
+                {currentMatch.status === "live" && (
                   <>
                     <Button
                       onClick={isClockRunning ? pauseMatch : resumeMatch}
@@ -1068,14 +1208,14 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                   </>
                 )}
 
-                {match.status === "half_time" && (
+                {currentMatch.status === "half_time" && (
                   <Button onClick={secondHalf} className="gap-2">
                     <RotateCcw className="h-4 w-4" />
                     Start Second Half
                   </Button>
                 )}
 
-                {match.status === "extra_time" && (
+                {currentMatch.status === "extra_time" && (
                   <>
                     <Button
                       onClick={isClockRunning ? pauseMatch : resumeMatch}
@@ -1101,7 +1241,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                   </>
                 )}
 
-                {match.status === "penalties" && (
+                {currentMatch.status === "penalties" && (
                   <>
                     <Button
                       onClick={() => setPenaltyDialogOpen(true)}
@@ -1222,10 +1362,11 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
         </CardHeader>
         <CardContent className="p-4 sm:p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="control">Control</TabsTrigger>
               <TabsTrigger value="events">Events</TabsTrigger>
               <TabsTrigger value="lineups">Lineups</TabsTrigger>
+              <TabsTrigger value="details">Details</TabsTrigger>
               <TabsTrigger value="var">VAR</TabsTrigger>
             </TabsList>
             <TabsContent value="control" className="space-y-4 sm:space-y-6">
@@ -1841,6 +1982,256 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
                         </div>
                       ))}
                   </div>
+                </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="details" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Match Details</h3>
+                <Button
+                  onClick={() => {
+                    matchControlMutation.mutate({
+                      round: matchRound || undefined,
+                      home_formation: homeFormation,
+                      away_formation: awayFormation,
+                      coach_home: coachHome || undefined,
+                      coach_away: coachAway || undefined,
+                      assistant_referee_1: assistantReferee1 || undefined,
+                      assistant_referee_2: assistantReferee2 || undefined,
+                      assistant_referee_3: assistantReferee3 || undefined,
+                      fourth_official: fourthOfficial || undefined,
+                      match_commissioner: matchCommissioner || undefined,
+                      weather: weather || undefined,
+                      temperature: temperature || undefined,
+                      humidity: humidity || undefined,
+                      wind: wind || undefined,
+                      surface: surface || undefined,
+                    });
+                    toast.success("Match details saved successfully");
+                  }}
+                  size="sm"
+                  className="gap-2"
+                  disabled={matchControlMutation.isPending}
+                >
+                  <Save className="h-4 w-4" />
+                  {matchControlMutation.isPending
+                    ? "Saving..."
+                    : "Save Details"}
+                </Button>
+              </div>
+
+              {/* Round/Matchday */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="matchRound">Round / Stage</Label>
+                  <Input
+                    id="matchRound"
+                    value={matchRound}
+                    onChange={(e) => setMatchRound(e.target.value)}
+                    placeholder="e.g., Quarter-final, Matchday 12"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="surface">Playing Surface</Label>
+                  <Select value={surface} onValueChange={setSurface}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select surface" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="grass">Natural Grass</SelectItem>
+                      <SelectItem value="artificial">
+                        Artificial Turf
+                      </SelectItem>
+                      <SelectItem value="hybrid">Hybrid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Formations */}
+              <Separator />
+              <h4 className="font-semibold text-sm text-muted-foreground">
+                Formations
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="homeFormation">
+                    {match.home_team?.name_en} Formation
+                  </Label>
+                  <Select
+                    value={homeFormation}
+                    onValueChange={setHomeFormation}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select formation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {formations.map((f) => (
+                        <SelectItem key={f.id} value={f.id}>
+                          {f.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="awayFormation">
+                    {match.away_team?.name_en} Formation
+                  </Label>
+                  <Select
+                    value={awayFormation}
+                    onValueChange={setAwayFormation}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select formation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {formations.map((f) => (
+                        <SelectItem key={f.id} value={f.id}>
+                          {f.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Coaches */}
+              <Separator />
+              <h4 className="font-semibold text-sm text-muted-foreground">
+                Coaches
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="coachHome">
+                    {match.home_team?.name_en} Coach
+                  </Label>
+                  <Input
+                    id="coachHome"
+                    value={coachHome}
+                    onChange={(e) => setCoachHome(e.target.value)}
+                    placeholder="Coach name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="coachAway">
+                    {match.away_team?.name_en} Coach
+                  </Label>
+                  <Input
+                    id="coachAway"
+                    value={coachAway}
+                    onChange={(e) => setCoachAway(e.target.value)}
+                    placeholder="Coach name"
+                  />
+                </div>
+              </div>
+
+              {/* Match Officials */}
+              <Separator />
+              <h4 className="font-semibold text-sm text-muted-foreground">
+                Match Officials
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="assistantReferee1">Assistant Referee 1</Label>
+                  <Input
+                    id="assistantReferee1"
+                    value={assistantReferee1}
+                    onChange={(e) => setAssistantReferee1(e.target.value)}
+                    placeholder="Name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="assistantReferee2">Assistant Referee 2</Label>
+                  <Input
+                    id="assistantReferee2"
+                    value={assistantReferee2}
+                    onChange={(e) => setAssistantReferee2(e.target.value)}
+                    placeholder="Name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="assistantReferee3">VAR Official</Label>
+                  <Input
+                    id="assistantReferee3"
+                    value={assistantReferee3}
+                    onChange={(e) => setAssistantReferee3(e.target.value)}
+                    placeholder="Name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="fourthOfficial">Fourth Official</Label>
+                  <Input
+                    id="fourthOfficial"
+                    value={fourthOfficial}
+                    onChange={(e) => setFourthOfficial(e.target.value)}
+                    placeholder="Name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="matchCommissioner">Match Commissioner</Label>
+                  <Input
+                    id="matchCommissioner"
+                    value={matchCommissioner}
+                    onChange={(e) => setMatchCommissioner(e.target.value)}
+                    placeholder="Name"
+                  />
+                </div>
+              </div>
+
+              {/* Weather Conditions */}
+              <Separator />
+              <h4 className="font-semibold text-sm text-muted-foreground">
+                Weather Conditions
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <Label htmlFor="weather">Weather</Label>
+                  <Select value={weather} onValueChange={setWeather}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select weather" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sunny">Sunny</SelectItem>
+                      <SelectItem value="partly_cloudy">
+                        Partly Cloudy
+                      </SelectItem>
+                      <SelectItem value="cloudy">Cloudy</SelectItem>
+                      <SelectItem value="rainy">Rainy</SelectItem>
+                      <SelectItem value="stormy">Stormy</SelectItem>
+                      <SelectItem value="windy">Windy</SelectItem>
+                      <SelectItem value="foggy">Foggy</SelectItem>
+                      <SelectItem value="snowy">Snowy</SelectItem>
+                      <SelectItem value="clear">Clear</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="temperature">Temperature</Label>
+                  <Input
+                    id="temperature"
+                    value={temperature}
+                    onChange={(e) => setTemperature(e.target.value)}
+                    placeholder="e.g., 24°C"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="humidity">Humidity</Label>
+                  <Input
+                    id="humidity"
+                    value={humidity}
+                    onChange={(e) => setHumidity(e.target.value)}
+                    placeholder="e.g., 65%"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="wind">Wind</Label>
+                  <Input
+                    id="wind"
+                    value={wind}
+                    onChange={(e) => setWind(e.target.value)}
+                    placeholder="e.g., 12 km/h NW"
+                  />
                 </div>
               </div>
             </TabsContent>

@@ -18,7 +18,7 @@ export async function GET(
 
     const supabase = await createClient();
 
-    // Fetch the match with related data
+    // Fetch the match with related data including new fields
     const { data: match, error: matchError } = await supabase
       .from("matches")
       .select(
@@ -26,8 +26,8 @@ export async function GET(
         *,
         home_team:teams!matches_home_team_id_fkey(id, name_en, name_am, slug, logo_url),
         away_team:teams!matches_away_team_id_fkey(id, name_en, name_am, slug, logo_url),
-        league:leagues(id, name_en, name_am, slug, category),
-        venue:venues(id, name_en, name_am, city, capacity)
+        league:leagues(id, name_en, name_am, slug, category, logo_url),
+        venue:venues(id, name_en, name_am, city, capacity, latitude, longitude, surface)
       `
       )
       .eq("id", id)
@@ -72,7 +72,42 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ match, events });
+    // Fetch match lineups with player and team details
+    const { data: lineups, error: lineupsError } = await supabase
+      .from("match_lineups")
+      .select(
+        `
+        *,
+        player:players(id, name_en, name_am, slug, jersey_number, position_en, position_am, photo_url),
+        team:teams(id, name_en, name_am, slug, logo_url)
+      `
+      )
+      .eq("match_id", id)
+      .order("is_starting", { ascending: false })
+      .order("jersey_number", { ascending: true });
+
+    if (lineupsError) {
+      console.error("Supabase error fetching match lineups:", lineupsError);
+      // Don't fail the whole request if lineups are not available
+    }
+
+    // Fetch match stats if available
+    const { data: stats, error: statsError } = await supabase
+      .from("match_stats")
+      .select("*")
+      .eq("match_id", id);
+
+    if (statsError) {
+      console.error("Supabase error fetching match stats:", statsError);
+      // Don't fail the whole request if stats are not available
+    }
+
+    return NextResponse.json({
+      match,
+      events,
+      lineups: lineups || [],
+      stats: stats || [],
+    });
   } catch (error) {
     console.error("Unexpected error fetching match details:", error);
     return NextResponse.json(

@@ -28,6 +28,26 @@ export const matchEntitySchema = z.object({
   match_day: z.number().nullable(),
   season: z.string().nullable(),
   is_featured: z.boolean().default(false),
+  // New fields for round/matchday
+  round: z.string().nullable(),
+  // Formations
+  home_formation: z.string().default("4-4-2"),
+  away_formation: z.string().default("4-4-2"),
+  // Match officials
+  coach_home: z.string().nullable(),
+  coach_away: z.string().nullable(),
+  assistant_referee_1: z.string().nullable(),
+  assistant_referee_2: z.string().nullable(),
+  assistant_referee_3: z.string().nullable(),
+  fourth_official: z.string().nullable(),
+  match_commissioner: z.string().nullable(),
+  // Weather and conditions
+  weather: z.string().nullable(),
+  temperature: z.string().nullable(),
+  humidity: z.string().nullable(),
+  wind: z.string().nullable(),
+  surface: z.string().default("grass"),
+  // Timestamps
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
   created_by: z.string().uuid().nullable(),
@@ -67,6 +87,25 @@ export const createMatchInputSchema = z
     match_day: z.number().optional(),
     season: z.string().optional(),
     is_featured: z.boolean().default(false),
+    // New fields for round/matchday
+    round: z.string().optional(),
+    // Formations
+    home_formation: z.string().default("4-4-2").optional(),
+    away_formation: z.string().default("4-4-2").optional(),
+    // Match officials
+    coach_home: z.string().optional(),
+    coach_away: z.string().optional(),
+    assistant_referee_1: z.string().optional(),
+    assistant_referee_2: z.string().optional(),
+    assistant_referee_3: z.string().optional(),
+    fourth_official: z.string().optional(),
+    match_commissioner: z.string().optional(),
+    // Weather and conditions
+    weather: z.string().optional(),
+    temperature: z.string().optional(),
+    humidity: z.string().optional(),
+    wind: z.string().optional(),
+    surface: z.string().default("grass").optional(),
   })
   .refine((data) => data.home_team_id !== data.away_team_id, {
     message: "Home and away teams must be different",
@@ -112,6 +151,9 @@ export const matchWithRelationsSchema = matchEntitySchema.extend({
       name_am: z.string(),
       city: z.string(),
       capacity: z.number().nullable(),
+      latitude: z.number().nullable(),
+      longitude: z.number().nullable(),
+      surface: z.string().nullable(),
     })
     .nullable(),
 });
