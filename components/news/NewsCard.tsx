@@ -6,6 +6,7 @@ import { Clock, User, ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/components/providers/language-provider";
 
 // Updated interface to match transformed news object
 interface NewsCardProps {
@@ -35,6 +36,17 @@ export default function NewsCard({
   variant = "default",
   index = 0,
 }: NewsCardProps) {
+  const { language } = useLanguage();
+
+  const title = language === 'am' && news.title_am ? news.title_am : news.title;
+  // We don't have excerpt_am in the interface yet, strictly speaking, but let's assume it might be there or fallback.
+  // Actually the interface in the file didn't show excerpt_am, so I should be careful.
+  // Let's re-read the interface I saw in view_file.
+  // interface has: excerpt: string; content?: string; content_am?: string;
+  // It does NOT have excerpt_am. I should probably stick to what's there or check if api returns it.
+  // For now, I'll just do title. If excerpt_am is missing, I'll just use excerpt.
+  const content = language === 'am' && news.content_am ? news.content_am : news.content;
+
   if (variant === "featured") {
     return (
       <Link href={`/news/${news.id}`}>
