@@ -45,7 +45,7 @@ export default function NewsCard({
   // interface has: excerpt: string; content?: string; content_am?: string;
   // It does NOT have excerpt_am. I should probably stick to what's there or check if api returns it.
   // For now, I'll just do title. If excerpt_am is missing, I'll just use excerpt.
-  const content = language === 'am' && news.content_am ? news.content_am : news.content;
+
 
   if (variant === "featured") {
     return (
@@ -58,7 +58,7 @@ export default function NewsCard({
         >
           <Image
             src={news.image}
-            alt={news.title}
+            alt={title}
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-105"
             priority
@@ -80,7 +80,7 @@ export default function NewsCard({
                 </span>
               </div>
               <h1 className="text-2xl md:text-4xl lg:text-5xl font-black text-white leading-tight mb-3 md:mb-4 group-hover:text-primary transition-colors line-clamp-3 md:line-clamp-none">
-                {news.title}
+                {title}
               </h1>
               <p className="text-sm md:text-lg text-zinc-300 line-clamp-2 max-w-2xl leading-relaxed hidden sm:block">
                 {news.excerpt}
@@ -104,7 +104,7 @@ export default function NewsCard({
           <div className="relative w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-lg overflow-hidden">
             <Image
               src={news.image}
-              alt={news.title}
+              alt={title}
               fill
               className="object-cover group-hover:scale-110 transition-transform duration-500"
             />
@@ -118,7 +118,7 @@ export default function NewsCard({
               <span className="text-[10px] text-zinc-500">{news.date}</span>
             </div>
             <h4 className="text-sm font-bold text-zinc-200 group-hover:text-primary transition-colors line-clamp-2 leading-snug">
-              {news.title}
+              {title}
             </h4>
           </div>
         </motion.div>
@@ -139,7 +139,7 @@ export default function NewsCard({
           <div className="col-span-12 md:col-span-4 relative h-48 md:h-full min-h-[200px] rounded-xl overflow-hidden">
             <Image
               src={news.image}
-              alt={news.title}
+              alt={title}
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
@@ -159,7 +159,7 @@ export default function NewsCard({
               </span>
             </div>
             <h3 className="text-lg md:text-2xl font-bold text-white mb-2 md:mb-3 group-hover:text-primary transition-colors leading-tight">
-              {news.title}
+              {title}
             </h3>
             <p className="text-zinc-400 text-sm leading-relaxed line-clamp-2 mb-3 md:mb-4">
               {news.excerpt}
@@ -186,7 +186,7 @@ export default function NewsCard({
         <div className="relative h-48 md:h-52 overflow-hidden">
           <Image
             src={news.image}
-            alt={news.title}
+            alt={title}
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-105"
           />
@@ -202,7 +202,7 @@ export default function NewsCard({
             </span>
           </div>
           <h3 className="text-base md:text-lg font-bold text-white mb-2 md:mb-3 group-hover:text-primary transition-colors line-clamp-2 leading-snug flex-1">
-            {news.title}
+            {title}
           </h3>
           <div className="flex items-center justify-between mt-auto pt-3 md:pt-4 border-t border-white/5">
             <span className="text-xs text-zinc-400 flex items-center gap-1.5">
