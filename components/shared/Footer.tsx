@@ -13,28 +13,79 @@ import {
   MapPin,
 } from "lucide-react";
 
+import { useLanguage } from "@/components/providers/language-provider";
+
 export default function Footer() {
+  const { language } = useLanguage();
+
+  const labels = {
+    en: {
+      premierLeague: "Premier League",
+      ethiopianCup: "Ethiopian Cup",
+      higherLeague: "Higher League",
+      leagueOne: "League One",
+      womensLeague: "Women's League",
+      waliasU20: "Walias U-20 PL",
+      mensTeam: "Men's Team",
+      womensTeam: "Women's Team",
+      u20Team: "U-20 Team",
+      u17Team: "U-17 Team",
+      walias: "Walias",
+      news: "News",
+      liveMatches: "Live Matches",
+      athletics: "Athletics",
+      leagues: "Leagues",
+      nationalTeams: "National Teams",
+      resources: "Resources",
+      about: "Your comprehensive source for Ethiopian football news, match results, player statistics, and league standings. Stay updated with the latest from Ethiopian football.",
+      rights: "All rights reserved."
+    },
+    am: {
+      premierLeague: "ፕሪሚየር ሊግ",
+      ethiopianCup: "የኢትዮጵያ ዋንጫ",
+      higherLeague: "ከፍተኛ ሊግ",
+      leagueOne: "ሊግ አንድ",
+      womensLeague: "የሴቶች ሊግ",
+      waliasU20: "ዋሊያ U-20",
+      mensTeam: "የወንዶች ቡድን",
+      womensTeam: "የሴቶች ቡድን",
+      u20Team: "ከ 20 ዓመት በታች",
+      u17Team: "ከ 17 ዓመት በታች",
+      walias: "ዋሊያ",
+      news: "ዜና",
+      liveMatches: "ቀጥታ ጨዋታዎች",
+      athletics: "አትሌቲክስ",
+      leagues: "ሊጎች",
+      nationalTeams: "ብሄራዊ ቡድኖች",
+      resources: "ግብዓቶች",
+      about: "የኢትዮጵያ እግር ኳስ ዜናዎች፣ የጨዋታ ውጤቶች፣ የታዋቂዎች ስታቲስቲክስ እና የሊግ ደረጃዎች ሁሉን አቀፍ ምንጭ። ከኢትዮጵያ እግር ኳስ ጋር ይዘመኑ።",
+      rights: "መብቱ በህግ የተጠበቀ ነው።"
+    }
+  };
+
+  const t = labels[language];
+
   const quickLinks = [
-    { href: "/premier-league", label: "Premier League" },
-    { href: "/ethiopian-cup", label: "Ethiopian Cup" },
-    { href: "/higher-league", label: "Higher League" },
-    { href: "/league-one", label: "League One" },
-    { href: "/womens-league", label: "Women's League" },
-    { href: "/walias-u20-pl", label: "Walias U-20 PL" },
+    { href: "/premier-league", label: t.premierLeague },
+    { href: "/ethiopian-cup", label: t.ethiopianCup },
+    { href: "/higher-league", label: t.higherLeague },
+    { href: "/league-one", label: t.leagueOne },
+    { href: "/womens-league", label: t.womensLeague },
+    { href: "/walias-u20-pl", label: t.waliasU20 },
   ];
 
   const nationalTeamLinks = [
-    { href: "/national-team/mens", label: "Men's Team" },
-    { href: "/national-team/womens", label: "Women's Team" },
-    { href: "/national-team/under-20", label: "U-20 Team" },
-    { href: "/national-team/under-17", label: "U-17 Team" },
-    { href: "/national-team/walias", label: "Walias" },
+    { href: "/national-team/mens", label: t.mensTeam },
+    { href: "/national-team/womens", label: t.womensTeam },
+    { href: "/national-team/under-20", label: t.u20Team },
+    { href: "/national-team/under-17", label: t.u17Team },
+    { href: "/national-team/walias", label: t.walias },
   ];
 
   const resourcesLinks = [
-    { href: "/news", label: "News" },
-    { href: "/live", label: "Live Matches" },
-    { href: "/athletics", label: "Athletics" },
+    { href: "/news", label: t.news },
+    { href: "/live", label: t.liveMatches },
+    { href: "/athletics", label: t.athletics },
   ];
 
   return (
@@ -67,9 +118,7 @@ export default function Footer() {
             </Link>
 
             <p className="text-sm text-muted-foreground max-w-md">
-              Your comprehensive source for Ethiopian football news, match
-              results, player statistics, and league standings. Stay updated
-              with the latest from Ethiopian football.
+              {t.about}
             </p>
 
             <div className="flex space-x-4">
@@ -106,7 +155,7 @@ export default function Footer() {
 
           {/* Leagues */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">Leagues</h3>
+            <h3 className="text-lg font-semibold text-foreground">{t.leagues}</h3>
             <ul className="space-y-2">
               {quickLinks.map((link) => (
                 <li key={link.href}>
@@ -124,7 +173,7 @@ export default function Footer() {
           {/* National Teams */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-foreground">
-              National Teams
+              {t.nationalTeams}
             </h3>
             <ul className="space-y-2">
               {nationalTeamLinks.map((link) => (
@@ -142,7 +191,7 @@ export default function Footer() {
 
           {/* Resources */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">Resources</h3>
+            <h3 className="text-lg font-semibold text-foreground">{t.resources}</h3>
             <ul className="space-y-2 mb-6">
               {resourcesLinks.map((link) => (
                 <li key={link.href}>
@@ -162,7 +211,7 @@ export default function Footer() {
 
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Pana Sports. All rights reserved.
+            © {new Date().getFullYear()} Pana Sports. {t.rights}
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-sm text-muted-foreground">
