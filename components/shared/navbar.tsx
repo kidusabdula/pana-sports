@@ -20,6 +20,8 @@ import {
   Radio,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import LanguageToggle from "@/components/shared/language-toggle";
+import { useLanguage } from "@/components/providers/language-provider";
 
 type NavItem = {
   href?: string;
@@ -49,33 +51,74 @@ export default function Navbar() {
   const { data: liveMatches } = useLiveMatches();
   const hasLiveMatches = (liveMatches?.length ?? 0) > 0;
 
+  const { language } = useLanguage();
+
+  const labels = {
+    en: {
+      home: "Home",
+      news: "News",
+      league: "League",
+      womens: "Women's League",
+      national: "National Team",
+      athletics: "Athletics",
+      pl: "Premier League",
+      ec: "Ethiopian Cup",
+      hl: "Higher League",
+      lo: "League One",
+      walias: "Walias",
+      u20: "Under 20",
+      u17: "Under 17",
+      mens: "Men's",
+      womens_team: "Women's"
+    },
+    am: {
+      home: "መነሻ",
+      news: "ዜና",
+      league: "ሊግ",
+      womens: "የሴቶች ሊግ",
+      national: "ብሄራዊ ቡድን",
+      athletics: "አትሌቲክስ",
+      pl: "ፕሪሚየር ሊግ",
+      ec: "የኢትዮጵያ ዋንጫ",
+      hl: "ከፍተኛ ሊግ",
+      lo: "አንደኛ ሊግ",
+      walias: "ዋሊያዎች",
+      u20: "ከ20 ዓመት በታች",
+      u17: "ከ17 ዓመት በታች",
+      mens: "ወንዶች",
+      womens_team: "ሴቶች"
+    }
+  };
+
+  const t = labels[language];
+
   // Navigation structure
   const navItems: NavItem[] = [
-    { href: "/", label: "Home", type: "link" },
-    { href: "/news", label: "News", type: "link" },
+    { href: "/", label: t.home, type: "link" },
+    { href: "/news", label: t.news, type: "link" },
     {
-      label: "League",
+      label: t.league,
       type: "dropdown",
       items: [
-        { href: "/premier-league", label: "Premier League" },
-        { href: "/ethiopian-cup", label: "Ethiopian Cup" },
-        { href: "/higher-league", label: "Higher League" },
-        { href: "/league-one", label: "League One" },
+        { href: "/premier-league", label: t.pl },
+        { href: "/ethiopian-cup", label: t.ec },
+        { href: "/higher-league", label: t.hl },
+        { href: "/league-one", label: t.lo },
       ],
     },
-    { href: "/womens-league", label: "Women's League", type: "link" },
+    { href: "/womens-league", label: t.womens, type: "link" },
     {
-      label: "National Team",
+      label: t.national,
       type: "dropdown",
       items: [
-        { href: "/national-team/walias", label: "Walias" },
-        { href: "/national-team/under-20", label: "Under 20" },
-        { href: "/national-team/under-17", label: "Under 17" },
-        { href: "/national-team/mens", label: "Men's" },
-        { href: "/national-team/womens", label: "Women's" },
+        { href: "/national-team/walias", label: t.walias },
+        { href: "/national-team/under-20", label: t.u20 },
+        { href: "/national-team/under-17", label: t.u17 },
+        { href: "/national-team/mens", label: t.mens },
+        { href: "/national-team/womens", label: t.womens_team },
       ],
     },
-    { href: "/athletics", label: "Athletics", type: "link" },
+    { href: "/athletics", label: t.athletics, type: "link" },
   ];
 
   // 1. Handle Scroll & Outside Clicks
@@ -306,13 +349,13 @@ export default function Navbar() {
           {/* Desktop Actions */}
           <div className="flex items-center gap-3">
             {/* Desktop Search */}
-            {/* <div className="hidden lg:flex items-center relative group">
-              <Search className="absolute left-3 w-4 h-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
-              <Input
-                placeholder="Search news, stats..."
-                className="pl-9 pr-4 w-64 h-9 bg-zinc-900/50 border-zinc-800 rounded-full focus:bg-black focus:border-primary/50 focus:ring-primary/20 transition-all duration-300 text-sm"
-              />
-            </div> */}
+            <div className="hidden lg:flex items-center relative group">
+               {/* Search removed for now */}
+            </div>
+
+            <div className="hidden lg:block mr-2">
+              <LanguageToggle />
+            </div>
 
             <div className="h-6 w-px bg-zinc-800 mx-1 hidden lg:block" />
 
@@ -372,16 +415,13 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* Mobile Toggles */}
+          {/* Mobile Toggles */}
             <div className="flex md:hidden items-center gap-2">
-              {/* <Button
-                variant="ghost"
-                size="icon"
-                className="text-zinc-400 hover:text-white hover:bg-white/10"
-                onClick={() => setSearchOpen(!searchOpen)}
-              >
-                <Search className="w-5 h-5" />
-              </Button> */}
+              <div className="scale-90">
+                <LanguageToggle />
+              </div>
+
+             {/* Search removed */}
 
               <Button
                 variant="ghost"
