@@ -1,6 +1,7 @@
 import { Outfit, DM_Mono } from "next/font/google";
 import "./global.css";
 import QueryClientProvider from "@/components/providers/query-client-provider";
+import { LanguageProvider } from "@/components/providers/language-provider";
 import AppShell from "@/components/shared/AppShell";
 import { Toaster } from "sonner";
 
@@ -30,7 +31,9 @@ export default function RootLayout({
         className={`${outfit.variable} ${dmMono.variable} font-sans flex flex-col min-h-screen`}
       >
         <QueryClientProvider>
-          <AppShell>{children}</AppShell>
+          <LanguageProvider>
+            <AppShell>{children}</AppShell>
+          </LanguageProvider>
         </QueryClientProvider>
         <Toaster position="top-right" expand={true} richColors closeButton />
       </body>
