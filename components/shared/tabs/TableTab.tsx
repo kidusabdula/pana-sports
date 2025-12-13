@@ -9,6 +9,7 @@ import { transformNewsList } from "@/lib/utils/transformers";
 import NewsCard from "@/components/news/NewsCard";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useLanguage } from "@/components/providers/language-provider";
 
 interface TableTabProps {
   standings: Standing[];
@@ -16,6 +17,7 @@ interface TableTabProps {
 }
 
 export default function TableTab({ standings, isLoading }: TableTabProps) {
+  const { t } = useLanguage();
   // Fetch news
   const { data: newsData, isLoading: isNewsLoading } = useHomeNews();
   const news = newsData ? transformNewsList(newsData).slice(0, 3) : [];
@@ -39,9 +41,8 @@ export default function TableTab({ standings, isLoading }: TableTabProps) {
           {topTeams.map((team, index) => (
             <Card
               key={team.id}
-              className={`bg-zinc-900/40 backdrop-blur-xl border-white/5 overflow-hidden relative ${
-                index === 0 ? "border-primary/30 bg-primary/5" : ""
-              }`}
+              className={`bg-zinc-900/40 backdrop-blur-xl border-white/5 overflow-hidden relative ${index === 0 ? "border-primary/30 bg-primary/5" : ""
+                }`}
             >
               <CardContent className="p-3 flex flex-col items-center justify-center text-center relative z-10">
                 <div className="absolute top-2 right-2 text-[10px] font-bold text-zinc-500">
@@ -109,23 +110,21 @@ export default function TableTab({ standings, isLoading }: TableTabProps) {
                   {standings.map((team, index) => (
                     <tr
                       key={team.id}
-                      className={`group hover:bg-white/5 transition-colors ${
-                        index < 4
+                      className={`group hover:bg-white/5 transition-colors ${index < 4
                           ? "bg-blue-500/5"
                           : index >= standings.length - 3
-                          ? "bg-red-500/5"
-                          : ""
-                      }`}
+                            ? "bg-red-500/5"
+                            : ""
+                        }`}
                     >
                       <td className="p-2 text-center">
                         <span
-                          className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold ${
-                            index < 4
+                          className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold ${index < 4
                               ? "bg-blue-500/20 text-blue-400"
                               : index >= standings.length - 3
-                              ? "bg-red-500/20 text-red-400"
-                              : "text-zinc-400"
-                          }`}
+                                ? "bg-red-500/20 text-red-400"
+                                : "text-zinc-400"
+                            }`}
                         >
                           {index + 1}
                         </span>
@@ -141,7 +140,7 @@ export default function TableTab({ standings, isLoading }: TableTabProps) {
                             />
                           </div>
                           <span className="text-xs font-medium text-zinc-200 group-hover:text-white truncate max-w-[100px] sm:max-w-none">
-                            {team.team?.name_en}
+                            {t(team.team, 'name')}
                           </span>
                         </div>
                       </td>
@@ -174,13 +173,12 @@ export default function TableTab({ standings, isLoading }: TableTabProps) {
                             return (
                               <div
                                 key={i}
-                                className={`w-3 h-3 rounded-sm flex items-center justify-center text-[8px] font-bold ${
-                                  result === "W"
+                                className={`w-3 h-3 rounded-sm flex items-center justify-center text-[8px] font-bold ${result === "W"
                                     ? "bg-green-500/20 text-green-400"
                                     : result === "D"
-                                    ? "bg-zinc-500/20 text-zinc-400"
-                                    : "bg-red-500/20 text-red-400"
-                                }`}
+                                      ? "bg-zinc-500/20 text-zinc-400"
+                                      : "bg-red-500/20 text-red-400"
+                                  }`}
                               >
                                 {result === "W" && (
                                   <CheckCircle className="w-2 h-2" />

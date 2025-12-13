@@ -10,6 +10,7 @@ import { transformNewsList } from "@/lib/utils/transformers";
 import NewsCard from "@/components/news/NewsCard";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useLanguage } from "@/components/providers/language-provider";
 
 interface OverviewTabProps {
   league: League;
@@ -18,6 +19,8 @@ interface OverviewTabProps {
 }
 
 export default function OverviewTab({ matches, standings }: OverviewTabProps) {
+  const { t } = useLanguage();
+
   // Get top 3 teams from standings
   const topTeams = standings?.slice(0, 5) || [];
 
@@ -90,12 +93,12 @@ export default function OverviewTab({ matches, standings }: OverviewTabProps) {
             {/* Home Team */}
             <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
               <span className="text-xs font-medium text-zinc-200 truncate group-hover:text-white transition-colors text-right">
-                {match.home_team?.name_en}
+                {t(match.home_team, 'name')}
               </span>
               <div className="w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-zinc-700/50 shrink-0 bg-zinc-800/50 flex items-center justify-center">
                 <Image
                   src={match.home_team?.logo_url || ""}
-                  alt={match.home_team?.name_en || ""}
+                  alt={t(match.home_team, 'name')}
                   width={24}
                   height={24}
                   className="object-cover"
@@ -123,14 +126,14 @@ export default function OverviewTab({ matches, standings }: OverviewTabProps) {
               <div className="w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-zinc-700/50 shrink-0 bg-zinc-800/50 flex items-center justify-center">
                 <Image
                   src={match.away_team?.logo_url || ""}
-                  alt={match.away_team?.name_en || ""}
+                  alt={t(match.away_team, 'name')}
                   width={24}
                   height={24}
                   className="object-cover"
                 />
               </div>
               <span className="text-xs font-medium text-zinc-200 truncate group-hover:text-white transition-colors">
-                {match.away_team?.name_en}
+                {t(match.away_team, 'name')}
               </span>
             </div>
           </div>
@@ -246,7 +249,7 @@ export default function OverviewTab({ matches, standings }: OverviewTabProps) {
                     </div>
                     <div className="min-w-0">
                       <div className="text-white font-medium truncate text-xs">
-                        {team.team?.name_en}
+                        {t(team.team, 'name')}
                       </div>
                     </div>
                   </div>

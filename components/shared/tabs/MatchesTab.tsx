@@ -29,6 +29,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Match } from "@/lib/hooks/public/useMatches";
 import { MatchEvent } from "@/lib/hooks/public/useMatchDetail";
+import { useLanguage } from "@/components/providers/language-provider";
 
 interface MatchesTabProps {
   leagueId: string;
@@ -37,6 +38,7 @@ interface MatchesTabProps {
 export default function MatchesTab({ leagueId }: MatchesTabProps) {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const router = useRouter();
+  const { t } = useLanguage();
 
   const { data: matches, isLoading } = useLeagueMatches(leagueId);
 
@@ -143,12 +145,12 @@ export default function MatchesTab({ leagueId }: MatchesTabProps) {
           {/* Home Team */}
           <div className="flex items-center gap-2 flex-1 min-w-0 justify-end">
             <span className="text-xs font-medium text-zinc-200 truncate group-hover:text-white transition-colors text-right">
-              {match.home_team?.name_en}
+              {t(match.home_team, 'name')}
             </span>
             <div className="w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-zinc-700/50 shrink-0 bg-zinc-800/50 flex items-center justify-center">
               <Image
                 src={match.home_team?.logo_url || ""}
-                alt={match.home_team?.name_en || ""}
+                alt={t(match.home_team, 'name')}
                 width={24}
                 height={24}
                 className="object-cover"
@@ -176,14 +178,14 @@ export default function MatchesTab({ leagueId }: MatchesTabProps) {
             <div className="w-5 h-5 md:w-6 md:h-6 rounded-full overflow-hidden border border-zinc-700/50 shrink-0 bg-zinc-800/50 flex items-center justify-center">
               <Image
                 src={match.away_team?.logo_url || ""}
-                alt={match.away_team?.name_en || ""}
+                alt={t(match.away_team, 'name')}
                 width={24}
                 height={24}
                 className="object-cover"
               />
             </div>
             <span className="text-xs font-medium text-zinc-200 truncate group-hover:text-white transition-colors">
-              {match.away_team?.name_en}
+              {t(match.away_team, 'name')}
             </span>
           </div>
         </div>

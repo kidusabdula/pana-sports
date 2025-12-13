@@ -20,6 +20,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
+import { useLanguage } from "@/components/providers/language-provider";
 
 interface TeamsTabProps {
   leagueId: string;
@@ -28,6 +29,7 @@ interface TeamsTabProps {
 export default function TeamsTab({ leagueId }: TeamsTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
+  const { t } = useLanguage();
 
   const { data: teams, isLoading } = useLeagueTeams(leagueId);
 
@@ -106,7 +108,7 @@ export default function TeamsTab({ leagueId }: TeamsTabProps) {
                     />
                   </div>
                   <h3 className="text-sm font-bold text-white text-center truncate w-full">
-                    {team.name_en}
+                    {t(team, 'name')}
                   </h3>
                   <p className="text-xs text-zinc-400 text-center mb-1 truncate w-full">
                     {team.name_am}
@@ -157,7 +159,7 @@ export default function TeamsTab({ leagueId }: TeamsTabProps) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="text-sm font-bold text-white truncate">
-                        {team.name_en}
+                        {t(team, 'name')}
                       </h3>
                       <p className="text-xs text-zinc-400 truncate">
                         {team.name_am}
