@@ -3,7 +3,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Trophy, ChevronUp, ChevronDown, Minus } from "lucide-react";
+import { Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { CardContent } from "../ui/card";
@@ -17,12 +17,6 @@ interface StandingsTableProps {
   showViewAllButton?: boolean;
 }
 
-const getStatusIcon = (gd: number) => {
-  if (gd > 0) return <ChevronUp className="w-3 h-3 text-green-500" />;
-  if (gd < 0) return <ChevronDown className="w-3 h-3 text-red-500" />;
-  return <Minus className="w-3 h-3 text-zinc-500" />;
-};
-
 export default function StandingsTable({
   title = "League Table",
   subtitle,
@@ -33,7 +27,7 @@ export default function StandingsTable({
   return (
     <div
       className={cn(
-        "bg-zinc-900/40 backdrop-blur-xl border-white/5 overflow-hidden",
+        "bg-zinc-900/40 backdrop-blur-xl border border-white/5 overflow-hidden rounded-2xl",
         className
       )}
     >
@@ -54,59 +48,129 @@ export default function StandingsTable({
         </div>
       )}
       <CardContent className="p-0">
-        <div className="grid grid-cols-[2rem_1fr_2rem_2rem_2rem_2rem_2rem_2rem_2rem_3rem] gap-1 px-2 py-2 text-[10px] font-bold text-zinc-500 uppercase tracking-wider border-b border-white/5">
-          <div className="text-center">#</div>
-          <div>Team</div>
-          <div className="text-center">P</div>
-          <div className="text-center">W</div>
-          <div className="text-center">D</div>
-          <div className="text-center">L</div>
-          <div className="text-center">GF</div>
-          <div className="text-center">GA</div>
-          <div className="text-center">GD</div>
-          <div className="text-center">PTS</div>
+        <div className="overflow-x-auto pana-scrollbar">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-white/5 text-[11px] uppercase text-zinc-500 font-medium tracking-wider">
+                <th className="py-4 pl-4 w-12 text-center">#</th>
+                <th className="py-4 px-2">Team</th>
+                <th className="py-4 px-2 text-center w-10">PL</th>
+                <th className="py-4 px-2 text-center w-10">W</th>
+                <th className="py-4 px-2 text-center w-10">D</th>
+                <th className="py-4 px-2 text-center w-10">L</th>
+                <th className="py-4 px-2 text-center w-16 hidden sm:table-cell">
+                  +/-
+                </th>
+                <th className="py-4 px-2 text-center w-12">GD</th>
+                <th className="py-4 px-2 text-center w-12 text-white font-bold">
+                  PTS
+                </th>
+                <th className="py-4 px-4 text-center w-32 hidden md:table-cell">
+                  Form
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-800/50">
+              {standings
+                .filter((team) => team.team)
+                .map((team, index) => {
+                  // Determine status color bar
+                  let statusColor = "bg-transparent";
+                  if (team.rank <= 4) statusColor = "bg-emerald-500"; // UCL
+                  else if (team.rank === 5) statusColor = "bg-blue-500"; // UEL
+                  else if (
+                    standings.length > 15 &&
+                    index >= standings.length - 3
+                  )
+                    statusColor = "bg-red-500"; // Relegation
+
+                  return (
+                    <tr
+                      key={team.id}
+                      className="group hover:bg-white/5 transition-colors relative"
+                    >
+                      <td className="py-3 pl-4 text-center relative">
+                        {/* Status Bar */}
+                        <div
+                          className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full ${statusColor}`}
+                        />
+
+                        <span className="text-sm font-medium text-white">
+                          {team.rank || index + 1}
+                        </span>
+                      </td>
+                      <td className="py-3 px-2">
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 relative shrink-0">
+                            <Image
+                              src={team.team?.logo_url || ""}
+                              alt={team.team?.name_en || ""}
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
+                          <span className="text-sm font-bold text-white truncate max-w-[120px] sm:max-w-[180px]">
+                            {team.team?.name_en}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-2 text-center text-sm font-medium text-white">
+                        {team.played}
+                      </td>
+                      <td className="py-3 px-2 text-center text-sm text-zinc-400 font-medium">
+                        {team.won}
+                      </td>
+                      <td className="py-3 px-2 text-center text-sm text-zinc-400 font-medium">
+                        {team.draw}
+                      </td>
+                      <td className="py-3 px-2 text-center text-sm text-zinc-400 font-medium">
+                        {team.lost}
+                      </td>
+                      <td className="py-3 px-2 text-center text-sm text-zinc-400 hidden sm:table-cell tracking-tighter">
+                        {team.goals_for}-{team.goals_against}
+                      </td>
+                      <td className="py-3 px-2 text-center text-sm font-medium text-white">
+                        {team.gd > 0 ? `+${team.gd}` : team.gd}
+                      </td>
+                      <td className="py-3 px-2 text-center text-base font-bold text-white">
+                        {team.points}
+                      </td>
+                      <td className="py-3 px-4 hidden md:table-cell">
+                        <div className="flex items-center justify-center gap-1">
+                          {[...Array(5)].map((_, i) => {
+                            // Mock form data
+                            const result = ["W", "D", "L", "W", "D"][
+                              (index + i) % 5
+                            ];
+                            let badgeClass = "bg-zinc-700 text-zinc-400";
+                            if (result === "W")
+                              badgeClass = "bg-emerald-500 text-black";
+                            if (result === "L")
+                              badgeClass = "bg-red-500 text-white";
+                            if (result === "D")
+                              badgeClass = "bg-zinc-600 text-white";
+
+                            return (
+                              <div
+                                key={i}
+                                className={`w-5 h-5 rounded-sm flex items-center justify-center text-[10px] font-bold ${badgeClass}`}
+                              >
+                                {result}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </table>
         </div>
-        {standings
-          .filter((team) => team.team)
-          .map((team) => (
-            <div
-              key={team.id}
-              className="grid grid-cols-[2rem_1fr_2rem_2rem_2rem_2rem_2rem_2rem_2rem_3rem] gap-1 px-2 py-2 text-xs border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors"
-            >
-              <div className="flex items-center justify-center text-zinc-500 font-mono">
-                {team.rank}
-              </div>
-              <div className="flex items-center gap-2 font-medium text-zinc-200 truncate">
-                <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0">
-                  <Image
-                    src={team.team?.logo_url || ""}
-                    alt={team.team?.name_en || "Team"}
-                    width={20}
-                    height={20}
-                    className="object-cover"
-                  />
-                </div>
-                <span className="truncate">{team.team?.name_en}</span>
-              </div>
-              <div className="text-center text-zinc-400">{team.played}</div>
-              <div className="text-center text-zinc-400">{team.won}</div>
-              <div className="text-center text-zinc-400">{team.draw}</div>
-              <div className="text-center text-zinc-400">{team.lost}</div>
-              <div className="text-center text-zinc-400">{team.goals_for}</div>
-              <div className="text-center text-zinc-400">
-                {team.goals_against}
-              </div>
-              <div className="text-center text-zinc-400">{team.gd}</div>
-              <div className="text-right font-bold text-white font-mono flex items-center justify-end gap-1">
-                {team.points}
-                {getStatusIcon(team.gd)}
-              </div>
-            </div>
-          ))}
         {showViewAllButton && (
           <Button
             variant="ghost"
-            className="w-full py-3 text-xs text-zinc-500 hover:text-primary hover:bg-white/5 transition-colors rounded-none"
+            className="w-full py-4 text-xs font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-colors rounded-none border-t border-white/5"
           >
             View Full Standings
           </Button>

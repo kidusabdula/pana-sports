@@ -185,6 +185,30 @@
   .hide-scrollbar::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera*/
   }
+
+  /* Custom Pana Scrollbar */
+  .pana-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  }
+
+  .pana-scrollbar::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  .pana-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .pana-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+
+  .pana-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: oklch(var(--primary) / 0.5);
+  }
 }
 
 /* CMS Light Theme Styles */

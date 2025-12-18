@@ -275,16 +275,15 @@ function LiveMatchesPageContent() {
           <div className="flex items-center justify-between py-4.5">
             {/* Left Section */}
             <div className="flex items-center gap-2 sm:gap-3">
-              <Link href="/">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all h-8 px-2"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  <span className="hidden sm:inline ml-1 text-xs">Back</span>
-                </Button>
-              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.back()}
+                className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all h-8 px-2"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span className="hidden sm:inline ml-1 text-xs">Back</span>
+              </Button>
 
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <div className="relative flex h-2 w-2">

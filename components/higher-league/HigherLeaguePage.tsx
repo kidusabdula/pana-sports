@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   useLeagues,
   useLeagueMatches,
@@ -38,8 +39,8 @@ interface HigherLeaguePageProps {
 }
 
 function HigherLeaguePageContent({ leagueId }: HigherLeaguePageProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
-
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Fetch all leagues to find Higher League
@@ -126,16 +127,15 @@ function HigherLeaguePageContent({ leagueId }: HigherLeaguePageProps) {
           <div className="flex items-center justify-between py-3">
             {/* Left Section */}
             <div className="flex items-center gap-3">
-              <Link href="/">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                  <span className="hidden sm:inline ml-1">Back</span>
-                </Button>
-              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.back()}
+                className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all"
+              >
+                <ChevronLeft className="h-5 w-5" />
+                <span className="hidden sm:inline ml-1">Back</span>
+              </Button>
 
               <div className="hidden md:flex items-center gap-2 ml-2">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-white/10 to-transparent border border-white/20 flex items-center justify-center">

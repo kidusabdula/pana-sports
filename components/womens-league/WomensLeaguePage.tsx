@@ -38,12 +38,17 @@ import TableTab from "@/components/shared/tabs/TableTab";
 import TeamsTab from "@/components/shared/tabs/TeamsTab";
 
 function WomensLeaguePageContent({ leagueId }: { leagueId: string }) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Fetch league data using the provided leagueId
-  const { data: league, isLoading: leagueLoading, error: leagueError } = useLeague(leagueId);
-  
+  const {
+    data: league,
+    isLoading: leagueLoading,
+    error: leagueError,
+  } = useLeague(leagueId);
+
   const { data: matches, isLoading: matchesLoading } = useLeagueMatches(
     leagueId,
     { limit: 10 }
@@ -57,7 +62,8 @@ function WomensLeaguePageContent({ leagueId }: { leagueId: string }) {
   const { data: teams, isLoading: teamsLoading } = useLeagueTeams(leagueId);
 
   // Handle loading state
-  const isLoading = leagueLoading || matchesLoading || standingsLoading || teamsLoading;
+  const isLoading =
+    leagueLoading || matchesLoading || standingsLoading || teamsLoading;
 
   // Handle error state
   if (leagueError) {
@@ -94,7 +100,9 @@ function WomensLeaguePageContent({ leagueId }: { leagueId: string }) {
           <p className="text-zinc-400 mb-6">
             The Women's League data is currently unavailable.
           </p>
-          <Button onClick={() => (window.location.href = "/")}>Back to Home</Button>
+          <Button onClick={() => (window.location.href = "/")}>
+            Back to Home
+          </Button>
         </div>
       </div>
     );
@@ -116,16 +124,15 @@ function WomensLeaguePageContent({ leagueId }: { leagueId: string }) {
           <div className="flex items-center justify-between py-3">
             {/* Left Section */}
             <div className="flex items-center gap-3">
-              <Link href="/">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                  <span className="hidden sm:inline ml-1">Back</span>
-                </Button>
-              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.back()}
+                className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all"
+              >
+                <ChevronLeft className="h-5 w-5" />
+                <span className="hidden sm:inline ml-1">Back</span>
+              </Button>
 
               <div className="hidden md:flex items-center gap-2 ml-2">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-white/10 to-transparent border border-white/20 flex items-center justify-center">
@@ -138,7 +145,9 @@ function WomensLeaguePageContent({ leagueId }: { leagueId: string }) {
                   />
                 </div>
                 <div>
-                  <h1 className="text-lg font-bold text-white">{league?.name_en}</h1>
+                  <h1 className="text-lg font-bold text-white">
+                    {league?.name_en}
+                  </h1>
                   <p className="text-xs text-zinc-400">
                     {new Date().getFullYear()}/{new Date().getFullYear() + 1}
                   </p>
@@ -321,7 +330,9 @@ function WomensLeaguePageContent({ leagueId }: { leagueId: string }) {
               />
             </div>
             <div className="flex-1">
-              <h2 className="text-base font-bold text-white">{league?.name_en}</h2>
+              <h2 className="text-base font-bold text-white">
+                {league?.name_en}
+              </h2>
               <p className="text-xs text-zinc-400">
                 {new Date().getFullYear()}/{new Date().getFullYear() + 1} •{" "}
                 {teams?.length || 0} Teams
@@ -366,7 +377,9 @@ function WomensLeaguePageContent({ leagueId }: { leagueId: string }) {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-zinc-800/30 rounded-lg p-3 border border-white/5">
                   <p className="text-sm text-zinc-500 mb-1">Category</p>
-                  <p className="text-white font-medium">{league?.category || "N/A"}</p>
+                  <p className="text-white font-medium">
+                    {league?.category || "N/A"}
+                  </p>
                 </div>
                 <div className="bg-zinc-800/30 rounded-lg p-3 border border-white/5">
                   <p className="text-sm text-zinc-500 mb-1">Founded</p>
@@ -474,7 +487,8 @@ function WomensLeaguePageContent({ leagueId }: { leagueId: string }) {
                   {(() => {
                     const nextMatch =
                       matches.find(
-                        (m) => m.status === "upcoming" || m.status === "scheduled"
+                        (m) =>
+                          m.status === "upcoming" || m.status === "scheduled"
                       ) || matches[0];
                     return (
                       <>
@@ -510,12 +524,15 @@ function WomensLeaguePageContent({ leagueId }: { leagueId: string }) {
                           </div>
                         </div>
                         <div className="text-xs text-zinc-400 text-center">
-                          {new Date(nextMatch.date).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          {new Date(nextMatch.date).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}
                         </div>
                         <Button
                           variant="outline"

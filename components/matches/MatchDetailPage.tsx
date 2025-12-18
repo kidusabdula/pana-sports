@@ -42,6 +42,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { FormationFieldMap } from "./FormationFieldMap";
 import { SimpleKnockoutBracket } from "./KnockoutBracket";
 
@@ -244,7 +245,7 @@ const TimelineEvent = ({
         {/* Icon with colored background */}
         <div
           className={cn(
-            "shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-transform group-hover:scale-110",
+            "shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-transform active:scale-95",
             isGoal && "bg-green-500/20 ring-2 ring-green-500/30",
             isCard &&
               event.type.includes("red") &&
@@ -262,7 +263,7 @@ const TimelineEvent = ({
           )}
         >
           {typeof icon === "string" ? (
-            <span className="text-lg">{icon}</span>
+            <span className="text-base sm:text-lg">{icon}</span>
           ) : (
             <div className="text-zinc-300">{icon}</div>
           )}
@@ -272,7 +273,7 @@ const TimelineEvent = ({
         <div className="flex flex-col justify-center min-w-0">
           <div
             className={cn(
-              "font-semibold text-sm text-white truncate",
+              "font-semibold text-xs sm:text-sm text-white truncate max-w-[90px] sm:max-w-none",
               isGoal && "text-green-400",
               isCard && event.type.includes("red") && "text-red-400",
               isCard && !event.type.includes("red") && "text-yellow-400",
@@ -283,7 +284,7 @@ const TimelineEvent = ({
             {getPrimaryText()}
           </div>
           {getSecondaryText() && (
-            <div className="text-[11px] text-zinc-400 truncate">
+            <div className="text-[10px] sm:text-[11px] text-zinc-400 truncate max-w-[90px] sm:max-w-none">
               {getSecondaryText()}
             </div>
           )}
@@ -291,10 +292,10 @@ const TimelineEvent = ({
       </div>
 
       {/* Center Line & Minute */}
-      <div className="w-14 flex justify-center relative shrink-0 mx-2">
+      <div className="w-10 sm:w-14 flex justify-center relative shrink-0 mx-1 sm:mx-2">
         <div
           className={cn(
-            "w-9 h-9 rounded-full flex items-center justify-center z-10 transition-all",
+            "w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center z-10 transition-all",
             isGoal && "bg-green-500/30 border-2 border-green-500/50",
             isCard && "bg-zinc-800 border-2 border-zinc-600",
             isVAR && "bg-blue-500/30 border-2 border-blue-500/50",
@@ -344,12 +345,16 @@ const StatCard = ({
   value: string | number;
   color?: string;
 }) => (
-  <div className="bg-zinc-800/30 rounded-lg p-3 border border-zinc-800/50">
-    <div className="flex items-center gap-2 mb-1">
-      <Icon className={cn("h-4 w-4", color)} />
-      <span className="text-xs text-zinc-400">{label}</span>
+  <div className="bg-zinc-800/30 rounded-lg p-2 sm:p-3 border border-zinc-800/50 min-w-0">
+    <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+      <Icon className={cn("h-3 w-3 sm:h-4 sm:w-4 shrink-0", color)} />
+      <span className="text-[10px] sm:text-xs text-zinc-400 truncate">
+        {label}
+      </span>
     </div>
-    <div className="text-lg font-bold text-white">{value}</div>
+    <div className="text-sm sm:text-lg font-bold text-white truncate">
+      {value}
+    </div>
   </div>
 );
 
@@ -368,15 +373,15 @@ const TeamStatBar = ({
   const awayPercentage = total > 0 ? (awayValue / total) * 100 : 50;
 
   return (
-    <div className="mb-4">
-      <div className="flex justify-between text-xs text-zinc-400 mb-1.5">
+    <div className="mb-3 sm:mb-4">
+      <div className="flex justify-between text-[10px] sm:text-xs text-zinc-400 mb-1 sm:mb-1.5">
         <span className="font-medium">{homeValue}</span>
-        <span className="text-zinc-500 uppercase tracking-wide text-[10px]">
+        <span className="text-zinc-500 uppercase tracking-wide text-[9px] sm:text-[10px] truncate px-1">
           {label}
         </span>
         <span className="font-medium">{awayValue}</span>
       </div>
-      <div className="flex h-2 rounded-full overflow-hidden bg-zinc-800">
+      <div className="flex h-1.5 sm:h-2 rounded-full overflow-hidden bg-zinc-800">
         <div
           className="bg-primary transition-all"
           style={{ width: `${homePercentage}%` }}
@@ -405,26 +410,26 @@ const LineupList = ({
   const injured = lineups.filter((l) => l.is_injured);
 
   return (
-    <div className="space-y-3">
-      <h4 className="text-sm font-semibold text-zinc-300 flex items-center gap-2">
-        <Shirt className="h-4 w-4" />
-        {teamName}
+    <div className="space-y-2 sm:space-y-3">
+      <h4 className="text-xs sm:text-sm font-semibold text-zinc-300 flex items-center gap-2">
+        <Shirt className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+        <span className="truncate">{teamName}</span>
       </h4>
 
       {/* Starting XI */}
       <div className="space-y-1">
-        <div className="text-[10px] text-zinc-500 uppercase tracking-wide">
+        <div className="text-[9px] sm:text-[10px] text-zinc-500 uppercase tracking-wide">
           Starting XI
         </div>
         {starters.map((lineup) => (
           <div
             key={lineup.id}
             className={cn(
-              "flex items-center gap-2 p-2 rounded-lg bg-zinc-800/30",
+              "flex items-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-lg bg-zinc-800/30 active:bg-zinc-700/40 touch-manipulation",
               lineup.captain && "ring-1 ring-yellow-500/30"
             )}
           >
-            <div className="w-6 h-6 rounded-full overflow-hidden bg-zinc-700/50 flex items-center justify-center">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full overflow-hidden bg-zinc-700/50 flex items-center justify-center shrink-0">
               {lineup.player?.photo_url ? (
                 <Image
                   src={lineup.player.photo_url}
@@ -434,24 +439,31 @@ const LineupList = ({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-[10px] text-zinc-400">
+                <span className="text-[9px] sm:text-[10px] text-zinc-400">
                   {lineup.jersey_number || "?"}
                 </span>
               )}
             </div>
-            <div className="flex-1 min-w-0">
-              <span className="text-xs text-white truncate block">
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <span className="text-[11px] sm:text-xs text-white truncate block">
                 {lineup.player?.name_en || "Unknown"}
               </span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
               {lineup.captain && (
-                <Badge className="h-4 px-1 text-[8px] bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                <Badge className="h-3.5 sm:h-4 px-0.5 sm:px-1 text-[7px] sm:text-[8px] bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
                   C
                 </Badge>
               )}
-              <Badge variant="outline" className="text-[10px] h-4 px-1">
-                {lineup.position || lineup.player?.position_en || "-"}
+              <Badge
+                variant="outline"
+                className="text-[8px] sm:text-[10px] h-3.5 sm:h-4 px-0.5 sm:px-1"
+              >
+                {(
+                  lineup.position ||
+                  lineup.player?.position_en ||
+                  "-"
+                ).substring(0, 3)}
               </Badge>
             </div>
           </div>
@@ -461,13 +473,13 @@ const LineupList = ({
       {/* Substitutes */}
       {subs.length > 0 && (
         <div className="space-y-1 pt-2 border-t border-zinc-800/50">
-          <div className="text-[10px] text-zinc-500 uppercase tracking-wide">
+          <div className="text-[9px] sm:text-[10px] text-zinc-500 uppercase tracking-wide">
             Substitutes
           </div>
           {subs.map((lineup) => (
             <div
               key={lineup.id}
-              className="flex items-center gap-2 p-2 rounded-lg bg-zinc-800/20"
+              className="flex items-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-lg bg-zinc-800/20 active:bg-zinc-700/30 touch-manipulation"
             >
               <span className="text-[10px] text-zinc-500 w-4 text-center">
                 {lineup.jersey_number || "?"}
@@ -579,6 +591,7 @@ const StandingRow = ({
 );
 
 export function MatchDetailPage({ matchId }: MatchDetailPageProps) {
+  const router = useRouter();
   const { data: matchData, isLoading, error } = useMatchDetail(matchId);
   const [activeTab, setActiveTab] = useState("preview");
 
@@ -695,15 +708,15 @@ export function MatchDetailPage({ matchId }: MatchDetailPageProps) {
       {/* Header */}
       <div className="bg-zinc-900/80 backdrop-blur-md border-b border-zinc-800/50 sticky top-0 z-40">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <Link
-            href="/live"
-            className="text-zinc-400 hover:text-white transition-colors"
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.back()}
+            className="text-zinc-400 hover:text-white transition-colors gap-2"
           >
-            <Button variant="ghost" size="sm" className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Back</span>
-            </Button>
-          </Link>
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Back</span>
+          </Button>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -883,18 +896,32 @@ export function MatchDetailPage({ matchId }: MatchDetailPageProps) {
 
         {/* Tabs Section */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full grid grid-cols-4 bg-zinc-900/60 border border-zinc-800/50">
-            <TabsTrigger value="preview" className="text-xs sm:text-sm">
+          <TabsList className="w-full grid grid-cols-4 bg-zinc-900/60 border border-zinc-800/50 h-10 sm:h-11">
+            <TabsTrigger
+              value="preview"
+              className="text-[10px] sm:text-sm px-1 sm:px-3"
+            >
               Preview
             </TabsTrigger>
-            <TabsTrigger value="table" className="text-xs sm:text-sm">
+            <TabsTrigger
+              value="table"
+              className="text-[10px] sm:text-sm px-1 sm:px-3"
+            >
               Table
             </TabsTrigger>
-            <TabsTrigger value="knockout" className="text-xs sm:text-sm">
-              Knockout
+            <TabsTrigger
+              value="knockout"
+              className="text-[10px] sm:text-sm px-1 sm:px-3"
+            >
+              <span className="hidden sm:inline">Knockout</span>
+              <span className="sm:hidden">K.O.</span>
             </TabsTrigger>
-            <TabsTrigger value="h2h" className="text-xs sm:text-sm">
-              Head-to-Head
+            <TabsTrigger
+              value="h2h"
+              className="text-[10px] sm:text-sm px-1 sm:px-3"
+            >
+              <span className="hidden sm:inline">Head-to-Head</span>
+              <span className="sm:hidden">H2H</span>
             </TabsTrigger>
           </TabsList>
 
@@ -1168,26 +1195,28 @@ export function MatchDetailPage({ matchId }: MatchDetailPageProps) {
                       <div className="text-[10px] text-zinc-500 mb-2">
                         Last {h2hData.stats.totalMatches} Meetings
                       </div>
-                      <div className="flex items-center justify-center gap-4 text-sm font-bold">
-                        <div className="text-center">
-                          <div className="text-2xl text-primary">
+                      <div className="flex items-center justify-center gap-3 sm:gap-4 text-sm font-bold">
+                        <div className="text-center flex-1">
+                          <div className="text-xl sm:text-2xl text-primary">
                             {h2hData.stats.homeWins}
                           </div>
-                          <div className="text-[10px] text-zinc-500">
+                          <div className="text-[9px] sm:text-[10px] text-zinc-500 truncate">
                             {match.home_team.name_en}
                           </div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl text-zinc-400">
+                          <div className="text-xl sm:text-2xl text-zinc-400">
                             {h2hData.stats.draws}
                           </div>
-                          <div className="text-[10px] text-zinc-500">Draws</div>
+                          <div className="text-[9px] sm:text-[10px] text-zinc-500">
+                            Draws
+                          </div>
                         </div>
-                        <div className="text-center">
-                          <div className="text-2xl text-red-400">
+                        <div className="text-center flex-1">
+                          <div className="text-xl sm:text-2xl text-red-400">
                             {h2hData.stats.awayWins}
                           </div>
-                          <div className="text-[10px] text-zinc-500">
+                          <div className="text-[9px] sm:text-[10px] text-zinc-500 truncate">
                             {match.away_team.name_en}
                           </div>
                         </div>
@@ -1202,19 +1231,19 @@ export function MatchDetailPage({ matchId }: MatchDetailPageProps) {
                       {h2hData.matches.map((h2hMatch) => (
                         <div
                           key={h2hMatch.id}
-                          className="flex items-center justify-between p-2 bg-zinc-800/20 rounded-lg"
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 bg-zinc-800/20 rounded-lg gap-1 sm:gap-2"
                         >
-                          <span className="text-[10px] text-zinc-500">
+                          <span className="text-[9px] sm:text-[10px] text-zinc-500">
                             {format(new Date(h2hMatch.date), "MMM dd, yyyy")}
                           </span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-zinc-300 truncate max-w-[80px]">
+                          <div className="flex items-center justify-center gap-1.5 sm:gap-2">
+                            <span className="text-[10px] sm:text-xs text-zinc-300 truncate max-w-[60px] sm:max-w-[80px]">
                               {h2hMatch.home_team.name_en}
                             </span>
-                            <span className="text-sm font-bold text-white">
+                            <span className="text-xs sm:text-sm font-bold text-white shrink-0">
                               {h2hMatch.score_home} - {h2hMatch.score_away}
                             </span>
-                            <span className="text-xs text-zinc-300 truncate max-w-[80px]">
+                            <span className="text-[10px] sm:text-xs text-zinc-300 truncate max-w-[60px] sm:max-w-[80px]">
                               {h2hMatch.away_team.name_en}
                             </span>
                           </div>

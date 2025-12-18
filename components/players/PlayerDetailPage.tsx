@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 import Link from "next/link";
 
@@ -30,6 +31,7 @@ interface PlayerDetailPageProps {
 }
 
 export function PlayerDetailPage({ playerId }: PlayerDetailPageProps) {
+  const router = useRouter();
   const { data: playerData, isLoading, error } = usePlayerDetail(playerId);
 
   if (isLoading) {
@@ -81,12 +83,14 @@ export function PlayerDetailPage({ playerId }: PlayerDetailPageProps) {
       {/* Header */}
       <div className="bg-zinc-900/80 backdrop-blur-md border-b border-zinc-800/50 sticky top-0 z-10">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <Link
-            href="/"
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.back()}
             className="text-zinc-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
-          </Link>
+          </Button>
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"

@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   useLeague,
   useLeagueMatches,
@@ -39,6 +40,7 @@ interface PremierLeaguePageContentProps {
 }
 
 function PremierLeaguePageContent({ leagueId }: PremierLeaguePageContentProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -124,16 +126,15 @@ function PremierLeaguePageContent({ leagueId }: PremierLeaguePageContentProps) {
           <div className="flex items-center justify-between py-4">
             {/* Left Section */}
             <div className="flex items-center gap-2 sm:gap-3">
-              <Link href="/">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all h-8 px-2"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  <span className="hidden sm:inline ml-1 text-xs">Back</span>
-                </Button>
-              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.back()}
+                className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all h-8 px-2"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span className="hidden sm:inline ml-1 text-xs">Back</span>
+              </Button>
 
               <div className="hidden md:flex items-center gap-2 ml-1">
                 <div className="w-6 h-6 rounded-full bg-gradient-to-br from-white/10 to-transparent border border-white/20 flex items-center justify-center">
