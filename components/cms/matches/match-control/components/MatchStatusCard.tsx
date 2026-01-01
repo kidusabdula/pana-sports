@@ -1,0 +1,388 @@
+// components/cms/matches/match-control/components/MatchStatusCard.tsx
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Play,
+  Pause,
+  Square,
+  RotateCcw,
+  Timer,
+  Clock,
+  Flag,
+  Trophy,
+  Calendar,
+  MapPin,
+  RefreshCw,
+} from "lucide-react";
+import { format } from "date-fns";
+import { StatusBadge } from "./shared/StatusBadge";
+import { Match } from "@/lib/schemas/match";
+
+interface MatchStatusCardProps {
+  match: Match;
+  currentMatch: Match;
+  localScoreHome: number;
+  localScoreAway: number;
+  matchMinute: number;
+  matchSecond: number;
+  isClockRunning: boolean;
+  isExtraTime: boolean;
+  isPenaltyShootout: boolean;
+  isAnyFetching: boolean;
+  formatTime: (minute: number, second: number) => string;
+  onStartMatch: () => void;
+  onPauseMatch: () => void;
+  onResumeMatch: () => void;
+  onHalfTime: () => void;
+  onSecondHalf: () => void;
+  onStartExtraTime: () => void;
+  onEndExtraTime: () => void;
+  onStartPenaltyShootout: () => void;
+  onEndPenaltyShootout: () => void;
+  onFullTime: () => void;
+  onRefresh: () => void;
+  onUpdateMinute: (minute: number) => void;
+  onAddInjuryTime: (half: "first" | "second", minutes: number) => void;
+  onOpenPenaltyDialog: () => void;
+  setMatchMinute: React.Dispatch<React.SetStateAction<number>>;
+}
+
+export function MatchStatusCard({
+  match,
+  currentMatch,
+  localScoreHome,
+  localScoreAway,
+  matchMinute,
+  matchSecond,
+  isClockRunning,
+  isExtraTime,
+  isPenaltyShootout,
+  isAnyFetching,
+  formatTime,
+  onStartMatch,
+  onPauseMatch,
+  onResumeMatch,
+  onHalfTime,
+  onSecondHalf,
+  onStartExtraTime,
+  onEndExtraTime,
+  onStartPenaltyShootout,
+  onEndPenaltyShootout,
+  onFullTime,
+  onRefresh,
+  onUpdateMinute,
+  onAddInjuryTime,
+  onOpenPenaltyDialog,
+  setMatchMinute,
+}: MatchStatusCardProps) {
+  return (
+    <Card className="shadow-sm border border-border/50 bg-card rounded-xl overflow-hidden">
+      <CardHeader className="bg-muted/20 px-4 sm:px-6 py-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <CardTitle className="text-lg sm:text-xl font-bold text-foreground flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-primary" />
+            Match Status
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRefresh}
+              disabled={isAnyFetching}
+              className="gap-2"
+            >
+              <RefreshCw
+                className={`h-4 w-4 ${isAnyFetching ? "animate-spin" : ""}`}
+              />
+              {isAnyFetching ? "Refreshing..." : "Refresh"}
+            </Button>
+            <StatusBadge status={currentMatch.status} />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="p-4 sm:p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Teams and Score */}
+          <div className="lg:col-span-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+              {/* Home Team */}
+              <div className="flex items-center gap-3">
+                {match.home_team?.logo_url && (
+                  <img
+                    src={match.home_team.logo_url}
+                    alt={match.home_team.name_en}
+                    className="h-10 w-10 object-contain"
+                  />
+                )}
+                <div>
+                  <h3 className="font-bold text-lg truncate max-w-[150px] sm:max-w-none">
+                    {match.home_team?.name_en}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">Home</p>
+                </div>
+              </div>
+
+              {/* Score */}
+              <div className="text-center">
+                <div className="text-2xl sm:text-3xl font-bold text-foreground">
+                  {localScoreHome} - {localScoreAway}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {(currentMatch.status === "live" ||
+                    currentMatch.status === "extra_time") && (
+                    <Badge variant="outline" className="mt-1">
+                      {formatTime(matchMinute, matchSecond)}
+                      {isExtraTime && " (ET)"}
+                      {isPenaltyShootout && " (PEN)"}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              {/* Away Team */}
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <h3 className="font-bold text-lg truncate max-w-[150px] sm:max-w-none">
+                    {match.away_team?.name_en}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">Away</p>
+                </div>
+                {match.away_team?.logo_url && (
+                  <img
+                    src={match.away_team.logo_url}
+                    alt={match.away_team.name_en}
+                    className="h-10 w-10 object-contain"
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Match Control Buttons */}
+            <div className="flex flex-wrap gap-2 mt-6">
+              {/* Scheduled State */}
+              {currentMatch.status === "scheduled" && (
+                <Button onClick={onStartMatch} className="gap-2">
+                  <Play className="h-4 w-4" />
+                  Start Match
+                </Button>
+              )}
+
+              {/* Live State */}
+              {currentMatch.status === "live" && (
+                <>
+                  <Button
+                    onClick={isClockRunning ? onPauseMatch : onResumeMatch}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    {isClockRunning ? (
+                      <>
+                        <Pause className="h-4 w-4" />
+                        Pause
+                      </>
+                    ) : (
+                      <>
+                        <Play className="h-4 w-4" />
+                        Resume
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={onHalfTime}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <Timer className="h-4 w-4" />
+                    Half Time
+                  </Button>
+                  <Button
+                    onClick={onSecondHalf}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    Second Half
+                  </Button>
+                  <Button
+                    onClick={onStartExtraTime}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <Clock className="h-4 w-4" />
+                    Extra Time
+                  </Button>
+                  <Button
+                    onClick={onStartPenaltyShootout}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <Flag className="h-4 w-4" />
+                    Penalties
+                  </Button>
+                  <Button onClick={onFullTime} className="gap-2">
+                    <Square className="h-4 w-4" />
+                    Full Time
+                  </Button>
+                </>
+              )}
+
+              {/* Half Time State */}
+              {currentMatch.status === "half_time" && (
+                <Button onClick={onSecondHalf} className="gap-2">
+                  <RotateCcw className="h-4 w-4" />
+                  Start Second Half
+                </Button>
+              )}
+
+              {/* Extra Time State */}
+              {currentMatch.status === "extra_time" && (
+                <>
+                  <Button
+                    onClick={isClockRunning ? onPauseMatch : onResumeMatch}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    {isClockRunning ? (
+                      <>
+                        <Pause className="h-4 w-4" />
+                        Pause
+                      </>
+                    ) : (
+                      <>
+                        <Play className="h-4 w-4" />
+                        Resume
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={onStartPenaltyShootout}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <Flag className="h-4 w-4" />
+                    Go to Penalties
+                  </Button>
+                  <Button onClick={onEndExtraTime} className="gap-2">
+                    <Square className="h-4 w-4" />
+                    End Extra Time
+                  </Button>
+                </>
+              )}
+
+              {/* Penalties State */}
+              {currentMatch.status === "penalties" && (
+                <>
+                  <Button
+                    onClick={onOpenPenaltyDialog}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <Flag className="h-4 w-4" />
+                    Record Penalty
+                  </Button>
+                  <Button onClick={onEndPenaltyShootout} className="gap-2">
+                    <Square className="h-4 w-4" />
+                    End Penalties
+                  </Button>
+                </>
+              )}
+
+              {/* Postponed State */}
+              {currentMatch.status === "postponed" && (
+                <Button onClick={onResumeMatch} className="gap-2">
+                  <Play className="h-4 w-4" />
+                  Resume Match
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Match Details */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span>{format(new Date(match.date), "MMM dd, yyyy")}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="truncate">{match.venue?.name_en || "TBD"}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Trophy className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="truncate">
+                {match.league?.name_en || "No League"}
+              </span>
+            </div>
+
+            {/* Minute Control */}
+            <div className="pt-4">
+              <Label htmlFor="minute" className="text-sm font-medium">
+                Match Minute
+              </Label>
+              <div className="flex items-center gap-2 mt-1">
+                <Input
+                  id="minute"
+                  type="number"
+                  value={matchMinute}
+                  onChange={(e) => setMatchMinute(Number(e.target.value))}
+                  className="w-20"
+                  min={0}
+                  max={120}
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onUpdateMinute(matchMinute)}
+                >
+                  Update
+                </Button>
+              </div>
+            </div>
+
+            {/* Extra Time Controls */}
+            {currentMatch.status === "live" && (
+              <div className="pt-4">
+                <Label className="text-sm font-medium">Injury Time</Label>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onAddInjuryTime("first", 1)}
+                  >
+                    +1' 1st
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onAddInjuryTime("first", 2)}
+                  >
+                    +2' 1st
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onAddInjuryTime("second", 1)}
+                  >
+                    +1' 2nd
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onAddInjuryTime("second", 2)}
+                  >
+                    +2' 2nd
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
