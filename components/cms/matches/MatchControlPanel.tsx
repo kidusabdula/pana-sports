@@ -7,7 +7,6 @@ import {
   useCreateMatchEvent,
 } from "@/lib/hooks/cms/useMatchEvents";
 import { useMatchControl } from "@/lib/hooks/cms/useMatchControl";
-import { calculateMatchTime, isClockRunning } from "@/lib/utils/matchTime";
 import {
   useMatchLineups,
   useCreateMatchLineups,
@@ -429,15 +428,9 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
 
   // Match control functions
   const startMatch = () => {
-    const now = new Date().toISOString();
     matchControlMutation.mutate({
       status: "live",
       minute: 0,
-      match_started_at: now,
-      second_half_started_at: null,
-      extra_time_started_at: null,
-      paused_at: null,
-      total_paused_seconds: 0,
     });
     setIsClockRunning(true);
     setMatchMinute(0);
@@ -460,11 +453,8 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
   };
 
   const pauseMatch = () => {
-    const now = new Date().toISOString();
     matchControlMutation.mutate({
-      status: "paused",
-      paused_at: now,
-      minute: matchMinute,
+      status: "postponed",
     });
     setIsClockRunning(false);
 
@@ -483,27 +473,8 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
   };
 
   const resumeMatch = () => {
-    // Calculate pause duration and add to total
-    const pausedAt = currentMatch.paused_at
-      ? new Date(currentMatch.paused_at)
-      : null;
-    const pauseDuration = pausedAt
-      ? Math.floor((Date.now() - pausedAt.getTime()) / 1000)
-      : 0;
-    const newTotalPaused =
-      (currentMatch.total_paused_seconds || 0) + pauseDuration;
-
-    // Determine which status to resume to based on the current period
-    const resumeStatus = isExtraTime
-      ? "extra_time"
-      : matchMinute >= 46
-      ? "second_half"
-      : "live";
-
     matchControlMutation.mutate({
-      status: resumeStatus,
-      paused_at: null,
-      total_paused_seconds: newTotalPaused,
+      status: "live",
     });
     setIsClockRunning(true);
 
@@ -543,17 +514,11 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
   };
 
   const secondHalf = () => {
-    const now = new Date().toISOString();
     matchControlMutation.mutate({
-      status: "second_half",
+      status: "live",
       minute: 46,
-      second_half_started_at: now,
-      paused_at: null,
-      total_paused_seconds: 0, // Reset pause time for second half
     });
     setIsClockRunning(true);
-    setMatchMinute(46);
-    setMatchSecond(0);
 
     // Create second half event
     createEventMutation.mutate({
@@ -591,18 +556,12 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
   };
 
   const startExtraTime = () => {
-    const now = new Date().toISOString();
     matchControlMutation.mutate({
       status: "extra_time",
       minute: 91,
-      extra_time_started_at: now,
-      paused_at: null,
-      total_paused_seconds: 0, // Reset pause time for extra time
     });
     setIsClockRunning(true);
     setIsExtraTime(true);
-    setMatchMinute(91);
-    setMatchSecond(0);
 
     // Create extra time event
     createEventMutation.mutate({

@@ -17,8 +17,6 @@ export const matchEntitySchema = z.object({
     "half_time",
     "extra_time",
     "penalties",
-    "paused", // New status for temporary pause
-    "second_half", // New status for clarity
   ]),
   score_home: z.number().default(0),
   score_away: z.number().default(0),
@@ -29,7 +27,6 @@ export const matchEntitySchema = z.object({
   referee: z.string().nullable(),
   match_day: z.number().nullable(),
   season: z.string().nullable(),
-  season_id: z.string().uuid().nullable(), // v2.0: Link to seasons table
   is_featured: z.boolean().default(false),
   // New fields for round/matchday
   round: z.string().nullable(),
@@ -50,18 +47,6 @@ export const matchEntitySchema = z.object({
   humidity: z.string().nullable(),
   wind: z.string().nullable(),
   surface: z.string().default("grass"),
-
-  // v2.0: Time persistence fields
-  match_started_at: z.string().datetime().nullable(), // First half start timestamp
-  second_half_started_at: z.string().datetime().nullable(), // Second half start timestamp
-  extra_time_started_at: z.string().datetime().nullable(), // Extra time start timestamp
-  paused_at: z.string().datetime().nullable(), // When match was paused
-  total_paused_seconds: z.number().default(0), // Accumulated pause time
-
-  // v2.0: Penalty shootout scores
-  penalty_score_home: z.number().default(0),
-  penalty_score_away: z.number().default(0),
-
   // Timestamps
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
@@ -90,8 +75,6 @@ export const createMatchInputSchema = z
         "half_time",
         "extra_time",
         "penalties",
-        "paused",
-        "second_half",
       ])
       .default("scheduled"),
     score_home: z.number().default(0),
@@ -103,7 +86,6 @@ export const createMatchInputSchema = z
     referee: z.string().optional(),
     match_day: z.number().optional(),
     season: z.string().optional(),
-    season_id: z.string().uuid().optional(), // v2.0
     is_featured: z.boolean().default(false),
     // New fields for round/matchday
     round: z.string().optional(),
@@ -124,15 +106,6 @@ export const createMatchInputSchema = z
     humidity: z.string().optional(),
     wind: z.string().optional(),
     surface: z.string().default("grass").optional(),
-    // v2.0: Time persistence fields
-    match_started_at: z.string().datetime().optional().nullable(),
-    second_half_started_at: z.string().datetime().optional().nullable(),
-    extra_time_started_at: z.string().datetime().optional().nullable(),
-    paused_at: z.string().datetime().optional().nullable(),
-    total_paused_seconds: z.number().default(0).optional(),
-    // v2.0: Penalty shootout scores
-    penalty_score_home: z.number().default(0).optional(),
-    penalty_score_away: z.number().default(0).optional(),
   })
   .refine((data) => data.home_team_id !== data.away_team_id, {
     message: "Home and away teams must be different",
