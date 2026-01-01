@@ -978,27 +978,32 @@ Key tasks:
 Use this checklist to track progress across chat sessions:
 
 ### Phase 1: Infrastructure
-- [ ] Database migration run
-- [ ] TypeScript types regenerated
-- [ ] Season hooks created
-- [ ] Season API routes created
+- [x] Database migration run
+- [x] TypeScript types regenerated
+- [x] Season hooks created (`lib/hooks/public/useSeasons.ts`)
+- [x] Season API routes created (`app/api/public/seasons/`)
 
-### Phase 2: Main Site UI
-- [ ] Navbar enlarged
-- [ ] Women's League moved to dropdown
-- [ ] Features menu added
-- [ ] AdBanner component updated
-- [ ] Global search implemented
-- [ ] OtherNews component created
-- [ ] Standings limit removed
-- [ ] Ad placements added to home page
+### Phase 2: Main Site UI ✅ COMPLETE
+- [x] Navbar enlarged (logo h-16 lg:h-20)
+- [x] Women's League moved to dropdown
+- [x] Features menu added
+- [x] AdBanner component updated (3 variants: full, sidebar, inline)
+- [x] Global search implemented (Cmd/Ctrl+K shortcut)
+- [x] OtherNews component created (2x3 grid)
+- [x] Standings limit removed
+- [x] Ad placements added to home page (top, inline, right column)
 
-### Phase 3: League Pages
-- [ ] SeasonToggle component created
-- [ ] League headers updated
-- [ ] Season filtering implemented
-- [ ] Standings color coding fixed
-- [ ] Team row click handlers added
+### Phase 3: League Pages ✅ COMPLETE
+- [x] SeasonToggle component created
+- [x] CompetitionHeader component created (reusable sticky header)
+- [x] Main navbar non-sticky on competition pages
+- [x] Season filtering implemented in hooks (season_id param)
+- [x] Standings color coding fixed (green/red only)
+- [x] Team row click handlers added (navigates to /teams/[slug])
+- [x] OverviewTab revamped (2-column layout, uses StandingsTable, ad banners)
+- [x] MatchesTab revamped (card-based, larger logos, animations)
+- [x] TeamsTab redesigned (featured cards, bigger logos, stats grid)
+- [x] TableTab updated (uses shared StandingsTable, ad banner)
 
 ### Phase 4: Match Control Panel
 - [ ] Time persistence implemented
