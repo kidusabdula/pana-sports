@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import SeasonToggle from "@/components/shared/SeasonToggle";
@@ -46,8 +44,6 @@ export default function CompetitionHeader({
   showAd = true,
   className,
 }: CompetitionHeaderProps) {
-  const pathname = usePathname();
-
   const handleSeasonChange = (seasonId: string) => {
     onSeasonChange?.(seasonId);
   };

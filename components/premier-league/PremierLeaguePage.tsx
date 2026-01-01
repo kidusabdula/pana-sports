@@ -2,7 +2,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   useLeague,
   useLeagueMatches,
@@ -10,24 +9,12 @@ import {
   useLeagueTeams,
 } from "@/lib/hooks/public/useLeagues";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import {
-  Calendar,
-  ChevronLeft,
-  Users,
-  Trophy,
-  Activity,
-  Menu,
-  Bell,
-  Search,
-  Flame,
-  ArrowRight,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Trophy, Flame, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { Suspense } from "react";
-import Link from "next/link";
+import CompetitionHeader from "@/components/shared/CompetitionHeader";
+import { Button } from "@/components/ui/button";
 
 // Import tab components from shared location
 import OverviewTab from "@/components/shared/tabs/OverviewTab";
@@ -40,9 +27,10 @@ interface PremierLeaguePageContentProps {
 }
 
 function PremierLeaguePageContent({ leagueId }: PremierLeaguePageContentProps) {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [selectedSeasonId, setSelectedSeasonId] = useState<
+    string | undefined
+  >();
 
   // Use the provided leagueId to fetch the specific league
   const {
@@ -73,7 +61,7 @@ function PremierLeaguePageContent({ leagueId }: PremierLeaguePageContentProps) {
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-8 max-w-md mx-auto text-center">
           <h2 className="text-2xl font-bold text-white mb-4">
-            Error loading Premier League data
+            Error loading league data
           </h2>
           <p className="text-zinc-400 mb-6">Please try again later.</p>
           <Button onClick={() => window.location.reload()}>Retry</Button>
@@ -97,10 +85,10 @@ function PremierLeaguePageContent({ leagueId }: PremierLeaguePageContentProps) {
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-8 max-w-md mx-auto text-center">
           <h2 className="text-2xl font-bold text-white mb-4">
-            Premier League Not Found
+            League Not Found
           </h2>
           <p className="text-zinc-400 mb-6">
-            The Premier League data is currently unavailable.
+            The league data is currently unavailable.
           </p>
           <Button onClick={() => (window.location.href = "/")}>
             Back to Home
@@ -117,299 +105,37 @@ function PremierLeaguePageContent({ leagueId }: PremierLeaguePageContentProps) {
   // Get top team from standings
   const topTeam = standings?.[0];
 
+  // Define tabs for CompetitionHeader
+  const tabs = [
+    { id: "overview", label: "Overview" },
+    { id: "matches", label: "Matches" },
+    { id: "table", label: "Standings" },
+    { id: "teams", label: "Teams" },
+  ];
+
+  const handleSeasonChange = (seasonId: string) => {
+    setSelectedSeasonId(seasonId);
+    // TODO: Refetch data with new season ID when season filtering is implemented
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
-      {/* Enhanced Premium Header - Compact */}
-      <header className="bg-zinc-900/80 backdrop-blur-md border-b border-zinc-800/50 sticky top-0 z-40">
-        <div className="container mx-auto px-3 sm:px-4">
-          {/* Top Navigation Bar */}
-          <div className="flex items-center justify-between py-4">
-            {/* Left Section */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.back()}
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all h-8 px-2"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                <span className="hidden sm:inline ml-1 text-xs">Back</span>
-              </Button>
-
-              <div className="hidden md:flex items-center gap-2 ml-1">
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-white/10 to-transparent border border-white/20 flex items-center justify-center">
-                  <Image
-                    src={league?.logo_url || ""}
-                    alt={league?.name_en || ""}
-                    width={24}
-                    height={24}
-                    className="object-contain"
-                  />
-                </div>
-                <div>
-                  <h1 className="text-sm font-bold text-white leading-none">
-                    {league?.name_en}
-                  </h1>
-                </div>
-              </div>
-            </div>
-
-            {/* Center Section - Desktop Only */}
-            <div className="hidden lg:flex items-center gap-1 bg-zinc-800/40 backdrop-blur-sm border border-white/5 p-0.5 rounded-lg">
-              <Button
-                variant={activeTab === "overview" ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => setActiveTab("overview")}
-                className={cn(
-                  "text-[10px] font-medium transition-all h-7 px-3",
-                  activeTab === "overview"
-                    ? "bg-zinc-800 text-white shadow-lg"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-                )}
-              >
-                <Activity className="h-3.5 w-3.5 mr-1.5" />
-                Overview
-              </Button>
-              <Button
-                variant={activeTab === "matches" ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => setActiveTab("matches")}
-                className={cn(
-                  "text-[10px] font-medium transition-all h-7 px-3",
-                  activeTab === "matches"
-                    ? "bg-zinc-800 text-white shadow-lg"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-                )}
-              >
-                <Calendar className="h-3.5 w-3.5 mr-1.5" />
-                Matches
-              </Button>
-              <Button
-                variant={activeTab === "table" ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => setActiveTab("table")}
-                className={cn(
-                  "text-[10px] font-medium transition-all h-7 px-3",
-                  activeTab === "table"
-                    ? "bg-zinc-800 text-white shadow-lg"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-                )}
-              >
-                <Trophy className="h-3.5 w-3.5 mr-1.5" />
-                Table
-              </Button>
-              <Button
-                variant={activeTab === "teams" ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => setActiveTab("teams")}
-                className={cn(
-                  "text-[10px] font-medium transition-all h-7 px-3",
-                  activeTab === "teams"
-                    ? "bg-zinc-800 text-white shadow-lg"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-                )}
-              >
-                <Users className="h-3.5 w-3.5 mr-1.5" />
-                Teams
-              </Button>
-            </div>
-
-            {/* Right Section */}
-            <div className="flex items-center gap-1.5">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all h-8 w-8"
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all h-8 w-8"
-              >
-                <Bell className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="lg:hidden text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all h-8 w-8"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                <Menu className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Mobile Menu */}
-          {mobileMenuOpen && (
-            <div className="lg:hidden border-t border-zinc-800/50 py-2">
-              <div className="flex flex-col gap-1">
-                <Button
-                  variant={activeTab === "overview" ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => {
-                    setActiveTab("overview");
-                    setMobileMenuOpen(false);
-                  }}
-                  className={cn(
-                    "justify-start font-medium transition-all h-9",
-                    activeTab === "overview"
-                      ? "bg-zinc-800 text-white"
-                      : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-                  )}
-                >
-                  <Activity className="h-4 w-4 mr-2" />
-                  Overview
-                </Button>
-                <Button
-                  variant={activeTab === "matches" ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => {
-                    setActiveTab("matches");
-                    setMobileMenuOpen(false);
-                  }}
-                  className={cn(
-                    "justify-start font-medium transition-all h-9",
-                    activeTab === "matches"
-                      ? "bg-zinc-800 text-white"
-                      : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-                  )}
-                >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Matches
-                </Button>
-                <Button
-                  variant={activeTab === "table" ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => {
-                    setActiveTab("table");
-                    setMobileMenuOpen(false);
-                  }}
-                  className={cn(
-                    "justify-start font-medium transition-all h-9",
-                    activeTab === "table"
-                      ? "bg-zinc-800 text-white"
-                      : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-                  )}
-                >
-                  <Trophy className="h-4 w-4 mr-2" />
-                  Table
-                </Button>
-                <Button
-                  variant={activeTab === "teams" ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => {
-                    setActiveTab("teams");
-                    setMobileMenuOpen(false);
-                  }}
-                  className={cn(
-                    "justify-start font-medium transition-all h-9",
-                    activeTab === "teams"
-                      ? "bg-zinc-800 text-white"
-                      : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-                  )}
-                >
-                  <Users className="h-4 w-4 mr-2" />
-                  Teams
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* League Info Bar - Mobile Only */}
-          <div className="md:hidden border-t border-zinc-800/50 py-2 flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-white/10 to-transparent border border-white/20 flex items-center justify-center">
-              <Image
-                src={league?.logo_url || ""}
-                alt={league?.name_en || ""}
-                width={32}
-                height={32}
-                className="object-contain"
-              />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-sm font-bold text-white">
-                {league?.name_en}
-              </h2>
-              <p className="text-[10px] text-zinc-400">
-                {new Date().getFullYear()}/{new Date().getFullYear() + 1} •{" "}
-                {teams?.length || 0} Teams
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div className="container mx-auto px-3 sm:px-4 py-4 space-y-4">
-        {/* League Info Hero Card - Desktop Only - Compact */}
-        <div className="hidden md:block">
-          <Card className="bg-zinc-900/40 backdrop-blur-xl border-white/5 overflow-hidden">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-white/10 to-transparent border border-white/20 flex items-center justify-center">
-                      <Image
-                        src={league?.logo_url || ""}
-                        alt={league?.name_en || ""}
-                        width={48}
-                        height={48}
-                        className="object-contain"
-                      />
-                    </div>
-                    <div>
-                      <h1 className="text-xl font-bold text-white">
-                        {league?.name_en}
-                      </h1>
-                      <p className="text-xs text-zinc-400">
-                        Season {new Date().getFullYear()}/
-                        {new Date().getFullYear() + 1}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Inline Stats */}
-                  <div className="h-8 w-px bg-white/10 mx-2"></div>
-
-                  <div className="flex items-center gap-6">
-                    <div>
-                      <p className="text-[10px] text-zinc-500 uppercase tracking-wider">
-                        Teams
-                      </p>
-                      <p className="text-sm font-bold text-white">
-                        {teams?.length || 0}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-zinc-500 uppercase tracking-wider">
-                        Founded
-                      </p>
-                      <p className="text-sm font-bold text-white">
-                        {league?.founded_year || "N/A"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-zinc-500 uppercase tracking-wider">
-                        Category
-                      </p>
-                      <p className="text-sm font-bold text-white">
-                        {league?.category || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <Button
-                  size="sm"
-                  className="bg-primary hover:bg-primary/90 text-white h-8 text-xs"
-                >
-                  Follow League
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="container mx-auto px-3 sm:px-4 py-6 space-y-6">
+        {/* Competition Header with Season Toggle and Tabs */}
+        <CompetitionHeader
+          name={league.name_en || "League"}
+          nameAm={league.name_am}
+          logo={league.logo_url}
+          country="Ethiopia"
+          competitionType="league"
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onSeasonChange={handleSeasonChange}
+          currentSeasonId={selectedSeasonId}
+          showSeasonToggle={true}
+          showAd={true}
+        />
 
         {/* Quick Stats Cards - Compact Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
