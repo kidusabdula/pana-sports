@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import LanguageToggle from "@/components/shared/language-toggle";
+import GlobalSearch from "@/components/shared/GlobalSearch";
 import { useLanguage } from "@/components/providers/language-provider";
 
 type NavItem = {
@@ -57,6 +58,7 @@ export default function Navbar() {
     en: {
       home: "Home",
       news: "News",
+      features: "Features",
       league: "League",
       womens: "Women's League",
       national: "National Team",
@@ -69,11 +71,12 @@ export default function Navbar() {
       u20: "Under 20",
       u17: "Under 17",
       mens: "Men's",
-      womens_team: "Women's"
+      womens_team: "Women's",
     },
     am: {
       home: "መነሻ",
       news: "ዜና",
+      features: "ትንታኔዎች",
       league: "ሊግ",
       womens: "የሴቶች ሊግ",
       national: "ብሄራዊ ቡድን",
@@ -86,8 +89,8 @@ export default function Navbar() {
       u20: "ከ20 ዓመት በታች",
       u17: "ከ17 ዓመት በታች",
       mens: "ወንዶች",
-      womens_team: "ሴቶች"
-    }
+      womens_team: "ሴቶች",
+    },
   };
 
   const t = labels[language];
@@ -96,6 +99,7 @@ export default function Navbar() {
   const navItems: NavItem[] = [
     { href: "/", label: t.home, type: "link" },
     { href: "/news", label: t.news, type: "link" },
+    { href: "/features", label: t.features, type: "link" },
     {
       label: t.league,
       type: "dropdown",
@@ -104,9 +108,9 @@ export default function Navbar() {
         { href: "/ethiopian-cup", label: t.ec },
         { href: "/higher-league", label: t.hl },
         { href: "/league-one", label: t.lo },
+        { href: "/womens-league", label: t.womens },
       ],
     },
-    { href: "/womens-league", label: t.womens, type: "link" },
     {
       label: t.national,
       type: "dropdown",
@@ -229,7 +233,7 @@ export default function Navbar() {
         >
           <span
             className={cn(
-              "relative z-10 transition-colors duration-300 text-sm font-medium",
+              "relative z-10 transition-colors duration-300 text-lg font-medium",
               isActive ? "text-primary" : "text-zinc-400 group-hover:text-white"
             )}
           >
@@ -258,7 +262,7 @@ export default function Navbar() {
         <button className="relative group transition-all duration-300 flex items-center gap-1">
           <span
             className={cn(
-              "relative z-10 transition-colors duration-300 text-sm font-medium",
+              "relative z-10 transition-colors duration-300 text-lg font-medium",
               isActive ? "text-primary" : "text-zinc-400 group-hover:text-white"
             )}
           >
@@ -327,13 +331,13 @@ export default function Navbar() {
               <Image
                 src="/logo1.png"
                 alt="Pana Sports"
-                width={120}
-                height={48}
-                className="h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                width={130}
+                height={64}
+                className="h-16 mt-10 lg:h-20 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                 priority
               />
             </Link>
-            
+
             {/* Mobile Live Button - Only show on mobile and when there are live matches */}
             {hasLiveMatches && (
               <Link
@@ -349,9 +353,7 @@ export default function Navbar() {
           {/* Desktop Actions */}
           <div className="flex items-center gap-3">
             {/* Desktop Search */}
-            <div className="hidden lg:flex items-center relative group">
-               {/* Search removed for now */}
-            </div>
+            <GlobalSearch />
 
             <div className="hidden lg:block mr-2">
               <LanguageToggle />
@@ -415,13 +417,13 @@ export default function Navbar() {
               </div>
             )}
 
-          {/* Mobile Toggles */}
+            {/* Mobile Toggles */}
             <div className="flex md:hidden items-center gap-2">
               <div className="scale-90">
                 <LanguageToggle />
               </div>
 
-             {/* Search removed */}
+              {/* Search removed */}
 
               <Button
                 variant="ghost"

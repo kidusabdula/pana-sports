@@ -18,6 +18,7 @@ import PlayerSpotlight from "@/components/players/PlayerSpotlight";
 import MatchesListSkeleton from "@/components/shared/Skeletons/MatchesListSkeleton";
 import StandingsTableSkeleton from "@/components/shared/Skeletons/StandingsTableSkeleton";
 import PlayerSpotlightSkeleton from "@/components/shared/Skeletons/PlayerSpotlightSkeleton";
+import AdBanner from "@/components/shared/AdBanner";
 import { Suspense } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -58,7 +59,6 @@ function RightColumnContent() {
     isError: isErrorStandings,
   } = useStandings({
     league_id: leagues?.[currentLeagueIndex]?.id,
-    limit: 6,
   });
 
   // Handle loading states
@@ -114,13 +114,16 @@ function RightColumnContent() {
   const topScorerData = topScorer?.[0];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Live Matches */}
       <MatchesList
         title="Live Matches"
         matches={liveMatches || []}
         isLive={true}
       />
+
+      {/* Ad after live matches */}
+      <AdBanner variant="sidebar" showClose={false} page="home-sidebar" />
 
       {/* Upcoming Matches */}
       <MatchesList title="Upcoming Fixtures" matches={upcomingMatches || []} />
@@ -160,6 +163,9 @@ function RightColumnContent() {
           />
         </div>
       )}
+
+      {/* Ad after standings */}
+      <AdBanner variant="sidebar" showClose={false} page="home-sidebar" />
 
       {/* Recent Matches */}
       <MatchesList title="Recent Results" matches={recentMatches || []} />
