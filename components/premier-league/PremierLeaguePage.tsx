@@ -39,14 +39,16 @@ function PremierLeaguePageContent({ leagueId }: PremierLeaguePageContentProps) {
     error: leagueError,
   } = useLeague(leagueId);
 
+  // Fetch matches with season filter
   const { data: matches, isLoading: matchesLoading } = useLeagueMatches(
     leagueId,
-    { limit: 10 }
+    { limit: 10, season_id: selectedSeasonId }
   );
 
+  // Fetch standings with season filter
   const { data: standings, isLoading: standingsLoading } = useLeagueStandings(
     leagueId,
-    { limit: 10 }
+    { limit: 10, season_id: selectedSeasonId }
   );
 
   const { data: teams, isLoading: teamsLoading } = useLeagueTeams(leagueId);

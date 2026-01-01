@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { CardContent } from "../ui/card";
 import { Standing } from "@/lib/hooks/public/useStandings";
+import { useRouter } from "next/navigation";
 
 interface StandingsTableProps {
   title?: string;
@@ -15,6 +16,9 @@ interface StandingsTableProps {
   standings: Standing[];
   className?: string;
   showViewAllButton?: boolean;
+  promotionSpots?: number;
+  relegationSpots?: number;
+  onTeamClick?: (teamId: string, teamSlug?: string) => void;
 }
 
 export default function StandingsTable({
@@ -23,7 +27,29 @@ export default function StandingsTable({
   standings,
   className,
   showViewAllButton = true,
+  promotionSpots = 1, // Default: 1st place gets promoted/title
+  relegationSpots = 3, // Default: bottom 3 get relegated
+  onTeamClick,
 }: StandingsTableProps) {
+  const router = useRouter();
+  const totalTeams = standings.length;
+
+  // Get position color based on rank
+  const getPositionColor = (rank: number) => {
+    if (rank <= promotionSpots) return "bg-emerald-500"; // Title/Promotion zone
+    if (totalTeams > 10 && rank > totalTeams - relegationSpots)
+      return "bg-red-500"; // Relegation zone
+    return "bg-transparent";
+  };
+
+  const handleTeamClick = (team: Standing) => {
+    if (onTeamClick) {
+      onTeamClick(team.team_id, team.team?.slug);
+    } else if (team.team?.slug) {
+      router.push(`/teams/${team.team.slug}`);
+    }
+  };
+
   return (
     <div
       className={cn(
@@ -74,20 +100,14 @@ export default function StandingsTable({
               {standings
                 .filter((team) => team.team)
                 .map((team, index) => {
-                  // Determine status color bar
-                  let statusColor = "bg-transparent";
-                  if (team.rank <= 4) statusColor = "bg-emerald-500"; // UCL
-                  else if (team.rank === 5) statusColor = "bg-blue-500"; // UEL
-                  else if (
-                    standings.length > 15 &&
-                    index >= standings.length - 3
-                  )
-                    statusColor = "bg-red-500"; // Relegation
+                  const rank = team.rank || index + 1;
+                  const statusColor = getPositionColor(rank);
 
                   return (
                     <tr
                       key={team.id}
-                      className="group hover:bg-white/5 transition-colors relative"
+                      onClick={() => handleTeamClick(team)}
+                      className="group hover:bg-white/5 transition-colors relative cursor-pointer"
                     >
                       <td className="py-3 pl-4 text-center relative">
                         {/* Status Bar */}
@@ -96,7 +116,7 @@ export default function StandingsTable({
                         />
 
                         <span className="text-sm font-medium text-white">
-                          {team.rank || index + 1}
+                          {rank}
                         </span>
                       </td>
                       <td className="py-3 px-2">
@@ -109,7 +129,7 @@ export default function StandingsTable({
                               className="object-contain"
                             />
                           </div>
-                          <span className="text-sm font-bold text-white truncate max-w-[120px] sm:max-w-[180px]">
+                          <span className="text-sm font-bold text-white truncate max-w-[120px] sm:max-w-[180px] group-hover:text-primary transition-colors">
                             {team.team?.name_en}
                           </span>
                         </div>
@@ -138,7 +158,7 @@ export default function StandingsTable({
                       <td className="py-3 px-4 hidden md:table-cell">
                         <div className="flex items-center justify-center gap-1">
                           {[...Array(5)].map((_, i) => {
-                            // Mock form data
+                            // Mock form data - TODO: use real form data when available
                             const result = ["W", "D", "L", "W", "D"][
                               (index + i) % 5
                             ];

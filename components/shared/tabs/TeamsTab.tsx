@@ -1,26 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Users,
   Search,
-  ArrowRight,
   MapPin,
   Calendar,
-  Zap,
+  ChevronRight,
+  Building2,
   Star,
 } from "lucide-react";
 import { useLeagueTeams } from "@/lib/hooks/public/useLeagues";
-import { useHomeNews } from "@/lib/hooks/public/useNews";
-import { transformNewsList } from "@/lib/utils/transformers";
-import NewsCard from "@/components/news/NewsCard";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/components/providers/language-provider";
+import AdBanner from "@/components/shared/AdBanner";
+import { motion } from "framer-motion";
 
 interface TeamsTabProps {
   leagueId: string;
@@ -33,10 +30,6 @@ export default function TeamsTab({ leagueId }: TeamsTabProps) {
 
   const { data: teams, isLoading } = useLeagueTeams(leagueId);
 
-  // Fetch news
-  const { data: newsData, isLoading: isNewsLoading } = useHomeNews();
-  const news = newsData ? transformNewsList(newsData).slice(0, 3) : [];
-
   // Filter teams by search term
   const filteredTeams = teams
     ? teams.filter(
@@ -46,12 +39,13 @@ export default function TeamsTab({ leagueId }: TeamsTabProps) {
       )
     : [];
 
-  // Get top teams (first 3)
-  const topTeams = filteredTeams.slice(0, 3);
+  // Get featured teams (first 3)
+  const featuredTeams = filteredTeams.slice(0, 3);
+  const otherTeams = filteredTeams.slice(3);
 
   // Handle team click
-  const handleTeamClick = (teamId: string) => {
-    router.push(`/teams/${teamId}`);
+  const handleTeamClick = (teamSlug: string) => {
+    router.push(`/teams/${teamSlug}`);
   };
 
   if (isLoading) {
@@ -63,175 +57,201 @@ export default function TeamsTab({ leagueId }: TeamsTabProps) {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Search and Controls */}
-      <div className="flex items-center justify-between bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-lg p-2">
-        <div className="flex items-center gap-2 px-2">
-          <Users className="h-4 w-4 text-primary" />
-          <span className="text-sm font-bold text-white">Teams</span>
-        </div>
-        <div className="relative w-full max-w-[200px]">
-          <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
-          <Input
-            placeholder="Search teams..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8 h-8 text-xs bg-zinc-800/50 border-zinc-700/50 text-white"
-          />
+    <div className="space-y-6">
+      {/* Search Bar */}
+      <div className="bg-zinc-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+              <Users className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-white">All Teams</h2>
+              <p className="text-xs text-zinc-500">
+                {filteredTeams.length} teams in competition
+              </p>
+            </div>
+          </div>
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400" />
+            <Input
+              placeholder="Search teams..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 h-10 bg-zinc-800/50 border-zinc-700/50 text-white placeholder:text-zinc-500 rounded-xl"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Featured Teams */}
-      {topTeams.length > 0 && (
-        <Card className="bg-zinc-900/40 backdrop-blur-xl border-white/5 overflow-hidden">
-          <CardHeader className="py-2 px-3 border-b border-white/5">
-            <CardTitle className="text-sm text-white flex items-center gap-2">
-              <Star className="h-4 w-4 text-primary" />
-              Featured Teams
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3">
-              {topTeams.map((team) => (
-                <div
-                  key={team.id}
-                  className="flex flex-col items-center p-3 rounded-lg bg-zinc-800/20 border border-zinc-700/50 hover:bg-zinc-800/30 transition-colors cursor-pointer"
-                  onClick={() => handleTeamClick(team.id)}
-                >
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-white/10 to-transparent border border-white/20 flex items-center justify-center mb-2">
-                    <Image
-                      src={team.logo_url || ""}
-                      alt={team.name_en || ""}
-                      width={32}
-                      height={32}
-                      className="object-contain"
-                    />
-                  </div>
-                  <h3 className="text-sm font-bold text-white text-center truncate w-full">
-                    {t(team, 'name')}
-                  </h3>
-                  <p className="text-xs text-zinc-400 text-center mb-1 truncate w-full">
-                    {team.name_am}
-                  </p>
-                  <div className="flex items-center gap-1 text-xs text-zinc-500">
-                    <MapPin className="h-3 w-3" />
-                    {team.stadium_en || "N/A"}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Featured Teams - Large Cards */}
+      {featuredTeams.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Star className="h-5 w-5 text-amber-500" />
+            <h3 className="text-lg font-bold text-white">Featured Teams</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {featuredTeams.map((team, index) => (
+              <motion.div
+                key={team.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                onClick={() => handleTeamClick(team.slug)}
+                className="group cursor-pointer"
+              >
+                <div className="relative bg-gradient-to-b from-zinc-900/80 to-zinc-900/40 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
+                  {/* Background Gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-      {/* All Teams Grid */}
-      <Card className="bg-zinc-900/40 backdrop-blur-xl border-white/5 overflow-hidden">
-        <CardHeader className="py-2 px-3 border-b border-white/5">
-          <CardTitle className="text-sm text-white flex items-center gap-2">
-            <Users className="h-4 w-4 text-primary" />
-            All Teams
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {filteredTeams.length === 0 ? (
-            <div className="p-4 text-center text-zinc-400 text-xs">
-              {searchTerm
-                ? "No teams found matching your search"
-                : "No teams available"}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 p-3">
-              {filteredTeams.map((team) => (
-                <div
-                  key={team.id}
-                  className="flex flex-col bg-zinc-800/20 border border-zinc-700/50 rounded-lg overflow-hidden hover:bg-zinc-800/30 transition-colors cursor-pointer"
-                  onClick={() => handleTeamClick(team.id)}
-                >
-                  <div className="p-3 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-white/10 to-transparent border border-white/20 flex items-center justify-center shrink-0">
-                      <Image
-                        src={team.logo_url || ""}
-                        alt={team.name_en || ""}
-                        width={24}
-                        height={24}
-                        className="object-contain"
-                      />
+                  <div className="relative p-6">
+                    {/* Large Logo */}
+                    <div className="flex justify-center mb-4">
+                      <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center p-3 group-hover:scale-110 transition-transform duration-300">
+                        <Image
+                          src={team.logo_url || ""}
+                          alt={team.name_en}
+                          width={72}
+                          height={72}
+                          className="object-contain"
+                        />
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-sm font-bold text-white truncate">
-                        {t(team, 'name')}
+
+                    {/* Team Name */}
+                    <div className="text-center mb-4">
+                      <h3 className="text-xl font-bold text-white group-hover:text-primary transition-colors">
+                        {t(team, "name")}
                       </h3>
-                      <p className="text-xs text-zinc-400 truncate">
+                      <p className="text-sm text-zinc-400 mt-1">
                         {team.name_am}
                       </p>
                     </div>
-                  </div>
-                  <div className="px-3 pb-3 pt-0 space-y-1">
-                    <div className="flex items-center gap-2 text-xs text-zinc-500">
-                      <Calendar className="h-3 w-3" />
-                      Founded: {team.founded || "N/A"}
+
+                    {/* Stats */}
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="bg-zinc-800/50 rounded-xl p-3 text-center">
+                        <Calendar className="h-4 w-4 text-zinc-400 mx-auto mb-1" />
+                        <p className="text-xs text-zinc-500">Founded</p>
+                        <p className="text-sm font-bold text-white">
+                          {team.founded || "N/A"}
+                        </p>
+                      </div>
+                      <div className="bg-zinc-800/50 rounded-xl p-3 text-center">
+                        <Building2 className="h-4 w-4 text-zinc-400 mx-auto mb-1" />
+                        <p className="text-xs text-zinc-500">Capacity</p>
+                        <p className="text-sm font-bold text-white">
+                          {team.capacity?.toLocaleString() || "N/A"}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-zinc-500">
-                      <MapPin className="h-3 w-3" />
-                      {team.stadium_en || "N/A"}
+
+                    {/* Stadium */}
+                    <div className="flex items-center gap-2 text-sm text-zinc-400 justify-center">
+                      <MapPin className="h-4 w-4" />
+                      <span className="truncate">
+                        {team.stadium_en || "N/A"}
+                      </span>
                     </div>
-                  </div>
-                  <div className="mt-auto px-3 pb-3 pt-0">
+
+                    {/* View Button */}
                     <Button
                       variant="ghost"
-                      size="sm"
-                      className="w-full text-zinc-400 hover:text-white justify-end h-6 text-xs p-0"
+                      className="w-full mt-4 text-primary hover:bg-primary/10 group-hover:bg-primary group-hover:text-white transition-all"
                     >
-                      View Details
-                      <ArrowRight className="h-3 w-3 ml-1" />
+                      View Team
+                      <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Latest News Section */}
-      <div className="space-y-3 pt-2">
-        <div className="flex items-center justify-between px-1">
-          <h2 className="text-sm font-bold text-white flex items-center gap-2">
-            <Zap className="h-4 w-4 text-primary" />
-            Latest News
-          </h2>
-          <Link href="/news">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-zinc-400 hover:text-white h-6 text-xs"
-            >
-              View All
-            </Button>
-          </Link>
+              </motion.div>
+            ))}
+          </div>
         </div>
+      )}
 
-        {isNewsLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-48 bg-zinc-900/40 rounded-xl animate-pulse border border-white/5"
-              ></div>
+      {/* Ad Banner */}
+      <AdBanner variant="full" showClose={false} page="league-teams" />
+
+      {/* All Teams Grid */}
+      {otherTeams.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-bold text-white">All Teams</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {otherTeams.map((team, index) => (
+              <motion.div
+                key={team.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.02 }}
+                onClick={() => handleTeamClick(team.slug)}
+                className="group cursor-pointer"
+              >
+                <div className="bg-zinc-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-4 hover:border-primary/30 hover:bg-zinc-900/80 transition-all duration-200">
+                  {/* Logo */}
+                  <div className="flex justify-center mb-3">
+                    <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center p-2 group-hover:scale-105 transition-transform">
+                      <Image
+                        src={team.logo_url || ""}
+                        alt={team.name_en}
+                        width={48}
+                        height={48}
+                        className="object-contain"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Team Info */}
+                  <div className="text-center">
+                    <h4 className="text-sm font-bold text-white truncate group-hover:text-primary transition-colors">
+                      {t(team, "name")}
+                    </h4>
+                    <p className="text-xs text-zinc-500 truncate mt-0.5">
+                      {team.name_am}
+                    </p>
+                    <div className="flex items-center justify-center gap-1 mt-2 text-xs text-zinc-500">
+                      <MapPin className="h-3 w-3" />
+                      <span className="truncate">
+                        {team.city || "Ethiopia"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Stats Row */}
+                  <div className="flex justify-center gap-3 mt-3 pt-3 border-t border-white/5">
+                    <div className="text-center">
+                      <p className="text-xs text-zinc-500">Est.</p>
+                      <p className="text-xs font-bold text-white">
+                        {team.founded || "-"}
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xs text-zinc-500">Stadium</p>
+                      <p className="text-xs font-bold text-white truncate max-w-[80px]">
+                        {team.stadium_en?.split(" ")[0] || "-"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
             ))}
           </div>
-        ) : news.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {news.map((item, idx) => (
-              <NewsCard key={item.id} news={item} index={idx} />
-            ))}
-          </div>
-        ) : (
-          <div className="p-4 text-center text-zinc-500 text-xs bg-zinc-900/40 rounded-xl border border-white/5">
-            No news available
-          </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {filteredTeams.length === 0 && (
+        <div className="text-center py-12 text-zinc-500">
+          {searchTerm ? (
+            <p>No teams found matching &quot;{searchTerm}&quot;</p>
+          ) : (
+            <p>No teams available</p>
+          )}
+        </div>
+      )}
+
+      {/* Bottom Ad Banner */}
+      <AdBanner variant="inline" showClose={false} page="league-teams" />
     </div>
   );
 }

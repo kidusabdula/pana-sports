@@ -82,7 +82,7 @@ async function fetchLeague(id: string) {
 
 async function fetchLeagueMatches(
   id: string,
-  params?: { matchday?: string; limit?: number }
+  params?: { matchday?: string; limit?: number; season_id?: string }
 ) {
   const queryString = new URLSearchParams(
     Object.entries(params || {}).reduce((acc, [key, value]) => {
@@ -147,7 +147,7 @@ export function useLeague(id: string) {
  */
 export function useLeagueMatches(
   id: string,
-  params?: { matchday?: string; limit?: number }
+  params?: { matchday?: string; limit?: number; season_id?: string }
 ) {
   const queryClient = useQueryClient();
   const supabase = createClient();
@@ -189,7 +189,7 @@ export function useLeagueMatches(
 
 export function useLeagueStandings(
   id: string,
-  params?: { season?: string; limit?: number }
+  params?: { season?: string; season_id?: string; limit?: number }
 ) {
   return useQuery({
     queryKey: ["league-standings", id, params],

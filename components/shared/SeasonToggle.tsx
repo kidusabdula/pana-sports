@@ -50,8 +50,21 @@ export default function SeasonToggle({
     return <div className="h-12 w-40 bg-zinc-800 animate-pulse rounded-xl" />;
   }
 
+  // Show a default placeholder if no seasons configured yet
   if (!seasons || seasons.length === 0) {
-    return null;
+    return (
+      <Button
+        variant="outline"
+        disabled
+        className={cn(
+          "h-12 px-6 text-base font-semibold bg-zinc-900/80 border-zinc-700 cursor-not-allowed",
+          className
+        )}
+      >
+        <Calendar className="w-5 h-5 mr-2 text-zinc-500" />
+        <span className="text-zinc-400">2024/25</span>
+      </Button>
+    );
   }
 
   return (

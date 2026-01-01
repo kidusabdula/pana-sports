@@ -313,13 +313,24 @@ export default function Navbar() {
     );
   };
 
+  // Detect if we're on a competition page that has its own sticky header
+  const isCompetitionPage = [
+    "/premier-league",
+    "/higher-league",
+    "/league-one",
+    "/womens-league",
+    "/ethiopian-cup",
+    "/cups",
+  ].some((path) => pathname.startsWith(path));
+
   return (
     <>
       <header
         className={cn(
-          "sticky top-0 z-40 transition-all duration-500 border-b",
+          "z-40 transition-all duration-500 border-b",
+          isCompetitionPage ? "relative" : "sticky top-0",
           scrolled
-            ? "bg-black/60 backdrop-blur-xl border-white/5 supports-[backdrop-filter]:bg-black/60"
+            ? "bg-black/60 backdrop-blur-xl border-white/5"
             : "bg-transparent border-transparent"
         )}
       >

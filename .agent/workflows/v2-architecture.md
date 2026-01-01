@@ -82,25 +82,31 @@ description: Pana Sports v2.0 Complete Architecture & Feature Specification
 
 ### PHASE 1: Foundation (Database + Core Hooks)
 1. ✅ Run database migration
-2. Create season-related hooks
+2. ✅ Create season-related hooks
 3. Create cup-related hooks
 4. Update match hooks for new fields
 
-### PHASE 2: Main Site - UI Enhancements
-1. Navbar enlargement (logo + nav)
-2. Move Women's League to dropdown
-3. Add "Features" (Opinion Articles) nav item
-4. Dynamic AdBanner component
-5. Global search functionality
-6. Full standings table (no limits)
-7. "Other News" component (2x3 grid)
+### PHASE 2: Main Site - UI Enhancements ✅ COMPLETE
+1. ✅ Navbar enlargement (logo + nav)
+2. ✅ Move Women's League to dropdown
+3. ✅ Add "Features" (Opinion Articles) nav item
+4. ✅ Dynamic AdBanner component (variants: full, sidebar, inline)
+5. ✅ Global search functionality (Cmd/Ctrl+K)
+6. ✅ Full standings table (no limits)
+7. ✅ "Other News" component (2x3 grid)
+8. ✅ Ad placements (home page top, inline, right column)
 
-### PHASE 3: League Pages Overhaul
-1. Season toggle in header
-2. Fetch data per season
-3. Standings color coding fix (green/red only)
-4. Team row click → team detail
-5. Ad placements on all tabs
+### PHASE 3: League Pages Overhaul ✅ COMPLETE
+1. ✅ Season toggle in header (SeasonToggle component)
+2. ✅ CompetitionHeader - reusable sticky header with tabs
+3. ✅ Main navbar non-sticky on competition pages
+4. ✅ Season filtering in league hooks (season_id param)
+5. ✅ Standings color coding fix (green/red only)
+6. ✅ Team row click → team detail
+7. ✅ Ad placements on all tabs
+8. ✅ Revamped OverviewTab (2-column layout, StandingsTable)
+9. ✅ Revamped MatchesTab (card-based, larger logos)
+10. ✅ Redesigned TeamsTab (featured cards, bigger logos, stats)
 
 ### PHASE 4: Cup Pages (Ethiopian Cup)
 1. New cup page structure
@@ -371,10 +377,21 @@ const getPositionColor = (rank: number, totalTeams: number, promotionSpots: numb
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| `GlobalSearch` | `components/shared/GlobalSearch.tsx` | Search overlay with results |
-| `SeasonToggle` | `components/shared/SeasonToggle.tsx` | Season selector for league pages |
-| `OtherNews` | `components/news/OtherNews.tsx` | 2x3 grid of additional news |
-| `AdBannerDynamic` | Enhanced `AdBanner.tsx` | Configurable ad component |
+| `GlobalSearch` | `components/shared/GlobalSearch.tsx` | ✅ Search overlay with Cmd/K shortcut |
+| `SeasonToggle` | `components/shared/SeasonToggle.tsx` | ✅ Season dropdown selector |
+| `CompetitionHeader` | `components/shared/CompetitionHeader.tsx` | ✅ Reusable sticky header for league/cup pages |
+| `OtherNews` | `components/news/OtherNews.tsx` | ✅ 2x3 grid of additional news |
+| `AdBanner` | Enhanced `AdBanner.tsx` | ✅ Configurable ad component (3 variants) |
+| `useDebounce` | `lib/hooks/useDebounce.ts` | ✅ Debounce hook for search |
+
+### Updated Tab Components
+
+| Component | Location | Changes |
+|-----------|----------|---------|
+| `OverviewTab` | `components/shared/tabs/OverviewTab.tsx` | ✅ 2-column layout, uses StandingsTable, ad banners |
+| `MatchesTab` | `components/shared/tabs/MatchesTab.tsx` | ✅ Card-based design, larger logos, animations |
+| `TeamsTab` | `components/shared/tabs/TeamsTab.tsx` | ✅ Featured section, bigger logos, stats grid |
+| `TableTab` | `components/shared/tabs/TableTab.tsx` | ✅ Uses shared StandingsTable, simplified legend |
 
 ### New CMS Components
 
