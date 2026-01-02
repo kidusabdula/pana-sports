@@ -25,6 +25,11 @@ import {
   EVENT_MESSAGES,
 } from "../constants";
 import type { Player, CreateEventPayload } from "../types";
+import {
+  calculateMatchTime,
+  isMatchRunning,
+  createMatchControlPayload,
+} from "@/lib/utils/match-time";
 
 interface UseMatchControlStateProps {
   match: Match;
@@ -145,31 +150,58 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
 
   // ============ Effects ============
 
-  // Real-time clock effect with DB sync
+  // Real-time clock effect using timestamp-based calculation for PERSISTENCE
+  // This calculates time from stored timestamps, so time persists across page refreshes
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    if (isClockRunning && currentMatch.status === "live") {
-      interval = setInterval(() => {
-        setMatchSecond((prevSecond) => {
-          if (prevSecond >= 59) {
-            setMatchMinute((prevMinute) => {
-              const newMinute = prevMinute + 1;
-              if (newMinute !== lastSyncedMinuteRef.current) {
-                lastSyncedMinuteRef.current = newMinute;
-                matchControlMutation.mutate({ minute: newMinute });
-              }
-              return newMinute;
-            });
-            return 0;
-          }
-          return prevSecond + 1;
-        });
-      }, 1000);
+    // Determine if the match is in a running state based on STATUS only
+    // Don't rely on calculateMatchTime for this - it might not have timestamps yet
+    const isActivelyRunning = isMatchRunning(currentMatch.status);
+
+    if (isActivelyRunning) {
+      // Set clock running based on status, not calculated value
+      setIsClockRunning(true);
+
+      // Calculate time - use timestamps if available, otherwise fallback to client-side timing
+      const updateTime = () => {
+        // Check if we have timestamps for proper calculation
+        const hasTimestamps =
+          (currentMatch.status === "live" && currentMatch.match_started_at) ||
+          (currentMatch.status === "second_half" &&
+            currentMatch.second_half_started_at) ||
+          (currentMatch.status === "extra_time" &&
+            currentMatch.extra_time_started_at);
+
+        if (hasTimestamps) {
+          // Use timestamp-based calculation for accuracy and persistence
+          const calculatedTime = calculateMatchTime(currentMatch);
+          setMatchMinute(calculatedTime.minute);
+          setMatchSecond(calculatedTime.second);
+        } else {
+          // Fallback: client-side timing when timestamps aren't available yet
+          // This happens right after starting when mutation hasn't synced
+          setMatchSecond((prevSecond) => {
+            if (prevSecond >= 59) {
+              setMatchMinute((prevMinute) => prevMinute + 1);
+              return 0;
+            }
+            return prevSecond + 1;
+          });
+        }
+      };
+
+      // Start updating immediately
+      interval = setInterval(updateTime, 1000);
+    } else {
+      // For non-running states, just use the stored minute
+      setMatchMinute(currentMatch.minute ?? 0);
+      setMatchSecond(0);
+      setIsClockRunning(false);
     }
 
     return () => clearInterval(interval);
-  }, [isClockRunning, currentMatch.status, matchControlMutation]);
+  }, [currentMatch]);
 
   // Real-time subscription for match events
   useEffect(() => {
@@ -310,7 +342,9 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
 
   // ============ Match Control Actions ============
   const startMatch = useCallback(() => {
-    matchControlMutation.mutate({ status: "live", minute: 0 });
+    // Use createMatchControlPayload to set match_started_at timestamp
+    const payload = createMatchControlPayload("start");
+    matchControlMutation.mutate(payload);
     setIsClockRunning(true);
     setMatchMinute(0);
     setMatchSecond(0);
@@ -331,7 +365,11 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
   }, [match.id, matchControlMutation]);
 
   const pauseMatch = useCallback(() => {
-    matchControlMutation.mutate({ status: "postponed" });
+    // Use "paused" status instead of "postponed" for in-game pause
+    matchControlMutation.mutate({
+      status: "paused",
+      minute: matchMinute,
+    });
     setIsClockRunning(false);
 
     createEvent({
@@ -348,7 +386,16 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
   }, [match.id, matchMinute, matchControlMutation]);
 
   const resumeMatch = useCallback(() => {
-    matchControlMutation.mutate({ status: "live" });
+    // Resume match - we need to recalculate the timestamp based on stored minute
+    // For now, we update match_started_at to account for the pause
+    const now = new Date();
+    // Calculate how far back the match_started_at should be based on current minute
+    const adjustedStartTime = new Date(now.getTime() - matchMinute * 60 * 1000);
+
+    matchControlMutation.mutate({
+      status: "live",
+      match_started_at: adjustedStartTime.toISOString(),
+    });
     setIsClockRunning(true);
 
     createEvent({
@@ -365,7 +412,8 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
   }, [match.id, matchMinute, matchControlMutation]);
 
   const halfTime = useCallback(() => {
-    matchControlMutation.mutate({ status: "half_time", minute: 45 });
+    const payload = createMatchControlPayload("half_time");
+    matchControlMutation.mutate(payload);
     setIsClockRunning(false);
 
     createEvent({
@@ -382,7 +430,8 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
   }, [match.id, matchControlMutation]);
 
   const secondHalf = useCallback(() => {
-    matchControlMutation.mutate({ status: "live", minute: 46 });
+    const payload = createMatchControlPayload("second_half");
+    matchControlMutation.mutate(payload);
     setIsClockRunning(true);
     setMatchMinute(46);
     setMatchSecond(0);
@@ -401,7 +450,8 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
   }, [match.id, matchControlMutation]);
 
   const fullTime = useCallback(() => {
-    matchControlMutation.mutate({ status: "completed", minute: 90 });
+    const payload = createMatchControlPayload("full_time");
+    matchControlMutation.mutate(payload);
     setIsClockRunning(false);
 
     createEvent({
@@ -418,7 +468,8 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
   }, [match.id, matchControlMutation]);
 
   const startExtraTime = useCallback(() => {
-    matchControlMutation.mutate({ status: "extra_time", minute: 91 });
+    const payload = createMatchControlPayload("extra_time");
+    matchControlMutation.mutate(payload);
     setIsClockRunning(true);
     setIsExtraTime(true);
     setMatchMinute(91);
@@ -438,7 +489,8 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
   }, [match.id, matchControlMutation]);
 
   const endExtraTime = useCallback(() => {
-    matchControlMutation.mutate({ status: "completed", minute: 120 });
+    const payload = createMatchControlPayload("end_extra_time");
+    matchControlMutation.mutate(payload);
     setIsClockRunning(false);
 
     createEvent({
@@ -455,7 +507,8 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
   }, [match.id, matchControlMutation]);
 
   const startPenaltyShootout = useCallback(() => {
-    matchControlMutation.mutate({ status: "penalties", minute: 120 });
+    const payload = createMatchControlPayload("penalties");
+    matchControlMutation.mutate(payload);
     setIsClockRunning(false);
     setIsPenaltyShootout(true);
 
@@ -473,7 +526,8 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
   }, [match.id, matchControlMutation]);
 
   const endPenaltyShootout = useCallback(() => {
-    matchControlMutation.mutate({ status: "completed", minute: 120 });
+    const payload = createMatchControlPayload("end_penalties");
+    matchControlMutation.mutate(payload);
 
     createEvent({
       match_id: match.id,

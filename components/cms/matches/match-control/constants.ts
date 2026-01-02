@@ -73,6 +73,18 @@ export const STATUS_CONFIG: Record<string, StatusConfig> = {
     variant: "destructive",
     color: "text-red-500",
   },
+  paused: {
+    label: "Paused",
+    icon: Pause,
+    variant: "outline",
+    color: "text-yellow-500",
+  },
+  second_half: {
+    label: "Second Half",
+    icon: Play,
+    variant: "destructive",
+    color: "text-red-500",
+  },
   completed: {
     label: "Completed",
     icon: CheckCircle,
@@ -103,11 +115,29 @@ export const STATUS_CONFIG: Record<string, StatusConfig> = {
     variant: "outline",
     color: "text-purple-500",
   },
+  extra_time_break: {
+    label: "ET Break",
+    icon: Timer,
+    variant: "outline",
+    color: "text-orange-500",
+  },
   penalties: {
     label: "Penalties",
     icon: Flag,
     variant: "outline",
     color: "text-pink-500",
+  },
+  abandoned: {
+    label: "Abandoned",
+    icon: XCircle,
+    variant: "destructive",
+    color: "text-red-600",
+  },
+  suspended: {
+    label: "Suspended",
+    icon: Pause,
+    variant: "outline",
+    color: "text-gray-500",
   },
 };
 
@@ -232,9 +262,12 @@ export const MATCH_PHASES = {
 // Active match statuses for polling
 export const ACTIVE_MATCH_STATUSES = [
   "live",
+  "second_half",
   "extra_time",
   "penalties",
   "half_time",
+  "paused",
+  "extra_time_break",
 ] as const;
 
 // Polling interval in milliseconds
