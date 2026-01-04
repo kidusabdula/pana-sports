@@ -44,8 +44,17 @@ export default function OverviewTab({ matches, standings }: OverviewTabProps) {
   const { data: newsData, isLoading: isNewsLoading } = useHomeNews();
   const news = newsData ? transformNewsList(newsData).slice(0, 3) : [];
 
-  // Categorize matches
-  const liveMatches = matches?.filter((m) => m.status === "live") || [];
+  // Categorize matches - include all active match statuses as "live"
+  const activeMatchStatuses = [
+    "live",
+    "second_half",
+    "extra_time",
+    "penalties",
+    "half_time",
+    "paused",
+  ];
+  const liveMatches =
+    matches?.filter((m) => activeMatchStatuses.includes(m.status)) || [];
   const scheduledMatches =
     matches
       ?.filter((m) => m.status === "scheduled" || m.status === "upcoming")
@@ -61,6 +70,37 @@ export default function OverviewTab({ matches, standings }: OverviewTabProps) {
     showScore?: boolean;
   }) => {
     const getStatusDisplay = () => {
+      // Paused status
+      if (match.status === "paused") {
+        return (
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] font-semibold text-yellow-400 uppercase tracking-wider">
+              PAUSED
+            </span>
+          </div>
+        );
+      }
+      // Half time status
+      if (match.status === "half_time") {
+        return (
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] font-semibold text-orange-400 uppercase tracking-wider">
+              HT
+            </span>
+          </div>
+        );
+      }
+      // Penalties status
+      if (match.status === "penalties") {
+        return (
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] font-semibold text-purple-400 uppercase tracking-wider">
+              PEN
+            </span>
+          </div>
+        );
+      }
+      // Active running statuses - show live minute
       if (
         match.status === "live" ||
         match.status === "second_half" ||

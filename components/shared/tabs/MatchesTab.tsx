@@ -32,6 +32,30 @@ interface MatchesTabProps {
 // Live minute badge component that uses the hook
 const LiveMinuteBadge = ({ match }: { match: Match }) => {
   const displayMinute = useLiveMatchTime(match);
+
+  // Determine display based on status
+  if (match.status === "paused") {
+    return (
+      <span className="text-xs font-bold text-yellow-400 uppercase tracking-wider">
+        Paused • {displayMinute}&apos;
+      </span>
+    );
+  }
+  if (match.status === "half_time") {
+    return (
+      <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">
+        Half Time
+      </span>
+    );
+  }
+  if (match.status === "penalties") {
+    return (
+      <span className="text-xs font-bold text-purple-400 uppercase tracking-wider">
+        Penalties
+      </span>
+    );
+  }
+  // Running statuses (live, second_half, extra_time)
   return (
     <span className="text-xs font-bold text-red-400 uppercase tracking-wider">
       Live • {displayMinute}&apos;
@@ -54,9 +78,22 @@ export default function MatchesTab({ leagueId }: MatchesTabProps) {
       })
     : [];
 
+  // Active match statuses - these count as "live" for display purposes
+  const activeStatuses = [
+    "live",
+    "second_half",
+    "extra_time",
+    "penalties",
+    "half_time",
+    "paused",
+  ];
+  const runningStatuses = ["live", "second_half", "extra_time"];
+
   // Group matches by status
   const matchesByStatus = {
-    live: filteredMatches.filter((match) => match.status === "live"),
+    live: filteredMatches.filter((match) =>
+      activeStatuses.includes(match.status)
+    ),
     upcoming: filteredMatches.filter(
       (match) => match.status === "upcoming" || match.status === "scheduled"
     ),
@@ -77,6 +114,11 @@ export default function MatchesTab({ leagueId }: MatchesTabProps) {
     isLive?: boolean;
   }) => {
     const isCompleted = match.status === "completed";
+    const isActive = activeStatuses.includes(match.status);
+    const isPaused = match.status === "paused";
+    const isHalfTime = match.status === "half_time";
+    const isPenalties = match.status === "penalties";
+    const isRunning = runningStatuses.includes(match.status);
 
     return (
       <motion.div
@@ -92,13 +134,25 @@ export default function MatchesTab({ leagueId }: MatchesTabProps) {
               : "border-white/10 hover:border-primary/30 hover:shadow-primary/5"
           }`}
         >
-          {/* Live Badge */}
+          {/* Live/Active Badge */}
           {isLive && (
-            <div className="bg-red-500/10 border-b border-red-500/20 px-4 py-2 flex items-center justify-center gap-2">
-              <div className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-              </div>
+            <div
+              className={`border-b px-4 py-2 flex items-center justify-center gap-2 ${
+                isPaused
+                  ? "bg-yellow-500/10 border-yellow-500/20"
+                  : isHalfTime
+                  ? "bg-orange-500/10 border-orange-500/20"
+                  : isPenalties
+                  ? "bg-purple-500/10 border-purple-500/20"
+                  : "bg-red-500/10 border-red-500/20"
+              }`}
+            >
+              {isRunning && (
+                <div className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                </div>
+              )}
               <LiveMinuteBadge match={match} />
             </div>
           )}
@@ -146,7 +200,7 @@ export default function MatchesTab({ leagueId }: MatchesTabProps) {
 
               {/* Score / VS */}
               <div className="flex flex-col items-center px-4">
-                {isCompleted || isLive ? (
+                {isCompleted || isActive ? (
                   <div className="flex items-center gap-2 bg-zinc-800/80 px-4 py-2 rounded-xl">
                     <span className="text-2xl font-bold text-white">
                       {match.score_home ?? 0}

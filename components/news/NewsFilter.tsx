@@ -38,8 +38,8 @@ export default function NewsFilter({
 
   if (isLoading) {
     return (
-      <div className="mb-10 overflow-x-auto pb-4 scrollbar-hide">
-        <div className="flex items-center gap-2 min-w-max">
+      <div className="mb-8 overflow-x-auto pb-2 pana-scrollbar">
+        <div className="flex items-center gap-3 min-w-max px-1">
           {[1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
@@ -53,8 +53,8 @@ export default function NewsFilter({
 
   if (error) {
     return (
-      <div className="mb-10 overflow-x-auto pb-4 scrollbar-hide">
-        <div className="flex items-center gap-2 min-w-max">
+      <div className="mb-8 overflow-x-auto pb-2 pana-scrollbar">
+        <div className="flex items-center gap-3 min-w-max px-1">
           <div className="text-red-500">Failed to load categories</div>
         </div>
       </div>
@@ -68,17 +68,17 @@ export default function NewsFilter({
   ];
 
   return (
-    <div className="mb-10 overflow-x-auto pb-4 scrollbar-hide">
-      <div className="flex items-center gap-2 min-w-max">
+    <div className="mb-8 overflow-x-auto pb-2 pana-scrollbar">
+      <div className="flex items-center gap-3 min-w-max px-1">
         {allCategories.map((category) => (
           <button
             key={category.id}
             onClick={() => setActiveCategory(category.id)} // Pass ID instead of slug
             className={cn(
-              "relative px-5 py-2.5 rounded-full text-sm font-medium transition-colors duration-300",
+              "relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 border border-transparent",
               activeCategory === category.id // Compare with ID
-                ? "text-white"
-                : "text-zinc-400 hover:text-white hover:bg-white/5"
+                ? "text-white shadow-lg shadow-primary/25"
+                : "text-zinc-400 bg-zinc-800/40 hover:bg-zinc-800 border-white/5 hover:text-zinc-200"
             )}
           >
             {activeCategory === category.id && ( // Compare with ID

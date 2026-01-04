@@ -659,7 +659,21 @@ export function MatchDetailPage({ matchId }: MatchDetailPageProps) {
   }
 
   const { match, events, lineups, stats } = matchData;
-  const isLive = match.status === "live";
+
+  // Status flags - isLive now includes running states
+  const runningStatuses = ["live", "second_half", "extra_time"];
+  const activeStatuses = [
+    ...runningStatuses,
+    "paused",
+    "half_time",
+    "penalties",
+  ];
+
+  const isLive = runningStatuses.includes(match.status);
+  const isActive = activeStatuses.includes(match.status);
+  const isPaused = match.status === "paused";
+  const isHalfTime = match.status === "half_time";
+  const isPenalties = match.status === "penalties";
   const isCompleted = match.status === "completed";
   const isScheduled = match.status === "scheduled";
 
@@ -788,6 +802,21 @@ export function MatchDetailPage({ matchId }: MatchDetailPageProps) {
               LIVE
             </Badge>
           )}
+          {isPaused && (
+            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 text-[10px] px-1.5 py-0">
+              PAUSED
+            </Badge>
+          )}
+          {isHalfTime && (
+            <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 text-[10px] px-1.5 py-0">
+              HALF TIME
+            </Badge>
+          )}
+          {isPenalties && (
+            <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-[10px] px-1.5 py-0">
+              PENALTIES
+            </Badge>
+          )}
         </div>
 
         {/* Match Score Card */}
@@ -825,7 +854,7 @@ export function MatchDetailPage({ matchId }: MatchDetailPageProps) {
               {/* Score */}
               <div className="flex flex-col items-center px-4">
                 <div className="text-3xl sm:text-5xl font-bold text-white mb-1">
-                  {isLive || isCompleted ? (
+                  {isActive || isCompleted ? (
                     <div className="flex items-center gap-3">
                       <span>{match.score_home}</span>
                       <span className="text-zinc-600">-</span>
@@ -835,11 +864,26 @@ export function MatchDetailPage({ matchId }: MatchDetailPageProps) {
                     <span className="text-2xl text-zinc-500">VS</span>
                   )}
                 </div>
-                {isLive && (
-                  <div className="flex items-center gap-1.5 text-red-400 text-xs font-medium">
+                {(isLive || isPaused || isHalfTime) && (
+                  <div
+                    className={`flex items-center gap-1.5 text-xs font-medium ${
+                      isPaused
+                        ? "text-yellow-400"
+                        : isHalfTime
+                        ? "text-orange-400"
+                        : "text-red-400"
+                    }`}
+                  >
                     <Clock className="h-3 w-3" />
+                    {isPaused && "PAUSED "}
+                    {isHalfTime && "HT "}
                     <LiveMinuteDisplay match={match} />
                   </div>
+                )}
+                {isPenalties && (
+                  <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/30 text-xs">
+                    Penalties
+                  </Badge>
                 )}
                 {isCompleted && (
                   <Badge className="bg-green-500/10 text-green-400 border-green-500/30 text-xs">

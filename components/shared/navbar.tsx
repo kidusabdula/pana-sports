@@ -4,21 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { useLiveMatches } from "@/lib/hooks/public/useMatches";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Search,
-  Menu,
-  X,
-  LogOut,
-  LayoutDashboard,
-  ChevronDown,
-  ShieldCheck,
-  Radio,
-} from "lucide-react";
+import { Menu, X, LayoutDashboard, ChevronDown, Radio } from "lucide-react";
 import { cn } from "@/lib/utils";
 import LanguageToggle from "@/components/shared/language-toggle";
 import GlobalSearch from "@/components/shared/GlobalSearch";
@@ -39,10 +29,7 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
 
   // Auth State
-  const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const profileRef = useRef<HTMLDivElement>(null);
 
   // Dropdown state
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -129,20 +116,9 @@ export default function Navbar() {
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
 
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        profileRef.current &&
-        !profileRef.current.contains(event.target as Node)
-      ) {
-        setProfileOpen(false);
-      }
-    };
-
     window.addEventListener("scroll", handleScroll);
-    document.addEventListener("mousedown", handleClickOutside);
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -154,7 +130,6 @@ export default function Navbar() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      setUser(user);
       if (user?.user_metadata?.role === "admin") {
         setIsAdmin(true);
       }
@@ -167,19 +142,15 @@ export default function Navbar() {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       // Don't use session.user directly - verify with getUser() for security
       if (_event === "SIGNED_OUT") {
-        setUser(null);
         setIsAdmin(false);
-        setProfileOpen(false);
         router.refresh();
       } else if (session) {
         // Verify the user with the server
         const {
           data: { user },
         } = await supabase.auth.getUser();
-        setUser(user);
         setIsAdmin(user?.user_metadata?.role === "admin");
       } else {
-        setUser(null);
         setIsAdmin(false);
       }
     });
@@ -197,12 +168,6 @@ export default function Navbar() {
     }, 0);
     return () => clearTimeout(timer);
   }, [pathname]);
-
-  const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
 
   const handleMouseEnter = (label: string) => {
     if (dropdownTimeoutRef.current) {
@@ -330,12 +295,12 @@ export default function Navbar() {
           "z-40 transition-all duration-500 border-b",
           isCompetitionPage ? "relative" : "sticky top-0",
           scrolled
-            ? "bg-black/60 backdrop-blur-xl border-white/5"
+            ? "bg-black/20 backdrop-blur-xl border-white/5"
             : "bg-transparent border-transparent"
         )}
       >
         {/* Top Row */}
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between relative z-10">
+        <div className="container mx-auto px-4 h-16 lg:h-20 flex items-center justify-between relative z-10">
           {/* Logo Section with Live Button for Mobile */}
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center group">
@@ -344,7 +309,7 @@ export default function Navbar() {
                 alt="Pana Sports"
                 width={130}
                 height={64}
-                className="h-16 mt-10 lg:h-20 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                className="h-16 lg:h-20 py-1 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                 priority
               />
             </Link>
@@ -369,64 +334,6 @@ export default function Navbar() {
             <div className="hidden lg:block mr-2">
               <LanguageToggle />
             </div>
-
-            <div className="h-6 w-px bg-zinc-800 mx-1 hidden lg:block" />
-
-            {/* User Auth Section - Only show if logged in */}
-            {user && (
-              <div className="relative" ref={profileRef}>
-                <button
-                  onClick={() => setProfileOpen(!profileOpen)}
-                  className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 hover:border-zinc-700 transition-all duration-200"
-                >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-900 flex items-center justify-center text-xs font-bold text-white border border-zinc-700">
-                    {user.email?.charAt(0).toUpperCase()}
-                  </div>
-                  <ChevronDown
-                    className={cn(
-                      "w-4 h-4 text-zinc-500 transition-transform",
-                      profileOpen && "rotate-180"
-                    )}
-                  />
-                </button>
-
-                {/* Profile Dropdown */}
-                <div
-                  className={cn(
-                    "absolute right-0 top-full mt-2 w-64 bg-[#0a0a0a] border border-zinc-800 rounded-2xl shadow-2xl p-2 transform transition-all duration-200 origin-top-right",
-                    profileOpen
-                      ? "opacity-100 scale-100 translate-y-0"
-                      : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
-                  )}
-                >
-                  <div className="px-3 py-2 border-b border-zinc-800 mb-2">
-                    <p className="text-sm font-medium text-white truncate">
-                      {user.email}
-                    </p>
-                    <p className="text-xs text-zinc-500">Sports Fan</p>
-                  </div>
-
-                  {isAdmin && (
-                    <Link
-                      href="/cms/dashboard"
-                      className="flex items-center gap-3 px-3 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-900 rounded-xl transition-colors mb-1"
-                      onClick={() => setProfileOpen(false)}
-                    >
-                      <ShieldCheck className="w-4 h-4 text-primary" />
-                      <span>Admin Dashboard</span>
-                    </Link>
-                  )}
-
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Sign out</span>
-                  </button>
-                </div>
-              </div>
-            )}
 
             {/* Mobile Toggles */}
             <div className="flex md:hidden items-center gap-2">
@@ -469,7 +376,7 @@ export default function Navbar() {
         </div>
 
         {/* Secondary Nav (Desktop) */}
-        <div className="hidden md:block border-t border-white/5 bg-black/20 backdrop-blur-sm">
+        <div className="hidden md:block border-t border-white/5 bg-black/80 backdrop-blur-sm">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-center gap-6 py-2.5">
               {navItems.map((item) => (
@@ -562,7 +469,7 @@ export default function Navbar() {
                           href={subItem.href}
                           onClick={() => setMobileMenuOpen(false)}
                           className={cn(
-                            "block text-base font-medium transition-all",
+                            "block text-lg font-medium transition-all",
                             pathname === subItem.href
                               ? "text-primary"
                               : "text-zinc-300 hover:text-white hover:pl-2"
