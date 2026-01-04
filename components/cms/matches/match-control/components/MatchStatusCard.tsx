@@ -1,6 +1,8 @@
 // components/cms/matches/match-control/components/MatchStatusCard.tsx
 "use client";
 
+import { useState, useEffect, useRef } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -80,6 +82,43 @@ export function MatchStatusCard({
   onOpenPenaltyDialog,
   setMatchMinute,
 }: MatchStatusCardProps) {
+  // Local state for minute input to prevent timer from overwriting during editing
+  const [localMinuteInput, setLocalMinuteInput] = useState(matchMinute);
+  const [isEditingMinute, setIsEditingMinute] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Sync local input with parent state when not editing
+  useEffect(() => {
+    if (!isEditingMinute) {
+      setLocalMinuteInput(matchMinute);
+    }
+  }, [matchMinute, isEditingMinute]);
+
+  // Handle minute input change
+  const handleMinuteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Number(e.target.value);
+    setLocalMinuteInput(value);
+  };
+
+  // Handle minute update submission
+  const handleMinuteUpdate = () => {
+    onUpdateMinute(localMinuteInput);
+    setIsEditingMinute(false);
+    // Blur the input after update
+    inputRef.current?.blur();
+  };
+
+  // Handle keyboard submit
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleMinuteUpdate();
+    } else if (e.key === "Escape") {
+      setIsEditingMinute(false);
+      setLocalMinuteInput(matchMinute);
+      inputRef.current?.blur();
+    }
+  };
+
   return (
     <Card className="shadow-sm border border-border/50 bg-card rounded-xl overflow-hidden">
       <CardHeader className="bg-muted/20 px-4 sm:px-6 py-4">
@@ -133,10 +172,25 @@ export function MatchStatusCard({
                   {localScoreHome} - {localScoreAway}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  {(currentMatch.status === "live" ||
-                    currentMatch.status === "extra_time") && (
-                    <Badge variant="outline" className="mt-1">
+                  {[
+                    "live",
+                    "second_half",
+                    "extra_time",
+                    "paused",
+                    "half_time",
+                    "penalties",
+                  ].includes(currentMatch.status) && (
+                    <Badge
+                      variant="outline"
+                      className={`mt-1 ${
+                        currentMatch.status === "paused"
+                          ? "border-yellow-500 text-yellow-500"
+                          : ""
+                      }`}
+                    >
                       {formatTime(matchMinute, matchSecond)}
+                      {currentMatch.status === "paused" && " (PAUSED)"}
+                      {currentMatch.status === "half_time" && " (HT)"}
                       {isExtraTime && " (ET)"}
                       {isPenaltyShootout && " (PEN)"}
                     </Badge>
@@ -239,6 +293,49 @@ export function MatchStatusCard({
                 </Button>
               )}
 
+              {/* Second Half State - Active running state with all controls */}
+              {currentMatch.status === "second_half" && (
+                <>
+                  <Button
+                    onClick={isClockRunning ? onPauseMatch : onResumeMatch}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    {isClockRunning ? (
+                      <>
+                        <Pause className="h-4 w-4" />
+                        Pause
+                      </>
+                    ) : (
+                      <>
+                        <Play className="h-4 w-4" />
+                        Resume
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={onStartExtraTime}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <Clock className="h-4 w-4" />
+                    Extra Time
+                  </Button>
+                  <Button
+                    onClick={onStartPenaltyShootout}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <Flag className="h-4 w-4" />
+                    Penalties
+                  </Button>
+                  <Button onClick={onFullTime} className="gap-2">
+                    <Square className="h-4 w-4" />
+                    Full Time
+                  </Button>
+                </>
+              )}
+
               {/* Extra Time State */}
               {currentMatch.status === "extra_time" && (
                 <>
@@ -292,6 +389,56 @@ export function MatchStatusCard({
                 </>
               )}
 
+              {/* Paused State - In-game pause with full control options */}
+              {currentMatch.status === "paused" && (
+                <>
+                  <Button onClick={onResumeMatch} className="gap-2">
+                    <Play className="h-4 w-4" />
+                    Resume
+                  </Button>
+                  <Button
+                    onClick={onHalfTime}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <Timer className="h-4 w-4" />
+                    Half Time
+                  </Button>
+                  <Button
+                    onClick={onSecondHalf}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    Second Half
+                  </Button>
+                  <Button
+                    onClick={onStartExtraTime}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <Clock className="h-4 w-4" />
+                    Extra Time
+                  </Button>
+                  <Button
+                    onClick={onStartPenaltyShootout}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <Flag className="h-4 w-4" />
+                    Penalties
+                  </Button>
+                  <Button
+                    onClick={onFullTime}
+                    variant="destructive"
+                    className="gap-2"
+                  >
+                    <Square className="h-4 w-4" />
+                    Full Time
+                  </Button>
+                </>
+              )}
+
               {/* Postponed State */}
               {currentMatch.status === "postponed" && (
                 <Button onClick={onResumeMatch} className="gap-2">
@@ -322,22 +469,38 @@ export function MatchStatusCard({
             {/* Minute Control */}
             <div className="pt-4">
               <Label htmlFor="minute" className="text-sm font-medium">
-                Match Minute
+                Match Minute{" "}
+                {isEditingMinute && (
+                  <span className="text-xs text-yellow-500 ml-2">
+                    (editing...)
+                  </span>
+                )}
               </Label>
               <div className="flex items-center gap-2 mt-1">
                 <Input
+                  ref={inputRef}
                   id="minute"
                   type="number"
-                  value={matchMinute}
-                  onChange={(e) => setMatchMinute(Number(e.target.value))}
-                  className="w-20"
+                  value={localMinuteInput}
+                  onChange={handleMinuteChange}
+                  onFocus={() => setIsEditingMinute(true)}
+                  onBlur={() => {
+                    // Delay to allow button click to register
+                    setTimeout(() => setIsEditingMinute(false), 200);
+                  }}
+                  onKeyDown={handleKeyDown}
+                  className={`w-20 ${
+                    isEditingMinute
+                      ? "border-yellow-500 ring-1 ring-yellow-500"
+                      : ""
+                  }`}
                   min={0}
                   max={120}
                 />
                 <Button
                   size="sm"
-                  variant="outline"
-                  onClick={() => onUpdateMinute(matchMinute)}
+                  variant={isEditingMinute ? "default" : "outline"}
+                  onClick={handleMinuteUpdate}
                 >
                   Update
                 </Button>

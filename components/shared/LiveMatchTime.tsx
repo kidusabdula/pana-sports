@@ -149,9 +149,14 @@ export function LiveMatchTimeDisplay({
   const displayMinute = useLiveMatchTime(match);
 
   if (
-    !["live", "second_half", "extra_time", "half_time", "penalties"].includes(
-      match.status
-    )
+    ![
+      "live",
+      "second_half",
+      "extra_time",
+      "half_time",
+      "penalties",
+      "paused",
+    ].includes(match.status)
   ) {
     return null;
   }

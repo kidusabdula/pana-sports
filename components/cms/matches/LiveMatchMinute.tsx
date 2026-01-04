@@ -57,9 +57,14 @@ export function LiveMatchMinute({
 
   // Don't show anything for scheduled or non-live matches
   if (
-    !["live", "second_half", "extra_time", "half_time", "penalties"].includes(
-      match.status
-    )
+    ![
+      "live",
+      "second_half",
+      "extra_time",
+      "half_time",
+      "penalties",
+      "paused",
+    ].includes(match.status)
   ) {
     return null;
   }

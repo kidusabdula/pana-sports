@@ -44,6 +44,43 @@ function CompactMatchItemInner({
   const displayMinute = useLiveMatchTime(match);
 
   const getStatusDisplay = () => {
+    // Paused state - show paused indicator
+    if (match.status === "paused") {
+      return (
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 border border-yellow-500/30 transition-colors">
+          <div className="flex flex-col items-center justify-center">
+            <span className="text-[9px] font-bold text-yellow-500 leading-none">
+              PAUSE
+            </span>
+          </div>
+        </div>
+      );
+    }
+    // Half time state
+    if (match.status === "half_time") {
+      return (
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 border border-orange-500/30 transition-colors">
+          <div className="flex flex-col items-center justify-center">
+            <span className="text-[9px] font-bold text-orange-500 leading-none">
+              HT
+            </span>
+          </div>
+        </div>
+      );
+    }
+    // Penalties state
+    if (match.status === "penalties") {
+      return (
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 border border-purple-500/30 transition-colors">
+          <div className="flex flex-col items-center justify-center">
+            <span className="text-[9px] font-bold text-purple-500 leading-none">
+              PEN
+            </span>
+          </div>
+        </div>
+      );
+    }
+    // Active running states - live, second_half, extra_time
     if (["live", "second_half", "extra_time"].includes(match.status)) {
       return (
         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 group-hover:border-red-500/30 transition-colors">
@@ -208,8 +245,12 @@ function LiveMatchesPageContent() {
   }) => {
     const [isExpanded, setIsExpanded] = useState(true);
     const leagueMatches = matches.filter((m) => m.league?.id === league.id);
+    // Count only actively running matches, not paused/halftime
     const liveCount = leagueMatches.filter((m) =>
       ["live", "second_half", "extra_time"].includes(m.status)
+    ).length;
+    const pausedCount = leagueMatches.filter((m) =>
+      ["paused", "half_time"].includes(m.status)
     ).length;
     const totalGoals = leagueMatches.reduce(
       (sum, m) => sum + (m.score_home || 0) + (m.score_away || 0),
@@ -247,6 +288,11 @@ function LiveMatchesPageContent() {
             {liveCount > 0 && (
               <Badge className="bg-red-500/10 text-red-400 border-red-500/20 text-[9px] md:text-[10px] px-1.5 py-0 h-4">
                 {liveCount} Live
+              </Badge>
+            )}
+            {pausedCount > 0 && (
+              <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20 text-[9px] md:text-[10px] px-1.5 py-0 h-4">
+                {pausedCount} Paused
               </Badge>
             )}
             {/* Goals badge - desktop only */}

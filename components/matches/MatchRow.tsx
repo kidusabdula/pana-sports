@@ -19,6 +19,35 @@ export default function MatchRow({ match, isLive = false }: MatchRowProps) {
   const displayMinute = useLiveMatchTime(match);
 
   const getStatusBadge = () => {
+    // Paused status - distinct from live
+    if (match.status === "paused") {
+      return (
+        <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-800/30 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5">
+          <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-yellow-500 mr-1"></span>
+          PAUSED {displayMinute}&apos;
+        </Badge>
+      );
+    }
+
+    // Half time status
+    if (match.status === "half_time") {
+      return (
+        <Badge className="bg-orange-500/20 text-orange-400 border-orange-800/30 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5">
+          HT
+        </Badge>
+      );
+    }
+
+    // Penalties status
+    if (match.status === "penalties") {
+      return (
+        <Badge className="bg-purple-500/20 text-purple-400 border-purple-800/30 text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5">
+          PEN
+        </Badge>
+      );
+    }
+
+    // Active running states - live, second_half, extra_time
     if (
       isLive ||
       ["live", "second_half", "extra_time"].includes(match.status)
