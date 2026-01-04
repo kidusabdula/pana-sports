@@ -452,7 +452,17 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
 
   const fullTime = useCallback(() => {
     const payload = createMatchControlPayload("full_time");
-    matchControlMutation.mutate(payload);
+    console.log("fullTime called, payload:", payload);
+    matchControlMutation.mutate(payload, {
+      onSuccess: (data) => {
+        console.log("fullTime mutation success, new status:", data?.status);
+        toast.success("Match ended - Full Time");
+      },
+      onError: (error) => {
+        console.error("fullTime mutation error:", error);
+        toast.error("Failed to end match");
+      },
+    });
     setIsClockRunning(false);
 
     createEvent({
@@ -528,7 +538,20 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
 
   const endPenaltyShootout = useCallback(() => {
     const payload = createMatchControlPayload("end_penalties");
-    matchControlMutation.mutate(payload);
+    console.log("endPenaltyShootout called, payload:", payload);
+    matchControlMutation.mutate(payload, {
+      onSuccess: (data) => {
+        console.log(
+          "endPenaltyShootout mutation success, new status:",
+          data?.status
+        );
+        toast.success("Penalty shootout ended");
+      },
+      onError: (error) => {
+        console.error("endPenaltyShootout mutation error:", error);
+        toast.error("Failed to end penalty shootout");
+      },
+    });
 
     createEvent({
       match_id: match.id,
@@ -542,6 +565,28 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
       confirmed: false,
     });
   }, [match.id, matchControlMutation]);
+
+  const restartMatch = useCallback(() => {
+    // Reset match back to scheduled status with cleared timestamps
+    matchControlMutation.mutate({
+      status: "scheduled",
+      minute: 0,
+      match_started_at: null,
+      first_half_ended_at: null,
+      second_half_started_at: null,
+      second_half_ended_at: null,
+      extra_time_started_at: null,
+      extra_time_ended_at: null,
+      penalties_started_at: null,
+      match_ended_at: null,
+    });
+    setIsClockRunning(false);
+    setMatchMinute(0);
+    setMatchSecond(0);
+    setIsExtraTime(false);
+    setIsPenaltyShootout(false);
+    toast.success("Match has been reset to scheduled status");
+  }, [matchControlMutation]);
 
   const updateMinute = useCallback(
     (newMinute: number) => {
@@ -1105,6 +1150,7 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
     endExtraTime,
     startPenaltyShootout,
     endPenaltyShootout,
+    restartMatch,
     updateMinute,
 
     // Event actions

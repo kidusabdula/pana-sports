@@ -38,14 +38,13 @@ export default function NewsCard({
 }: NewsCardProps) {
   const { language } = useLanguage();
 
-  const title = language === 'am' && news.title_am ? news.title_am : news.title;
+  const title = language === "am" && news.title_am ? news.title_am : news.title;
   // We don't have excerpt_am in the interface yet, strictly speaking, but let's assume it might be there or fallback.
   // Actually the interface in the file didn't show excerpt_am, so I should be careful.
   // Let's re-read the interface I saw in view_file.
   // interface has: excerpt: string; content?: string; content_am?: string;
   // It does NOT have excerpt_am. I should probably stick to what's there or check if api returns it.
   // For now, I'll just do title. If excerpt_am is missing, I'll just use excerpt.
-
 
   if (variant === "featured") {
     return (
@@ -54,7 +53,7 @@ export default function NewsCard({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="group relative rounded-3xl overflow-hidden cursor-pointer h-[400px] md:h-[500px] w-full"
+          className="group relative rounded-3xl overflow-hidden cursor-pointer h-[400px] md:h-[500px] w-full border border-white/5 hover:border-white/10 shadow-2xl shadow-black/50"
         >
           <Image
             src={news.image}
@@ -63,26 +62,26 @@ export default function NewsCard({
             className="object-cover transition-transform duration-700 group-hover:scale-105"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-90" />
+          <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent opacity-90" />
 
-          <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full md:w-3/4">
+          <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full md:w-3/4 z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
             >
               <div className="flex items-center gap-3 mb-3 md:mb-4">
-                <Badge className="bg-primary hover:bg-primary text-white border-none text-[10px] md:text-xs px-2 md:px-3 py-1 uppercase tracking-wider font-semibold">
+                <Badge className="bg-primary/90 backdrop-blur-sm hover:bg-primary text-white border-none text-[10px] md:text-xs px-3 py-1 uppercase tracking-wider font-bold shadow-lg shadow-primary/20">
                   {news.category || "General"}
                 </Badge>
-                <span className="text-xs md:text-sm text-zinc-300 flex items-center gap-1.5 font-medium">
-                  <Clock className="w-3 h-3 md:w-4 md:h-4" /> {news.date}
+                <span className="text-xs md:text-sm text-zinc-300 flex items-center gap-1.5 font-medium bg-black/30 backdrop-blur-sm px-2 py-1 rounded-full border border-white/5">
+                  <Clock className="w-3 h-3 md:w-3.5 md:h-3.5" /> {news.date}
                 </span>
               </div>
-              <h1 className="text-2xl md:text-4xl lg:text-5xl font-black text-white leading-tight mb-3 md:mb-4 group-hover:text-primary transition-colors line-clamp-3 md:line-clamp-none">
+              <h1 className="text-2xl md:text-4xl lg:text-5xl font-black text-white leading-[1.1] mb-3 md:mb-4 group-hover:text-primary transition-colors line-clamp-3 md:line-clamp-none drop-shadow-lg">
                 {title}
               </h1>
-              <p className="text-sm md:text-lg text-zinc-300 line-clamp-2 max-w-2xl leading-relaxed hidden sm:block">
+              <p className="text-sm md:text-lg text-zinc-300 line-clamp-2 max-w-2xl leading-relaxed hidden sm:block drop-shadow-md">
                 {news.excerpt}
               </p>
             </motion.div>
@@ -101,7 +100,7 @@ export default function NewsCard({
           transition={{ delay: index * 0.1 }}
           className="group flex gap-3 md:gap-4 items-center p-2 md:p-3 rounded-xl hover:bg-white/5 transition-colors"
         >
-          <div className="relative w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-lg overflow-hidden">
+          <div className="relative w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-lg overflow-hidden border border-white/5">
             <Image
               src={news.image}
               alt={title}
@@ -181,34 +180,34 @@ export default function NewsCard({
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: index * 0.1 }}
-        className="group h-full bg-zinc-900/40 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 flex flex-col"
+        className="group h-full bg-zinc-900/60 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 flex flex-col hover:-translate-y-1"
       >
-        <div className="relative h-48 md:h-52 overflow-hidden">
+        <div className="relative h-48 md:h-52 overflow-hidden border-b border-white/5">
           <Image
             src={news.image}
             alt={title}
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-60" />
-          <Badge className="absolute top-3 left-3 bg-black/50 backdrop-blur-md hover:bg-black/70 text-white border-white/10 text-xs px-2.5 py-1">
+          <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300" />
+          <Badge className="absolute top-3 left-3 bg-black/60 backdrop-blur-md hover:bg-black/70 text-white border-white/10 text-[10px] px-2.5 py-1 font-medium tracking-wide shadow-lg">
             {news.category || "General"}
           </Badge>
         </div>
-        <div className="p-4 md:p-5 flex flex-col flex-1">
-          <div className="flex items-center gap-3 text-xs text-zinc-500 mb-2 md:mb-3">
-            <span className="flex items-center gap-1">
+        <div className="p-5 flex flex-col flex-1">
+          <div className="flex items-center gap-3 text-xs text-zinc-500 mb-3">
+            <span className="flex items-center gap-1.5 bg-white/5 px-2 py-0.5 rounded-full">
               <Clock className="w-3 h-3" /> {news.date}
             </span>
           </div>
-          <h3 className="text-base md:text-lg font-bold text-white mb-2 md:mb-3 group-hover:text-primary transition-colors line-clamp-2 leading-snug flex-1">
+          <h3 className="text-lg md:text-xl font-bold text-white mb-3 group-hover:text-primary transition-colors line-clamp-2 leading-tight flex-1">
             {title}
           </h3>
-          <div className="flex items-center justify-between mt-auto pt-3 md:pt-4 border-t border-white/5">
-            <span className="text-xs text-zinc-400 flex items-center gap-1.5">
-              <User className="w-3 h-3" /> {news.author}
+          <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+            <span className="text-xs text-zinc-400 flex items-center gap-1.5 font-medium">
+              <User className="w-3 h-3 text-zinc-500" /> {news.author}
             </span>
-            <span className="p-1.5 rounded-full bg-white/5 group-hover:bg-primary group-hover:text-white transition-colors text-zinc-400">
+            <span className="p-2 rounded-full bg-white/5 group-hover:bg-primary group-hover:text-white transition-all duration-300 text-zinc-400 -ml-2 translate-x-0 group-hover:translate-x-1">
               <ArrowUpRight className="w-4 h-4" />
             </span>
           </div>

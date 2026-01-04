@@ -23,9 +23,6 @@ export default function Home() {
                 <HomeNewsSection />
               </Suspense>
 
-              {/* Ad after news feed */}
-              <AdBanner variant="inline" showClose={false} page="home" />
-
               {/* Other News Grid (2x3) */}
               <Suspense
                 fallback={
@@ -33,6 +30,9 @@ export default function Home() {
                 }
               >
                 <OtherNews />
+
+                {/* Ad after news feed */}
+                <AdBanner variant="full" showClose={false} page="home" />
               </Suspense>
             </div>
 

@@ -108,11 +108,17 @@ description: Pana Sports v2.0 Complete Architecture & Feature Specification
 9. ✅ Revamped MatchesTab (card-based, larger logos)
 10. ✅ Redesigned TeamsTab (featured cards, bigger logos, stats)
 
-### PHASE 4: Cup Pages (Ethiopian Cup)
-1. New cup page structure
-2. Knockout bracket visualization
-3. Group stage tables (if applicable)
-4. Cup-specific match display
+### PHASE 4: Match Control Panel Overhaul ✅ LARGELY COMPLETE
+1. ✅ Time persistence implementation (timestamps saved to DB)
+2. ✅ Pause vs postpone separation
+3. ✅ Resume functionality
+4. ✅ Real-time timer display (client-side calculation)
+5. ✅ Manual minute override with timestamp recalculation
+6. ✅ Half-time, second half, extra time handling
+7. ✅ Penalty shootout management
+8. ✅ Public pages real-time sync (useLiveMatchTime hook)
+9. [ ] Event editing/deletion
+10. [ ] Auto-timeout feature
 
 ### PHASE 5: CMS - Season Management Module
 1. Season CRUD pages
@@ -268,38 +274,63 @@ Filter news by `category_type = 'featured'` or `category_type = 'opinion'`
 
 ### Match Time Calculation Logic
 
+Time is calculated client-side for real-time updates using the `useLiveMatchTime` hook:
+
+**Location:** `components/shared/LiveMatchTime.tsx`
+
 ```typescript
-// Frontend calculation for live match time
+// Core hook for any component needing live match time
+import { useLiveMatchTime } from "@/components/shared/LiveMatchTime";
+
+const MyComponent = ({ match }) => {
+  const displayMinute = useLiveMatchTime(match);
+  return <span>{displayMinute}'</span>;
+};
+```
+
+**Internal logic:**
+```typescript
 function calculateMatchMinute(match: Match): number {
-  if (!['live', 'second_half', 'extra_time'].includes(match.status)) {
-    return match.minute;
-  }
-  
   const now = new Date();
-  let elapsedSeconds = 0;
+  
+  if (!['live', 'second_half', 'extra_time'].includes(match.status)) {
+    return match.minute ?? 0;
+  }
   
   switch (match.status) {
     case 'live':
-      // First half
-      if (match.match_started_at) {
-        elapsedSeconds = (now.getTime() - new Date(match.match_started_at).getTime()) / 1000;
-      }
-      break;
+      if (!match.match_started_at) return match.minute ?? 0;
+      const startTime = new Date(match.match_started_at);
+      return Math.floor((now.getTime() - startTime.getTime()) / 1000 / 60);
+      
     case 'second_half':
-      // Second half starts at 45
-      if (match.second_half_started_at) {
-        elapsedSeconds = 45 * 60 + (now.getTime() - new Date(match.second_half_started_at).getTime()) / 1000;
-      }
-      break;
+      if (!match.second_half_started_at) return match.minute ?? 46;
+      const shStart = new Date(match.second_half_started_at);
+      return 45 + Math.floor((now.getTime() - shStart.getTime()) / 1000 / 60);
+      
     case 'extra_time':
-      // Extra time starts at 90
-      if (match.extra_time_started_at) {
-        elapsedSeconds = 90 * 60 + (now.getTime() - new Date(match.extra_time_started_at).getTime()) / 1000;
-      }
-      break;
+      if (!match.extra_time_started_at) return match.minute ?? 91;
+      const etStart = new Date(match.extra_time_started_at);
+      return 90 + Math.floor((now.getTime() - etStart.getTime()) / 1000 / 60);
+      
+    default:
+      return match.minute ?? 0;
   }
-  
-  return Math.min(Math.floor(elapsedSeconds / 60), 120);
+}
+```
+
+**Manual Override Logic:**
+When CMS admin manually sets minute, timestamps are recalculated:
+```typescript
+// In useMatchControlState.ts updateMinute function
+if (currentMatch.status === "live") {
+  // Recalculate match_started_at to reflect manual override
+  const adjustedStartTime = new Date(now.getTime() - (newMinute * 60 * 1000));
+  updatePayload.match_started_at = adjustedStartTime.toISOString();
+} else if (currentMatch.status === "second_half") {
+  const elapsedInSecondHalf = (newMinute - 45) * 60 * 1000;
+  const adjustedStartTime = new Date(now.getTime() - elapsedInSecondHalf);
+  updatePayload.second_half_started_at = adjustedStartTime.toISOString();
 }
 ```
 
@@ -442,12 +473,15 @@ const getPositionColor = (rank: number, totalTeams: number, promotionSpots: numb
 - [ ] Update league pages for season filtering
 - [ ] Update match fetching for season
 
-### Phase 4: Match Control Overhaul
+### Phase 4: Match Control Overhaul ✅ LARGELY COMPLETE
 **Estimated tokens: ~70K**
-- [ ] Time persistence logic
-- [ ] New status handling
-- [ ] Pause/resume functionality
-- [ ] Penalty management
+- [x] Time persistence logic (timestamps in DB)
+- [x] New status handling (paused, half_time, penalties)
+- [x] Pause/resume functionality
+- [x] Penalty management
+- [x] Timer display fixes (CMS)
+- [x] Public pages real-time sync (useLiveMatchTime hook)
+- [x] Manual minute override with timestamp recalculation
 - [ ] Event editing
 - [ ] Restart functionality
 - [ ] Auto-timeout

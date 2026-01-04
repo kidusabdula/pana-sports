@@ -959,17 +959,90 @@ Modify `components/premier-league/PremierLeagueHeader.tsx` (and similar for othe
 
 ---
 
-## PHASE 4: Match Control Panel (Continue in next workflow file or chat)
+## PHASE 4: Match Control Panel ✅ LARGELY COMPLETE
 
-This section is extensive and will be implemented in the next phase.
+This phase focused on implementing the match timer persistence and real-time display system.
 
-Key tasks:
-- Time persistence implementation
-- Pause vs postpone separation
-- Event editing/deletion
-- Penalty shootout panel
-- Restart functionality
-- Auto-timeout
+### Task 4.1: Timer Persistence (Server-side) ✅ COMPLETE
+
+**Files modified:**
+- `app/api/matches/[id]/control/route.ts` - Saves timestamp fields to database
+- `useMatchControlState.ts` - Manages timer state and sync
+
+**Key implementation:**
+- When match starts: `match_started_at` timestamp is saved
+- When second half starts: `second_half_started_at` timestamp is saved
+- When extra time starts: `extra_time_started_at` timestamp is saved
+- All timestamps are used to calculate elapsed time on both CMS and public pages
+
+### Task 4.2: CMS Match Control Timer ✅ COMPLETE
+
+**Files modified:**
+- `components/cms/matches/LiveMatchMinute.tsx` - Real-time minute display
+- `components/cms/matches/match-control/hooks/useMatchControlState.ts` - Timer logic
+- `components/cms/matches/match-control/components/MatchStatusCard.tsx` - UI updates
+
+**Features:**
+- Timer runs locally using `setInterval` every second
+- Syncs with server on match status changes
+- Prevents input field from being overwritten during manual editing
+- Shows pause/halftime/penalties status
+
+### Task 4.3: Manual Time Override ✅ COMPLETE
+
+**Files modified:**
+- `useMatchControlState.ts` - `updateMinute` callback
+
+**Implementation:**
+When admin manually changes the minute:
+1. New minute is saved to database
+2. Timestamp is recalculated based on new minute
+3. This ensures timer continues correctly from new position
+
+```typescript
+// Example: If admin sets minute to 30' during first half
+const adjustedStartTime = new Date(now.getTime() - (30 * 60 * 1000));
+updatePayload.match_started_at = adjustedStartTime.toISOString();
+```
+
+### Task 4.4: Public Pages Real-Time Timer ✅ COMPLETE
+
+**NEW FILES CREATED:**
+- `components/shared/LiveMatchTime.tsx` - Core hook and display component
+
+**FILES UPDATED to use useLiveMatchTime:**
+- `components/live/LiveMatchesPage.tsx` - Added `CompactMatchItemInner` component
+- `components/matches/MatchRow.tsx` - Used by sidebar/RightColumn
+- `components/matches/MatchDetailPage.tsx` - Added `LiveMinuteDisplay` component
+- `components/shared/tabs/MatchesTab.tsx` - Added `LiveMinuteBadge` component
+- `components/shared/tabs/OverviewTab.tsx` - Added `LiveMatchMinuteDisplay` component
+- `components/teams/TeamDetailPage.tsx` - Added `LiveMatchMinute` component (3 usages)
+- `lib/hooks/public/useMatches.ts` - Added timestamp fields to Match type
+
+**Usage Pattern:**
+```typescript
+import { useLiveMatchTime } from "@/components/shared/LiveMatchTime";
+
+const MyComponent = ({ match }) => {
+  const displayMinute = useLiveMatchTime(match);
+  return <span>{displayMinute}'</span>;
+};
+```
+
+### Task 4.5: Status Handling Updates ✅ COMPLETE
+
+All components now handle these match statuses correctly:
+- `live` - First half running (shows real-time minute)
+- `second_half` - Second half running (shows 45+ minute)
+- `extra_time` - Extra time running (shows 90+ minute)
+- `paused` - Match paused (shows PAUSED badge)
+- `half_time` - Half time break (shows HT badge)
+- `penalties` - Penalty shootout (shows PEN badge)
+
+### Remaining Tasks (Phase 4):
+- [ ] Event editing/deletion modal
+- [ ] Auto-timeout feature (pause match after inactivity)
+- [ ] Restart match functionality
 
 ---
 
@@ -977,34 +1050,39 @@ Key tasks:
 
 Use this checklist to track progress across chat sessions:
 
-### Phase 1: Infrastructure
-- [ ] Database migration run
-- [ ] TypeScript types regenerated
-- [ ] Season hooks created
-- [ ] Season API routes created
+### Phase 1: Infrastructure ✅ COMPLETE
+- [x] Database migration run
+- [x] TypeScript types regenerated
+- [x] Season hooks created
+- [x] Season API routes created
 
-### Phase 2: Main Site UI
-- [ ] Navbar enlarged
-- [ ] Women's League moved to dropdown
-- [ ] Features menu added
-- [ ] AdBanner component updated
-- [ ] Global search implemented
-- [ ] OtherNews component created
-- [ ] Standings limit removed
-- [ ] Ad placements added to home page
+### Phase 2: Main Site UI ✅ COMPLETE
+- [x] Navbar enlarged
+- [x] Women's League moved to dropdown
+- [x] Features menu added
+- [x] AdBanner component updated
+- [x] Global search implemented
+- [x] OtherNews component created
+- [x] Standings limit removed
+- [x] Ad placements added to home page
 
-### Phase 3: League Pages
-- [ ] SeasonToggle component created
-- [ ] League headers updated
-- [ ] Season filtering implemented
-- [ ] Standings color coding fixed
-- [ ] Team row click handlers added
+### Phase 3: League Pages ✅ COMPLETE
+- [x] SeasonToggle component created
+- [x] League headers updated
+- [x] Season filtering implemented
+- [x] Standings color coding fixed
+- [x] Team row click handlers added
+- [x] CompetitionHeader component created
+- [x] Tab components revamped (Overview, Matches, Teams, Table)
 
-### Phase 4: Match Control Panel
-- [ ] Time persistence implemented
-- [ ] Status handling updated
-- [ ] Pause/resume working
-- [ ] Penalty management working
+### Phase 4: Match Control Panel ✅ LARGELY COMPLETE
+- [x] Time persistence implemented (timestamps saved)
+- [x] Status handling updated (paused, half_time, penalties)
+- [x] Pause/resume working
+- [x] Penalty management working
+- [x] Timer display fixed (CMS)
+- [x] Public pages real-time sync (useLiveMatchTime hook)
+- [x] Manual minute override with timestamp recalculation
 - [ ] Event editing implemented
 - [ ] Restart functionality added
 - [ ] Auto-timeout implemented
@@ -1036,9 +1114,15 @@ I'm continuing Pana Sports v2.0 development.
 
 Reference: /.agent/workflows/v2-architecture.md
 
-Current Phase: [PHASE NUMBER]
-Last Completed: [LAST TASK]
-Next Task: [NEXT TASK]
+Current Phase: Phase 4
+Last Completed: Task 4.4 - Public Pages Real-Time Timer (useLiveMatchTime hook)
+Next Task: Task 4.5 - Event editing/deletion OR Phase 5 Season Management
 
-Any blockers: [YES/NO - details if yes]
+Any blockers: NO
+
+Key files for context:
+- components/shared/LiveMatchTime.tsx (real-time timer hook)
+- components/cms/matches/match-control/hooks/useMatchControlState.ts (CMS timer logic)
+- app/api/matches/[id]/control/route.ts (match control API)
 ```
+

@@ -54,6 +54,7 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
         onStartPenaltyShootout={state.startPenaltyShootout}
         onEndPenaltyShootout={state.endPenaltyShootout}
         onFullTime={state.fullTime}
+        onRestartMatch={state.restartMatch}
         onRefresh={state.refreshAllData}
         onUpdateMinute={state.updateMinute}
         onAddInjuryTime={state.addInjuryTime}

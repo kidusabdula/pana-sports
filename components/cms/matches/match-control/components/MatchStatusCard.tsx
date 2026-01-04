@@ -47,6 +47,7 @@ interface MatchStatusCardProps {
   onStartPenaltyShootout: () => void;
   onEndPenaltyShootout: () => void;
   onFullTime: () => void;
+  onRestartMatch: () => void;
   onRefresh: () => void;
   onUpdateMinute: (minute: number) => void;
   onAddInjuryTime: (half: "first" | "second", minutes: number) => void;
@@ -76,6 +77,7 @@ export function MatchStatusCard({
   onStartPenaltyShootout,
   onEndPenaltyShootout,
   onFullTime,
+  onRestartMatch,
   onRefresh,
   onUpdateMinute,
   onAddInjuryTime,
@@ -445,6 +447,26 @@ export function MatchStatusCard({
                   <Play className="h-4 w-4" />
                   Resume Match
                 </Button>
+              )}
+
+              {/* Completed State */}
+              {currentMatch.status === "completed" && (
+                <>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Trophy className="h-4 w-4 text-green-500" />
+                    <span className="font-medium text-green-500">
+                      Match Completed
+                    </span>
+                  </div>
+                  <Button
+                    onClick={onRestartMatch}
+                    variant="outline"
+                    className="gap-2 border-yellow-500/50 hover:border-yellow-500 text-yellow-600 hover:text-yellow-500"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    Restart Match
+                  </Button>
+                </>
               )}
             </div>
           </div>

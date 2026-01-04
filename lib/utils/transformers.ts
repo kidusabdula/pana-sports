@@ -9,18 +9,19 @@ export function transformNewsToUINews(news: News) {
     title: news.title_en,
     title_am: news.title_am,
     category: news.category?.name || "General",
-    category_slug: news.category_slug,
+    category_id: news.category?.id,
+    category_slug: news.category?.slug,
     image: news.thumbnail_url || "/placeholder.svg",
-    date: formatDate(news.published_at), // Keep this as is
+    date: formatDate(news.published_at || ""), // Handle null date
     author: news.author?.name || "Pana Sports",
-    author_avatar: news.author?.avatar_url,
+    author_avatar: news.author?.avatar_url || undefined,
     excerpt: generateExcerpt(stripHtml(news.content_en || "")),
     content: news.content_en || "",
     content_am: news.content_am || "",
     views: news.views || 0,
     comments_count: news.comments_count || 0,
     league: news.league?.name_en,
-    league_slug: news.league_slug,
+    league_slug: news.league?.slug,
   };
 }
 

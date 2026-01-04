@@ -376,7 +376,7 @@ export default function Navbar() {
         </div>
 
         {/* Secondary Nav (Desktop) */}
-        <div className="hidden md:block border-t border-white/5 bg-black/80 backdrop-blur-sm">
+        <div className="hidden md:block border-t border-white/5 bg-black/20 backdrop-blur-xl">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-center gap-6 py-2.5">
               {navItems.map((item) => (
