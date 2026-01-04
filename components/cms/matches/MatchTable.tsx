@@ -33,6 +33,7 @@ import {
   Settings,
 } from "lucide-react";
 import { toast } from "sonner";
+import { LiveMatchMinute } from "./LiveMatchMinute";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -183,8 +184,13 @@ export default function MatchTable() {
     { value: "all", label: "All Statuses" },
     { value: "scheduled", label: "Scheduled" },
     { value: "live", label: "Live" },
+    { value: "second_half", label: "Second Half" },
+    { value: "half_time", label: "Half Time" },
+    { value: "extra_time", label: "Extra Time" },
+    { value: "penalties", label: "Penalties" },
     { value: "completed", label: "Completed" },
     { value: "postponed", label: "Postponed" },
+    { value: "paused", label: "Paused" },
     { value: "cancelled", label: "Cancelled" },
   ];
 
@@ -443,11 +449,7 @@ export default function MatchTable() {
                         <span className="font-bold text-sm text-foreground">
                           {match.score_away}
                         </span>
-                        {match.status === "live" && (
-                          <Badge variant="outline" className="text-xs">
-                            {match.minute}&apos;
-                          </Badge>
-                        )}
+                        <LiveMatchMinute match={match} className="text-xs" />
                       </div>
                     </TableCell>
                     <TableCell>
@@ -501,7 +503,9 @@ export default function MatchTable() {
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                              <AlertDialogCancel className="m-0">Cancel</AlertDialogCancel>
+                              <AlertDialogCancel className="m-0">
+                                Cancel
+                              </AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() =>
                                   handleDelete(
@@ -545,7 +549,8 @@ export default function MatchTable() {
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <div className="min-w-0 flex-1">
                           <h3 className="font-medium text-foreground text-sm truncate">
-                            {match.home_team?.name_en} vs {match.away_team?.name_en}
+                            {match.home_team?.name_en} vs{" "}
+                            {match.away_team?.name_en}
                           </h3>
                           <div className="flex items-center gap-2 mt-1">
                             <StatusBadge status={match.status} />
@@ -641,11 +646,7 @@ export default function MatchTable() {
                           <span className="font-medium text-foreground">
                             {match.score_home} - {match.score_away}
                           </span>
-                          {match.status === "live" && (
-                            <Badge variant="outline" className="text-xs">
-                              {match.minute}&apos;
-                            </Badge>
-                          )}
+                          <LiveMatchMinute match={match} className="text-xs" />
                         </div>
                       </div>
                     </div>

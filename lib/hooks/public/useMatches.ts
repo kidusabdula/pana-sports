@@ -11,6 +11,12 @@ export type Match = {
   score_home: number;
   score_away: number;
   minute: number;
+  // Time persistence fields
+  match_started_at?: string | null;
+  second_half_started_at?: string | null;
+  extra_time_started_at?: string | null;
+  // Server-calculated minute (available from API)
+  calculated_minute?: number;
   home_team: {
     id: string;
     name_en: string;

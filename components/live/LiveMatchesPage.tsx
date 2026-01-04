@@ -28,7 +28,114 @@ import {
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Suspense } from "react";
-import Link from "next/link";
+import { useLiveMatchTime } from "@/components/shared/LiveMatchTime";
+
+// Separate component to use the hook - must be outside main component
+function CompactMatchItemInner({
+  match,
+  showMinute,
+  onMatchClick,
+}: {
+  match: any;
+  showMinute?: boolean;
+  onMatchClick: (id: string) => void;
+}) {
+  // Use hook for real-time minute calculation
+  const displayMinute = useLiveMatchTime(match);
+
+  const getStatusDisplay = () => {
+    if (["live", "second_half", "extra_time"].includes(match.status)) {
+      return (
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 group-hover:border-red-500/30 transition-colors">
+          <div className="flex flex-col items-center justify-center">
+            <span className="text-[9px] font-bold text-red-500 leading-none">
+              {showMinute ? `${displayMinute}'` : "LIVE"}
+            </span>
+          </div>
+        </div>
+      );
+    }
+    if (match.date) {
+      const matchTime = new Date(match.date).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+      return (
+        <div className="flex items-center justify-center w-8 h-8">
+          <span className="text-[10px] font-medium text-zinc-500">
+            {matchTime}
+          </span>
+        </div>
+      );
+    }
+    return <div className="w-8" />;
+  };
+
+  return (
+    <div
+      className="flex items-center gap-2 md:gap-4 px-2 py-1 hover:bg-zinc-800/40 transition-colors cursor-pointer border-b border-zinc-800/20 last:border-0 h-10"
+      onClick={() => onMatchClick(match.id)}
+    >
+      {/* Status Badge */}
+      <div className="shrink-0">{getStatusDisplay()}</div>
+
+      {/* Match Content Grid */}
+      <div className="flex-1 grid grid-cols-[1fr_auto_1fr] items-center gap-2 md:gap-4">
+        {/* Home Team */}
+        <div className="flex items-center justify-end gap-2 min-w-0">
+          <span className="text-xs font-medium text-zinc-300 truncate text-right group-hover:text-white transition-colors">
+            {match.home_team?.name_en}
+          </span>
+          <div className="w-5 h-5 rounded-full overflow-hidden border border-zinc-700/30 shrink-0 bg-zinc-800/50 flex items-center justify-center">
+            {match.home_team?.logo_url ? (
+              <Image
+                src={match.home_team.logo_url}
+                alt={match.home_team?.name_en || ""}
+                width={20}
+                height={20}
+                className="object-cover"
+              />
+            ) : (
+              <span className="text-[8px] font-bold text-zinc-500">
+                {match.home_team?.name_en?.substring(0, 2).toUpperCase() || "?"}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Score */}
+        <div className="flex items-center justify-center bg-zinc-800/30 rounded px-2 py-0.5 min-w-[40px]">
+          <span className="text-xs font-bold text-white tracking-wider">
+            {match.score_home ?? 0} - {match.score_away ?? 0}
+          </span>
+        </div>
+
+        {/* Away Team */}
+        <div className="flex items-center justify-start gap-2 min-w-0">
+          <div className="w-5 h-5 rounded-full overflow-hidden border border-zinc-700/30 shrink-0 bg-zinc-800/50 flex items-center justify-center">
+            {match.away_team?.logo_url ? (
+              <Image
+                src={match.away_team.logo_url}
+                alt={match.away_team?.name_en || ""}
+                width={20}
+                height={20}
+                className="object-cover"
+              />
+            ) : (
+              <span className="text-[8px] font-bold text-zinc-500">
+                {match.away_team?.name_en?.substring(0, 2).toUpperCase() || "?"}
+              </span>
+            )}
+          </div>
+          <span className="text-xs font-medium text-zinc-300 truncate text-left group-hover:text-white transition-colors">
+            {match.away_team?.name_en}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function LiveMatchesPageContent() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -82,99 +189,12 @@ function LiveMatchesPageContent() {
     match: any;
     showMinute?: boolean;
   }) => {
-    const getStatusDisplay = () => {
-      if (match.status === "live") {
-        return (
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 group-hover:border-red-500/30 transition-colors">
-            <div className="flex flex-col items-center justify-center">
-              <span className="text-[9px] font-bold text-red-500 leading-none">
-                {showMinute ? `${match.minute}'` : "LIVE"}
-              </span>
-            </div>
-          </div>
-        );
-      }
-      if (match.date) {
-        const matchTime = new Date(match.date).toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        });
-        return (
-          <div className="flex items-center justify-center w-8 h-8">
-            <span className="text-[10px] font-medium text-zinc-500">
-              {matchTime}
-            </span>
-          </div>
-        );
-      }
-      return <div className="w-8" />;
-    };
-
     return (
-      <div
-        className="flex items-center gap-2 md:gap-4 px-2 py-1 hover:bg-zinc-800/40 transition-colors cursor-pointer border-b border-zinc-800/20 last:border-0 h-10"
-        onClick={() => handleMatchClick(match.id)}
-      >
-        {/* Status Badge */}
-        <div className="shrink-0">{getStatusDisplay()}</div>
-
-        {/* Match Content Grid */}
-        <div className="flex-1 grid grid-cols-[1fr_auto_1fr] items-center gap-2 md:gap-4">
-          {/* Home Team */}
-          <div className="flex items-center justify-end gap-2 min-w-0">
-            <span className="text-xs font-medium text-zinc-300 truncate text-right group-hover:text-white transition-colors">
-              {match.home_team?.name_en}
-            </span>
-            <div className="w-5 h-5 rounded-full overflow-hidden border border-zinc-700/30 shrink-0 bg-zinc-800/50 flex items-center justify-center">
-              {match.home_team?.logo_url ? (
-                <Image
-                  src={match.home_team.logo_url}
-                  alt={match.home_team?.name_en || ""}
-                  width={20}
-                  height={20}
-                  className="object-cover"
-                />
-              ) : (
-                <span className="text-[8px] font-bold text-zinc-500">
-                  {match.home_team?.name_en?.substring(0, 2).toUpperCase() ||
-                    "?"}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Score */}
-          <div className="flex items-center justify-center bg-zinc-800/30 rounded px-2 py-0.5 min-w-[40px]">
-            <span className="text-xs font-bold text-white tracking-wider">
-              {match.score_home ?? 0} - {match.score_away ?? 0}
-            </span>
-          </div>
-
-          {/* Away Team */}
-          <div className="flex items-center justify-start gap-2 min-w-0">
-            <div className="w-5 h-5 rounded-full overflow-hidden border border-zinc-700/30 shrink-0 bg-zinc-800/50 flex items-center justify-center">
-              {match.away_team?.logo_url ? (
-                <Image
-                  src={match.away_team.logo_url}
-                  alt={match.away_team?.name_en || ""}
-                  width={20}
-                  height={20}
-                  className="object-cover"
-                />
-              ) : (
-                <span className="text-[8px] font-bold text-zinc-500">
-                  {match.away_team?.name_en?.substring(0, 2).toUpperCase() ||
-                    "?"}
-                </span>
-              )}
-            </div>
-            <span className="text-xs font-medium text-zinc-300 truncate text-left group-hover:text-white transition-colors">
-              {match.away_team?.name_en}
-            </span>
-          </div>
-        </div>
-      </div>
+      <CompactMatchItemInner
+        match={match}
+        showMinute={showMinute}
+        onMatchClick={handleMatchClick}
+      />
     );
   };
 
@@ -188,7 +208,9 @@ function LiveMatchesPageContent() {
   }) => {
     const [isExpanded, setIsExpanded] = useState(true);
     const leagueMatches = matches.filter((m) => m.league?.id === league.id);
-    const liveCount = leagueMatches.filter((m) => m.status === "live").length;
+    const liveCount = leagueMatches.filter((m) =>
+      ["live", "second_half", "extra_time"].includes(m.status)
+    ).length;
     const totalGoals = leagueMatches.reduce(
       (sum, m) => sum + (m.score_home || 0) + (m.score_away || 0),
       0

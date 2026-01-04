@@ -191,7 +191,8 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
         }
       };
 
-      // Start updating immediately
+      // Calculate time IMMEDIATELY on mount/status change, then start interval
+      updateTime();
       interval = setInterval(updateTime, 1000);
     } else {
       // For non-running states, just use the stored minute
@@ -544,12 +545,40 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
 
   const updateMinute = useCallback(
     (newMinute: number) => {
-      matchControlMutation.mutate({ minute: newMinute });
+      // For manual time updates, we need to recalculate the timestamp
+      // so that automatic timing continues from the new minute
+      const now = new Date();
+
+      // Build the update payload based on current match status
+      const updatePayload: Record<string, unknown> = {
+        minute: newMinute,
+      };
+
+      // Recalculate the appropriate timestamp based on current status
+      if (currentMatch.status === "live") {
+        // Recalculate match_started_at to reflect the manual override
+        const adjustedStartTime = new Date(
+          now.getTime() - newMinute * 60 * 1000
+        );
+        updatePayload.match_started_at = adjustedStartTime.toISOString();
+      } else if (currentMatch.status === "second_half") {
+        // Second half: newMinute - 45 = elapsed seconds in second half
+        const elapsedInSecondHalf = (newMinute - 45) * 60 * 1000;
+        const adjustedStartTime = new Date(now.getTime() - elapsedInSecondHalf);
+        updatePayload.second_half_started_at = adjustedStartTime.toISOString();
+      } else if (currentMatch.status === "extra_time") {
+        // Extra time: newMinute - 90 = elapsed seconds in extra time
+        const elapsedInExtraTime = (newMinute - 90) * 60 * 1000;
+        const adjustedStartTime = new Date(now.getTime() - elapsedInExtraTime);
+        updatePayload.extra_time_started_at = adjustedStartTime.toISOString();
+      }
+
+      matchControlMutation.mutate(updatePayload);
       setMatchMinute(newMinute);
       setMatchSecond(0);
       lastSyncedMinuteRef.current = newMinute;
     },
-    [matchControlMutation]
+    [matchControlMutation, currentMatch.status]
   );
 
   // ============ Event Actions ============

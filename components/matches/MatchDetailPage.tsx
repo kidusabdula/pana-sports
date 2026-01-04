@@ -45,6 +45,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FormationFieldMap } from "./FormationFieldMap";
 import { SimpleKnockoutBracket } from "./KnockoutBracket";
+import { useLiveMatchTime } from "@/components/shared/LiveMatchTime";
 
 interface MatchDetailPageProps {
   matchId: string;
@@ -590,6 +591,22 @@ const StandingRow = ({
   </div>
 );
 
+// Live minute display component that uses the hook
+const LiveMinuteDisplay = ({
+  match,
+}: {
+  match: {
+    status: string;
+    minute?: number | null;
+    match_started_at?: string | null;
+    second_half_started_at?: string | null;
+    extra_time_started_at?: string | null;
+  };
+}) => {
+  const displayMinute = useLiveMatchTime(match);
+  return <span>{displayMinute}&apos;</span>;
+};
+
 export function MatchDetailPage({ matchId }: MatchDetailPageProps) {
   const router = useRouter();
   const { data: matchData, isLoading, error } = useMatchDetail(matchId);
@@ -821,7 +838,7 @@ export function MatchDetailPage({ matchId }: MatchDetailPageProps) {
                 {isLive && (
                   <div className="flex items-center gap-1.5 text-red-400 text-xs font-medium">
                     <Clock className="h-3 w-3" />
-                    <span>{match.minute}&apos;</span>
+                    <LiveMinuteDisplay match={match} />
                   </div>
                 )}
                 {isCompleted && (

@@ -21,10 +21,27 @@ import { useTeamDetail } from "@/lib/hooks/public/useTeamDetail";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { useLiveMatchTime } from "@/components/shared/LiveMatchTime";
 
 interface TeamDetailPageProps {
   teamId: string;
 }
+
+// Live minute display component for team detail matches
+const LiveMatchMinute = ({
+  match,
+}: {
+  match: {
+    status: string;
+    minute?: number | null;
+    match_started_at?: string | null;
+    second_half_started_at?: string | null;
+    extra_time_started_at?: string | null;
+  };
+}) => {
+  const displayMinute = useLiveMatchTime(match);
+  return <>{displayMinute}&apos;</>;
+};
 
 export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
   const [activeTab, setActiveTab] = useState("overview");
@@ -388,7 +405,7 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
                                 {match.status === "live" && (
                                   <span className="text-xs text-zinc-500 flex items-center gap-1">
                                     <Clock className="h-3 w-3" />
-                                    {match.minute}&apos;
+                                    <LiveMatchMinute match={match} />
                                   </span>
                                 )}
                               </div>
@@ -639,7 +656,7 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
                             {match.status === "live" && (
                               <span className="text-xs text-zinc-500 flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
-                                {match.minute}&apos;
+                                <LiveMatchMinute match={match} />
                               </span>
                             )}
                           </div>
@@ -722,7 +739,7 @@ export default function TeamDetailPage({ teamId }: TeamDetailPageProps) {
                             {match.status === "live" && (
                               <span className="text-xs text-zinc-500 flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
-                                {match.minute}&apos;
+                                <LiveMatchMinute match={match} />
                               </span>
                             )}
                           </div>

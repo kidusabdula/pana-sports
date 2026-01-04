@@ -13,12 +13,29 @@ import Link from "next/link";
 import { useLanguage } from "@/components/providers/language-provider";
 import StandingsTable from "@/components/standings/StandingsTable";
 import AdBanner from "@/components/shared/AdBanner";
+import { useLiveMatchTime } from "@/components/shared/LiveMatchTime";
 
 interface OverviewTabProps {
   league: League;
   matches: Match[];
   standings: Standing[];
 }
+
+// Live minute display component that uses the hook
+const LiveMatchMinuteDisplay = ({ match }: { match: Match }) => {
+  const displayMinute = useLiveMatchTime(match);
+  return (
+    <div className="flex items-center gap-1">
+      <span className="text-[10px] font-semibold text-red-400 uppercase tracking-wider">
+        {displayMinute}&apos;
+      </span>
+      <div className="relative flex h-1.5 w-1.5">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
+      </div>
+    </div>
+  );
+};
 
 export default function OverviewTab({ matches, standings }: OverviewTabProps) {
   const { t } = useLanguage();
@@ -44,18 +61,12 @@ export default function OverviewTab({ matches, standings }: OverviewTabProps) {
     showScore?: boolean;
   }) => {
     const getStatusDisplay = () => {
-      if (match.status === "live") {
-        return (
-          <div className="flex items-center gap-1">
-            <span className="text-[10px] font-semibold text-red-400 uppercase tracking-wider">
-              {match.minute}&apos;
-            </span>
-            <div className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
-            </div>
-          </div>
-        );
+      if (
+        match.status === "live" ||
+        match.status === "second_half" ||
+        match.status === "extra_time"
+      ) {
+        return <LiveMatchMinuteDisplay match={match} />;
       }
       if (match.date) {
         const matchTime = new Date(match.date).toLocaleTimeString("en-US", {

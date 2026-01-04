@@ -23,10 +23,21 @@ import { Match } from "@/lib/hooks/public/useMatches";
 import { useLanguage } from "@/components/providers/language-provider";
 import AdBanner from "@/components/shared/AdBanner";
 import { motion } from "framer-motion";
+import { useLiveMatchTime } from "@/components/shared/LiveMatchTime";
 
 interface MatchesTabProps {
   leagueId: string;
 }
+
+// Live minute badge component that uses the hook
+const LiveMinuteBadge = ({ match }: { match: Match }) => {
+  const displayMinute = useLiveMatchTime(match);
+  return (
+    <span className="text-xs font-bold text-red-400 uppercase tracking-wider">
+      Live • {displayMinute}&apos;
+    </span>
+  );
+};
 
 export default function MatchesTab({ leagueId }: MatchesTabProps) {
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -88,9 +99,7 @@ export default function MatchesTab({ leagueId }: MatchesTabProps) {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
               </div>
-              <span className="text-xs font-bold text-red-400 uppercase tracking-wider">
-                Live • {match.minute}&apos;
-              </span>
+              <LiveMinuteBadge match={match} />
             </div>
           )}
 

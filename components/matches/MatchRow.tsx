@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils";
 import { Match } from "@/lib/hooks/public/useMatches";
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, MapPin } from "lucide-react";
+import { Clock } from "lucide-react";
+import { useLiveMatchTime } from "@/components/shared/LiveMatchTime";
 
 interface MatchRowProps {
   match: Match;
@@ -14,12 +15,18 @@ interface MatchRowProps {
 }
 
 export default function MatchRow({ match, isLive = false }: MatchRowProps) {
+  // Use hook for real-time minute calculation
+  const displayMinute = useLiveMatchTime(match);
+
   const getStatusBadge = () => {
-    if (isLive) {
+    if (
+      isLive ||
+      ["live", "second_half", "extra_time"].includes(match.status)
+    ) {
       return (
         <Badge className="bg-red-500/20 text-red-400 border-red-800/30 animate-pulse text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5">
           <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-red-500 mr-1"></span>
-          LIVE {match.minute}'
+          LIVE {displayMinute}&apos;
         </Badge>
       );
     }
