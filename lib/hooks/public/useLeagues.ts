@@ -103,7 +103,10 @@ async function fetchLeagueMatches(
   return res.json() as Promise<Match[]>;
 }
 
-async function fetchLeagueStandings(id: string, params?: { season?: string }) {
+async function fetchLeagueStandings(
+  id: string,
+  params?: { season?: string; season_id?: string; limit?: number }
+) {
   const queryString = new URLSearchParams(
     Object.entries(params || {}).reduce((acc, [key, value]) => {
       if (value !== undefined && value !== null) {
@@ -123,8 +126,19 @@ async function fetchLeagueStandings(id: string, params?: { season?: string }) {
   return res.json() as Promise<Standing[]>;
 }
 
-async function fetchLeagueTeams(id: string) {
-  const res = await fetch(`/api/public/leagues/${id}/teams`);
+async function fetchLeagueTeams(id: string, params?: { season_id?: string }) {
+  const queryString = new URLSearchParams(
+    Object.entries(params || {}).reduce((acc, [key, value]) => {
+      if (value !== undefined && value !== null) {
+        acc[key] = String(value);
+      }
+      return acc;
+    }, {} as Record<string, string>)
+  ).toString();
+
+  const res = await fetch(
+    `/api/public/leagues/${id}/teams${queryString ? "?" + queryString : ""}`
+  );
   if (!res.ok) {
     const error = await res.json();
     throw new Error(error.error || "Failed to fetch league teams");
@@ -198,10 +212,10 @@ export function useLeagueStandings(
   });
 }
 
-export function useLeagueTeams(id: string) {
+export function useLeagueTeams(id: string, params?: { season_id?: string }) {
   return useQuery({
-    queryKey: ["league-teams", id],
-    queryFn: () => fetchLeagueTeams(id),
+    queryKey: ["league-teams", id, params],
+    queryFn: () => fetchLeagueTeams(id, params),
     enabled: !!id,
   });
 }

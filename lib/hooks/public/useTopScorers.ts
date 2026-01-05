@@ -1,5 +1,5 @@
 // lib/hooks/public/useTopScorers.ts
-import { useQuery } from '@tanstack/react-query'
+import { useQuery } from "@tanstack/react-query";
 
 // Define types
 export type TopScorer = {
@@ -36,7 +36,11 @@ export type TopScorer = {
 };
 
 // API helper functions
-async function fetchTopScorers(params?: { league_id?: string; limit?: number }) {
+async function fetchTopScorers(params?: {
+  league_id?: string;
+  season_id?: string;
+  limit?: number;
+}) {
   const queryString = new URLSearchParams(
     Object.entries(params || {}).reduce((acc, [key, value]) => {
       if (value !== undefined && value !== null) {
@@ -45,19 +49,25 @@ async function fetchTopScorers(params?: { league_id?: string; limit?: number }) 
       return acc;
     }, {} as Record<string, string>)
   ).toString();
-  
-  const res = await fetch(`/api/public/top-scorers${queryString ? '?' + queryString : ''}`)
+
+  const res = await fetch(
+    `/api/public/top-scorers${queryString ? "?" + queryString : ""}`
+  );
   if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to fetch top scorers')
+    const error = await res.json();
+    throw new Error(error.error || "Failed to fetch top scorers");
   }
-  return res.json() as Promise<TopScorer[]>
+  return res.json() as Promise<TopScorer[]>;
 }
 
 // React Query hooks
-export function useTopScorers(params?: { league_id?: string; limit?: number }) {
+export function useTopScorers(params?: {
+  league_id?: string;
+  season_id?: string;
+  limit?: number;
+}) {
   return useQuery({
-    queryKey: ['top-scorers', params],
+    queryKey: ["top-scorers", params],
     queryFn: () => fetchTopScorers(params),
-  })
+  });
 }

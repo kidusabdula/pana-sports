@@ -4,6 +4,7 @@ import QueryClientProvider from "@/components/providers/query-client-provider";
 import { LanguageProvider } from "@/components/providers/language-provider";
 import AppShell from "@/components/shared/AppShell";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/next"
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-sans" });
 const dmMono = DM_Mono({

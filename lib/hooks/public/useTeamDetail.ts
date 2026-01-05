@@ -1,5 +1,5 @@
 // lib/hooks/public/useTeamDetail.ts
-import { useQuery } from '@tanstack/react-query'
+import { useQuery } from "@tanstack/react-query";
 
 // Define types
 export type Player = {
@@ -113,20 +113,31 @@ export type TeamDetail = {
 export type TeamDetailResponse = TeamDetail;
 
 // API helper function
-async function fetchTeamDetail(id: string) {
-  const res = await fetch(`/api/public/teams/${id}`)
+async function fetchTeamDetail(id: string, params?: { season_id?: string }) {
+  const queryString = new URLSearchParams(
+    Object.entries(params || {}).reduce((acc, [key, value]) => {
+      if (value !== undefined && value !== null) {
+        acc[key] = String(value);
+      }
+      return acc;
+    }, {} as Record<string, string>)
+  ).toString();
+
+  const res = await fetch(
+    `/api/public/teams/${id}${queryString ? "?" + queryString : ""}`
+  );
   if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to fetch team details')
+    const error = await res.json();
+    throw new Error(error.error || "Failed to fetch team details");
   }
-  return res.json() as Promise<TeamDetailResponse>
+  return res.json() as Promise<TeamDetailResponse>;
 }
 
 // React Query hook
-export function useTeamDetail(id: string) {
+export function useTeamDetail(id: string, params?: { season_id?: string }) {
   return useQuery({
-    queryKey: ['team-detail', id],
-    queryFn: () => fetchTeamDetail(id),
+    queryKey: ["team-detail", id, params],
+    queryFn: () => fetchTeamDetail(id, params),
     enabled: !!id,
-  })
+  });
 }

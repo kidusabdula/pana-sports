@@ -36,22 +36,31 @@ function RightColumnContent() {
   } = useLiveMatches();
 
   const {
+    data: topScorer,
+    isLoading: isLoadingTopScorer,
+    isError: isErrorTopScorer,
+  } = useTopScorers({
+    limit: 1,
+    season_id: selectedSeason === "all" ? undefined : selectedSeason,
+  });
+
+  const {
     data: upcomingMatches,
     isLoading: isLoadingUpcoming,
     isError: isErrorUpcoming,
-  } = useUpcomingMatches({ limit: 5 });
+  } = useUpcomingMatches({
+    limit: 5,
+    season_id: selectedSeason === "all" ? undefined : selectedSeason,
+  });
 
   const {
     data: recentMatches,
     isLoading: isLoadingRecent,
     isError: isErrorRecent,
-  } = useRecentMatches({ limit: 5 });
-
-  const {
-    data: topScorer,
-    isLoading: isLoadingTopScorer,
-    isError: isErrorTopScorer,
-  } = useTopScorers({ limit: 1 });
+  } = useRecentMatches({
+    limit: 5,
+    season_id: selectedSeason === "all" ? undefined : selectedSeason,
+  });
 
   const { data: leagues, isLoading: isLoadingLeagues } = useLeagues();
 
@@ -118,6 +127,31 @@ function RightColumnContent() {
 
   return (
     <div className="space-y-6">
+      {/* Global Season Selection at the top of Right Column */}
+      <div className="bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
+        <div className="px-4 py-3 bg-gradient-to-r from-primary/10 to-transparent flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 bg-primary/20 rounded-lg">
+              <Calendar className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-500 leading-none mb-1">
+                Content Filter
+              </p>
+              <h3 className="text-xs font-black text-white uppercase tracking-wider leading-none">
+                Select Season
+              </h3>
+            </div>
+          </div>
+          <SeasonSelector
+            value={selectedSeason}
+            onValueChange={setSelectedSeason}
+            showAll={true}
+            className="h-9 w-36 bg-white/5 border-white/10 hover:bg-white/10 text-xs font-bold rounded-xl"
+          />
+        </div>
+      </div>
+
       {/* Live Matches */}
       <MatchesList
         title="Live Matches"
@@ -161,20 +195,7 @@ function RightColumnContent() {
             </div>
           </div>
 
-          <div className="px-4 py-2 bg-zinc-900/20 border-b border-white/5 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 overflow-hidden min-w-0">
-              <Calendar className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
-              <span className="text-[11px] font-medium text-zinc-400 truncate uppercase tracking-wider">
-                Season
-              </span>
-            </div>
-            <SeasonSelector
-              value={selectedSeason}
-              onValueChange={setSelectedSeason}
-              showAll={true}
-              className="h-8 w-32 border-none bg-transparent hover:bg-white/5"
-            />
-          </div>
+          {/* Season display removed from here as it's now at the top */}
           <StandingsTable
             standings={standings || []}
             showViewAllButton={true}

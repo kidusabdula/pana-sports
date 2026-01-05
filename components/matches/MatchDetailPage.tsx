@@ -615,6 +615,7 @@ export function MatchDetailPage({ matchId }: MatchDetailPageProps) {
     matchData?.match
       ? {
           league_id: matchData.match.league.id,
+          season_id: matchData.match.season_id || undefined,
           season: matchData.match.season || undefined,
         }
       : undefined

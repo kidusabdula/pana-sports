@@ -32,7 +32,7 @@ export function SeasonStatusBadge({
   return (
     <Badge
       variant="outline"
-      className="text-blue-500 border-blue-500/20 hover:bg-blue-500/5"
+      className="text-primary border-primary/20 hover:bg-primary/5"
     >
       Active
     </Badge>

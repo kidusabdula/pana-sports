@@ -21,14 +21,17 @@ import { motion } from "framer-motion";
 
 interface TeamsTabProps {
   leagueId: string;
+  seasonId?: string;
 }
 
-export default function TeamsTab({ leagueId }: TeamsTabProps) {
+export default function TeamsTab({ leagueId, seasonId }: TeamsTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
   const { t } = useLanguage();
 
-  const { data: teams, isLoading } = useLeagueTeams(leagueId);
+  const { data: teams, isLoading } = useLeagueTeams(leagueId, {
+    season_id: seasonId,
+  });
 
   // Filter teams by search term
   const filteredTeams = teams

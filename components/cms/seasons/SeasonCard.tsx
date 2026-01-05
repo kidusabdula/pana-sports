@@ -53,7 +53,7 @@ export function SeasonCard({ season }: SeasonCardProps) {
             {season.slug}
           </div>
         </div>
-        <CardTitle className="text-xl group-hover:text-blue-500 transition-colors">
+        <CardTitle className="text-xl group-hover:text-primary transition-colors">
           {season.name}
         </CardTitle>
       </CardHeader>
@@ -96,7 +96,7 @@ export function SeasonCard({ season }: SeasonCardProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="text-xs text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+            className="text-xs text-primary hover:text-primary/80 hover:bg-primary/5"
             onClick={handleSetCurrent}
             disabled={setCurrentMutation.isPending}
           >

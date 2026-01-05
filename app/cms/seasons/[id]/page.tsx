@@ -58,7 +58,7 @@ export default function SeasonDetailPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <Loader2 className="h-10 w-10 animate-spin text-blue-500 mb-4" />
+        <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
         <p className="text-muted-foreground font-medium">
           Loading season details...
         </p>
@@ -193,7 +193,7 @@ export default function SeasonDetailPage() {
                     className="w-full justify-start"
                   >
                     <Link href={`/cms/matches?seasonId=${id}`}>
-                      <Trophy className="h-4 w-4 mr-2 text-amber-500" />
+                      <Trophy className="h-4 w-4 mr-2 text-primary" />
                       View Matches
                     </Link>
                   </Button>
@@ -203,7 +203,7 @@ export default function SeasonDetailPage() {
                     className="w-full justify-start"
                   >
                     <Link href={`/cms/standings?seasonId=${id}`}>
-                      <LayoutDashboard className="h-4 w-4 mr-2 text-green-500" />
+                      <LayoutDashboard className="h-4 w-4 mr-2 text-primary" />
                       View Standings
                     </Link>
                   </Button>

@@ -60,6 +60,7 @@ async function fetchLiveMatches() {
 
 async function fetchUpcomingMatches(params?: {
   league_id?: string;
+  season_id?: string;
   limit?: number;
 }) {
   const queryString = new URLSearchParams(
@@ -83,6 +84,7 @@ async function fetchUpcomingMatches(params?: {
 
 async function fetchRecentMatches(params?: {
   league_id?: string;
+  season_id?: string;
   limit?: number;
 }) {
   const queryString = new URLSearchParams(
@@ -155,6 +157,7 @@ export function useLiveMatches() {
  */
 export function useUpcomingMatches(params?: {
   league_id?: string;
+  season_id?: string;
   limit?: number;
 }) {
   return useQuery({
@@ -169,6 +172,7 @@ export function useUpcomingMatches(params?: {
  */
 export function useRecentMatches(params?: {
   league_id?: string;
+  season_id?: string;
   limit?: number;
 }) {
   return useQuery({

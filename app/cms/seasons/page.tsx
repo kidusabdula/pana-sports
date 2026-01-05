@@ -51,7 +51,7 @@ export default function SeasonsPage() {
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center min-h-[300px] text-muted-foreground">
-          <Loader2 className="h-10 w-10 animate-spin mb-4 text-blue-500" />
+          <Loader2 className="h-10 w-10 animate-spin mb-4 text-primary" />
           <p className="text-sm font-medium">Loading seasons...</p>
         </div>
       ) : error ? (

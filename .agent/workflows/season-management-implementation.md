@@ -45,10 +45,10 @@ The following tables exist from the v2.0 migration:
 
 ## Implementation Tasks
 
-### Phase 1: API Layer
+### Phase 1: API Layer ✅ COMPLETE
 
-#### 1.1 CMS Season API Routes
-Create: `app/api/cms/seasons/`
+#### 1.1 CMS Season API Routes ✅ COMPLETE
+Created: `app/api/cms/seasons/`
 
 ```
 app/api/cms/seasons/
@@ -63,7 +63,7 @@ app/api/cms/seasons/
     └── route.ts          # POST (set as current season)
 ```
 
-#### 1.2 API Features
+#### 1.2 API Features ✅ COMPLETE
 - **GET /api/cms/seasons**: List all seasons with stats
 - **POST /api/cms/seasons**: Create new season
 - **GET /api/cms/seasons/[id]**: Get season with teams/players
@@ -73,13 +73,13 @@ app/api/cms/seasons/
 - **GET/POST/DELETE /api/cms/seasons/[id]/teams**: Manage season teams
 - **GET/POST/DELETE /api/cms/seasons/[id]/players**: Manage season players
 
-### Phase 2: React Query Hooks
+### Phase 2: React Query Hooks ✅ COMPLETE
 
-#### 2.1 CMS Hooks
-Create: `lib/hooks/cms/useSeasons.ts`
+#### 2.1 CMS Hooks ✅ COMPLETE
+Created: `lib/hooks/cms/useSeasons.ts`
 
 ```typescript
-// Hooks to implement:
+// Hooks implemented:
 - useAdminSeasons()      // List all seasons for CMS
 - useAdminSeason(id)     // Get single season with relations
 - useCreateSeason()      // Create mutation
@@ -98,10 +98,10 @@ Create: `lib/hooks/cms/useSeasons.ts`
 - useRemoveSeasonPlayer()
 ```
 
-### Phase 3: CMS UI Components
+### Phase 3: CMS UI Components ✅ COMPLETE
 
-#### 3.1 Season List Page
-Create: `app/cms/seasons/page.tsx`
+#### 3.1 Season List Page ✅ COMPLETE
+Created: `app/cms/seasons/page.tsx`
 
 Features:
 - List all seasons (sorted by date)
@@ -109,8 +109,8 @@ Features:
 - Quick actions: Set Current, Archive, Edit, Delete
 - Show team count, match count per season
 
-#### 3.2 Season Detail/Edit Page
-Create: `app/cms/seasons/[id]/page.tsx`
+#### 3.2 Season Detail/Edit Page ✅ COMPLETE
+Created: `app/cms/seasons/[id]/page.tsx`
 
 Features:
 - Edit season details (name, dates, descriptions)
@@ -122,16 +122,16 @@ Features:
   - **Standings**: View standings for this season
   - **Settings**: Archive, set current, etc.
 
-#### 3.3 Create Season Page
-Create: `app/cms/seasons/create/page.tsx`
+#### 3.3 Create Season Page ✅ COMPLETE
+Created: `app/cms/seasons/create/page.tsx`
 
 Features:
 - Form to create new season
 - Auto-generate slug from name
 - Option to copy teams from previous season
 
-#### 3.4 Season Components
-Create under: `components/cms/seasons/`
+#### 3.4 Season Components ✅ COMPLETE
+Created under: `components/cms/seasons/`
 
 ```
 components/cms/seasons/
@@ -144,53 +144,53 @@ components/cms/seasons/
 └── SeasonStats.tsx          # Stats summary card
 ```
 
-### Phase 4: Match Module Integration
+### Phase 4: Match Module Integration ✅ COMPLETE
 
-#### 4.1 Update Match Form
+#### 4.1 Update Match Form ✅ COMPLETE
 File: `components/cms/matches/MatchForm.tsx`
 
 Changes:
-- Add **mandatory** season selector at the top
-- Filter league dropdown to show leagues with teams in selected season
-- Auto-populate team dropdowns with only teams in the selected season
+- Added **mandatory** season selector at the top
+- Filtered league dropdown to show leagues with teams in selected season
+- Auto-populated team dropdowns with only teams in the selected season
 
-#### 4.2 Update Match List
+#### 4.2 Update Match List ✅ COMPLETE
 File: `app/cms/matches/page.tsx`
 
 Changes:
-- Add season filter dropdown (default to current season)
-- Show season name in match list
+- Added season filter dropdown (default to current season)
+- Shows season name in match list
 
-### Phase 5: Standings Integration
+### Phase 5: Standings Integration ✅ COMPLETE
 
-#### 5.1 Update Standings Page
+#### 5.1 Update Standings Page ✅ COMPLETE
 File: `app/cms/standings/page.tsx`
 
 Changes:
-- Add season filter (default to current)
-- Filter standings by `season_id` AND `league_id`
+- Added season filter (default to current)
+- Filtered standings by `season_id` AND `league_id`
 
-#### 5.2 Update Public Standings
-Files: `app/(public)/standings/page.tsx`
+#### 5.2 Update Public Standings ✅ COMPLETE
+Files: `app/(public)/standings/page.tsx` and league components.
 
 Changes:
-- Add season selector in public view
-- Default to current season
+- Added `SeasonToggle` in competition headers.
+- Integrated `season_id` into `useLeagueStandings` hook.
 
-### Phase 6: Top Scorers Integration
+### Phase 6: Top Scorers Integration ✅ COMPLETE
 
-#### 6.1 Update Top Scorers Page
+#### 6.1 Update Top Scorers Page ✅ COMPLETE
 Files: `app/cms/top-scorers/page.tsx`
 
 Changes:
-- Add season filter
-- Ensure top scorers are linked to season
+- Added season filter
+- Ensured top scorers are linked to season
 
-### Phase 7: Sidebar Navigation
+### Phase 7: Sidebar Navigation ✅ COMPLETE
 
 Update: `components/Layout/Layout.tsx`
 
-Add new CMS menu item:
+Added new CMS menu item:
 ```
 {
   name: "Seasons",
@@ -199,92 +199,21 @@ Add new CMS menu item:
 }
 ```
 
-## Additional Considerations
+## Additional Features Added
 
-### 1. Season Creation Workflow
-When creating a new season:
-1. Admin enters season name (e.g., "2024/25")
-2. Auto-generate slug (e.g., "2024-25")
-3. Set start/end dates
-4. Option to "Copy from previous season":
-   - Copies all teams from selected previous season
-   - Optionally copies players as well
+### 1. Global RightColumn Season Selector
+Integrated a `SeasonSelector` into the `RightColumn.tsx` component. This allows users to switch between matches/standings of different seasons globally on the homepage.
 
-### 2. Setting Current Season
-When setting a season as current:
-1. Unset any existing current season
-2. Update `leagues.current_season_id` for all leagues
-3. This affects what the public site shows by default
+### 2. Competition Header Toggle
+Implemented a robust `SeasonToggle` in the `CompetitionHeader.tsx` which is used across `PremierLeaguePage` and `EthiopianCupPage`. It dynamically filters:
+- **MatchesTab**: Shows matches for selected season.
+- **TeamsTab**: Shows teams participating in selected season.
+- **Standings/Overview**: Updates tables to selected season.
 
-### 3. Archiving a Season
-When archiving a season:
-1. Set `is_archived = true`
-2. Prevent new matches from being created in this season
-3. Standings become read-only
-4. Keep data viewable for historical purposes
+### 3. Match Detail Context
+Updated `MatchDetailPage` to automatically fetch the league table for the specific season the match belongs to, ensuring historical accuracy.
 
-### 4. Team Management in Season
-- Show all available teams
-- Allow adding/removing teams to/from season
-- Track which league each team participates in
-- Support promotion/relegation notes
-
-### 5. Player Management in Season
-- Filter by team
-- Allow bulk operations
-- Track jersey numbers per season (can differ from player's default)
-- Mark team captains per season
-
-### 6. Data Validation
-- Cannot delete a season with matches
-- Cannot remove a team from season if it has matches
-- Cannot set start_date after end_date
-- Ensure league is specified when adding team to season
-
-## File Creation Order
-
-1. **API Routes** (in order):
-   - `app/api/cms/seasons/route.ts`
-   - `app/api/cms/seasons/[id]/route.ts`
-   - `app/api/cms/seasons/[id]/teams/route.ts`
-   - `app/api/cms/seasons/[id]/players/route.ts`
-   - `app/api/cms/seasons/[id]/set-current/route.ts`
-
-2. **Hooks**:
-   - `lib/hooks/cms/useSeasons.ts`
-
-3. **Components** (in order):
-   - `components/cms/seasons/SeasonStatusBadge.tsx`
-   - `components/cms/seasons/SeasonSelector.tsx`
-   - `components/cms/seasons/SeasonForm.tsx`
-   - `components/cms/seasons/SeasonTeamManager.tsx`
-   - `components/cms/seasons/SeasonPlayerManager.tsx`
-   - `components/cms/seasons/SeasonCard.tsx`
-   - `components/cms/seasons/SeasonStats.tsx`
-
-4. **Pages**:
-   - `app/cms/seasons/page.tsx`
-   - `app/cms/seasons/create/page.tsx`
-   - `app/cms/seasons/[id]/page.tsx`
-
-5. **Integration Updates**:
-   - Update `components/cms/matches/MatchForm.tsx`
-   - Update `app/cms/matches/page.tsx`
-   - Update `app/cms/standings/page.tsx`
-   - Update `app/cms/top-scorers/page.tsx`
-   - Update `components/Layout/Layout.tsx`
-
-## Estimated Effort
-
-- **Phase 1 (API)**: 2-3 hours
-- **Phase 2 (Hooks)**: 1-2 hours
-- **Phase 3 (UI)**: 4-6 hours
-- **Phase 4-6 (Integration)**: 2-3 hours
-- **Phase 7 (Navigation)**: 15 minutes
-
-**Total**: ~10-15 hours
-
-## Success Criteria
+## 🏁 Final Status: 100% Complete
 
 1. ✅ Admins can create, edit, delete seasons
 2. ✅ Admins can manage which teams participate in each season
@@ -295,7 +224,3 @@ When archiving a season:
 7. ✅ One season can be marked as "current"
 8. ✅ Previous seasons can be archived
 9. ✅ Public pages default to current season
-
----
-
-**Ready to proceed with implementation. Start with Phase 1: API Routes.**

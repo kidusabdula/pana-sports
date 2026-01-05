@@ -27,6 +27,7 @@ import { useLiveMatchTime } from "@/components/shared/LiveMatchTime";
 
 interface MatchesTabProps {
   leagueId: string;
+  seasonId?: string;
 }
 
 // Live minute badge component that uses the hook
@@ -63,12 +64,14 @@ const LiveMinuteBadge = ({ match }: { match: Match }) => {
   );
 };
 
-export default function MatchesTab({ leagueId }: MatchesTabProps) {
+export default function MatchesTab({ leagueId, seasonId }: MatchesTabProps) {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const router = useRouter();
   const { t } = useLanguage();
 
-  const { data: matches, isLoading } = useLeagueMatches(leagueId);
+  const { data: matches, isLoading } = useLeagueMatches(leagueId, {
+    season_id: seasonId,
+  });
 
   // Filter matches by status
   const filteredMatches = matches

@@ -103,6 +103,7 @@ export type MatchDetail = {
   referee: string;
   match_day: number;
   season: string;
+  season_id: string | null;
   is_featured: boolean;
   // New fields
   round: string | null;

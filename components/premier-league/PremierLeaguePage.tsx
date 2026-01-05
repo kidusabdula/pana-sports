@@ -51,7 +51,9 @@ function PremierLeaguePageContent({ leagueId }: PremierLeaguePageContentProps) {
     { limit: 10, season_id: selectedSeasonId }
   );
 
-  const { data: teams, isLoading: teamsLoading } = useLeagueTeams(leagueId);
+  const { isLoading: teamsLoading } = useLeagueTeams(leagueId, {
+    season_id: selectedSeasonId,
+  });
 
   // Handle loading state
   const isLoading =
@@ -117,7 +119,6 @@ function PremierLeaguePageContent({ leagueId }: PremierLeaguePageContentProps) {
 
   const handleSeasonChange = (seasonId: string) => {
     setSelectedSeasonId(seasonId);
-    // TODO: Refetch data with new season ID when season filtering is implemented
   };
 
   return (
@@ -136,7 +137,6 @@ function PremierLeaguePageContent({ leagueId }: PremierLeaguePageContentProps) {
           onSeasonChange={handleSeasonChange}
           currentSeasonId={selectedSeasonId}
           showSeasonToggle={true}
-          showAd={true}
         />
 
         {/* Quick Stats Cards - Compact Grid */}
@@ -282,7 +282,7 @@ function PremierLeaguePageContent({ leagueId }: PremierLeaguePageContentProps) {
           </TabsContent>
 
           <TabsContent value="matches" className="mt-0">
-            <MatchesTab leagueId={leagueId} />
+            <MatchesTab leagueId={leagueId} seasonId={selectedSeasonId} />
           </TabsContent>
 
           <TabsContent value="table" className="mt-0">
@@ -290,7 +290,7 @@ function PremierLeaguePageContent({ leagueId }: PremierLeaguePageContentProps) {
           </TabsContent>
 
           <TabsContent value="teams" className="mt-0">
-            <TeamsTab leagueId={leagueId} />
+            <TeamsTab leagueId={leagueId} seasonId={selectedSeasonId} />
           </TabsContent>
         </Tabs>
       </div>
@@ -298,13 +298,9 @@ function PremierLeaguePageContent({ leagueId }: PremierLeaguePageContentProps) {
   );
 }
 
-interface PremierLeaguePageProps {
-  leagueId: string;
-}
-
 export default function PremierLeaguePage({
   leagueId,
-}: PremierLeaguePageProps) {
+}: PremierLeaguePageContentProps) {
   return (
     <Suspense
       fallback={
