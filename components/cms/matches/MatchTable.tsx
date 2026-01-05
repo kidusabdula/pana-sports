@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { LiveMatchMinute } from "./LiveMatchMinute";
+import { SeasonSelector } from "../seasons/SeasonSelector";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -91,6 +92,7 @@ export default function MatchTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLeague, setFilterLeague] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [filterSeason, setFilterSeason] = useState("all");
   const { data: matches, isLoading, error } = useMatches();
   const deleteMatchMutation = useDeleteMatch();
 
@@ -111,7 +113,10 @@ export default function MatchTable() {
       const matchesStatus =
         filterStatus === "all" || match.status === filterStatus;
 
-      return matchesSearch && matchesLeague && matchesStatus;
+      const matchesSeason =
+        filterSeason === "all" || match.season_id === filterSeason;
+
+      return matchesSearch && matchesLeague && matchesStatus && matchesSeason;
     }) || [];
 
   const handleDelete = async (
@@ -308,6 +313,14 @@ export default function MatchTable() {
                     ))}
                   </SelectContent>
                 </Select>
+                <div className="w-full sm:w-40">
+                  <SeasonSelector
+                    value={filterSeason}
+                    onValueChange={setFilterSeason}
+                    showAll={true}
+                    placeholder="All Seasons"
+                  />
+                </div>
                 <Select value={filterStatus} onValueChange={setFilterStatus}>
                   <SelectTrigger className="h-9 w-full sm:w-40">
                     <SelectValue placeholder="Filter by status" />
@@ -595,9 +608,9 @@ export default function MatchTable() {
                                   Delete Match
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete "
+                                  Are you sure you want to delete &quot;
                                   {match.home_team?.name_en} vs{" "}
-                                  {match.away_team?.name_en}"? This action
+                                  {match.away_team?.name_en}&quot;? This action
                                   cannot be undone.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>

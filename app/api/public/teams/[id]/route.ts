@@ -19,10 +19,13 @@ export async function GET(
     const supabase = await createClient();
 
     // Fetch team with related data
-    const { data: team, error } = await supabase
-      .from("teams")
-      .select(
-        `
+    const isUUID =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        id
+      );
+
+    const query = supabase.from("teams").select(
+      `
         *,
         league:leagues(id, name_en, name_am, slug, category),
         players:players(*),
@@ -38,9 +41,12 @@ export async function GET(
           venue:venues(id, name_en, name_am, city, capacity)
         )
       `
-      )
-      .eq("id", id)
-      .single();
+    );
+
+    const { data: team, error } = await (isUUID
+      ? query.eq("id", id)
+      : query.eq("slug", id)
+    ).single();
 
     if (error) {
       console.error("Supabase error fetching team:", error);
@@ -61,14 +67,16 @@ export async function GET(
     if (team.home_matches) {
       team.home_matches.sort(
         (a: unknown, b: unknown) =>
-          new Date((b as { date: string }).date).getTime() - new Date((a as { date: string }).date).getTime()
+          new Date((b as { date: string }).date).getTime() -
+          new Date((a as { date: string }).date).getTime()
       );
     }
 
     if (team.away_matches) {
       team.away_matches.sort(
         (a: unknown, b: unknown) =>
-          new Date((b as { date: string }).date).getTime() - new Date((a as { date: string }).date).getTime()
+          new Date((b as { date: string }).date).getTime() -
+          new Date((a as { date: string }).date).getTime()
       );
     }
 
@@ -83,7 +91,7 @@ export async function GET(
     if (Array.isArray(team.standing)) {
       // Sort by season descending (assuming season is a string like "2023/24")
       team.standing.sort((a: unknown, b: unknown) => {
-        if (a && b && typeof a === 'object' && typeof b === 'object') {
+        if (a && b && typeof a === "object" && typeof b === "object") {
           const seasonA = (a as { season: string }).season;
           const seasonB = (b as { season: string }).season;
           return seasonB.localeCompare(seasonA);

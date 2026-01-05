@@ -1,6 +1,10 @@
 // lib/hooks/cms/useMatchEvents.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { MatchEvent, CreateMatchEvent } from "@/lib/schemas/matchEvent";
+import {
+  MatchEvent,
+  CreateMatchEvent,
+  UpdateMatchEvent,
+} from "@/lib/schemas/matchEvent";
 import { toast } from "sonner";
 
 // API helper functions
@@ -28,6 +32,72 @@ async function createMatchEvent(matchId: string, newEvent: CreateMatchEvent) {
   return res.json() as Promise<MatchEvent>;
 }
 
+async function updateMatchEvent(eventId: string, updates: UpdateMatchEvent) {
+  const res = await fetch(`/api/match-events/${eventId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(updates),
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || "Failed to update match event");
+  }
+
+  return res.json() as Promise<MatchEvent>;
+}
+
+async function deleteMatchEvent(eventId: string) {
+  const res = await fetch(`/api/match-events/${eventId}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error || "Failed to delete match event");
+  }
+
+  return res.json() as Promise<{
+    success: boolean;
+    deleted_event_id: string;
+    match_id: string;
+    event_type: string;
+  }>;
+}
+
+// Event type labels for toasts
+const eventLabels: Record<string, string> = {
+  goal: "Goal",
+  own_goal: "Own goal",
+  penalty: "Penalty",
+  penalty_goal: "Penalty goal",
+  penalty_miss: "Missed penalty",
+  yellow: "Yellow card",
+  second_yellow: "Second yellow",
+  red: "Red card",
+  sub: "Substitution",
+  assist: "Assist",
+  half_time: "Half time",
+  second_half: "Second half",
+  match_start: "Match start",
+  match_end: "Match end",
+  match_pause: "Match pause",
+  match_resume: "Match resume",
+  extra_time_start: "Extra time start",
+  extra_time_end: "Extra time end",
+  penalty_shootout_start: "Penalty shootout start",
+  penalty_shootout_end: "Penalty shootout end",
+  penalty_shootout_scored: "Penalty scored",
+  penalty_shootout_missed: "Penalty missed",
+  var_check: "VAR check",
+  var_goal: "VAR goal confirmed",
+  var_no_goal: "VAR goal disallowed",
+  corner: "Corner",
+  free_kick: "Free kick",
+  offside: "Offside",
+  injury_time: "Injury time",
+};
+
 // React Query hooks
 export function useMatchEvents(matchId: string) {
   return useQuery({
@@ -48,46 +118,60 @@ export function useCreateMatchEvent(matchId: string) {
         queryKey: ["matches", matchId, "events"],
       });
 
-      // Add success toast based on event type
-      const eventLabels = {
-        goal: "Goal recorded",
-        own_goal: "Own goal recorded",
-        penalty: "Penalty recorded",
-        penalty_goal: "Penalty goal scored",
-        penalty_miss: "Penalty missed",
-        yellow: "Yellow card issued",
-        second_yellow: "Second yellow card issued",
-        red: "Red card issued",
-        sub: "Substitution made",
-        assist: "Assist recorded",
-        half_time: "Half time recorded",
-        second_half: "Second half started",
-        match_start: "Match started",
-        match_end: "Match ended",
-        match_pause: "Match paused",
-        match_resume: "Match resumed",
-        extra_time_start: "Extra time started",
-        extra_time_end: "Extra time ended",
-        penalty_shootout_start: "Penalty shootout started",
-        penalty_shootout_end: "Penalty shootout ended",
-        penalty_shootout_scored: "Penalty scored in shootout",
-        penalty_shootout_missed: "Penalty missed in shootout",
-        var_check: "VAR check initiated",
-        var_goal: "VAR goal confirmed",
-        var_no_goal: "VAR goal disallowed",
-        corner: "Corner kick recorded",
-        free_kick: "Free kick recorded",
-        offside: "Offside called",
-        injury_time: "Injury time added",
-      };
-
-      const label =
-        eventLabels[data.type as keyof typeof eventLabels] || "Event recorded";
-      toast.success(label);
+      const label = eventLabels[data.type] || "Event";
+      toast.success(`${label} recorded`);
     },
     onError: (error) => {
       toast.error(
         error instanceof Error ? error.message : "Failed to create event"
+      );
+    },
+  });
+}
+
+export function useUpdateMatchEvent(matchId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      eventId,
+      updates,
+    }: {
+      eventId: string;
+      updates: UpdateMatchEvent;
+    }) => updateMatchEvent(eventId, updates),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["matches", matchId, "events"],
+      });
+
+      const label = eventLabels[data.type] || "Event";
+      toast.success(`${label} updated successfully`);
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update event"
+      );
+    },
+  });
+}
+
+export function useDeleteMatchEvent(matchId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (eventId: string) => deleteMatchEvent(eventId),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["matches", matchId, "events"],
+      });
+
+      const label = eventLabels[data.event_type] || "Event";
+      toast.success(`${label} deleted`);
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete event"
       );
     },
   });

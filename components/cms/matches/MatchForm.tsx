@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {} from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -30,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+
 import {
   createMatchInputSchema,
   updateMatchInputSchema,
@@ -51,7 +51,10 @@ import {
   X,
   Clock,
   Star,
+  CalendarDays,
 } from "lucide-react";
+import { SeasonSelector } from "../seasons/SeasonSelector";
+import { useSeasonTeams } from "@/lib/hooks/cms/useSeasons";
 
 interface MatchFormProps {
   match?: Match;
@@ -83,7 +86,7 @@ export default function MatchForm({
       attendance: match?.attendance || undefined,
       referee: match?.referee || "",
       match_day: match?.match_day || undefined,
-      season: match?.season || "",
+      season_id: match?.season_id || "",
       is_featured: match?.is_featured || false,
     },
   });
@@ -100,14 +103,22 @@ export default function MatchForm({
     control: form.control,
     name: "home_team_id",
   });
-  const selectedAwayTeam = useWatch({
+
+  const selectedSeason = useWatch({
     control: form.control,
-    name: "away_team_id",
+    name: "season_id",
   });
 
-  // Filter teams by selected league
+  const { data: seasonTeams } = useSeasonTeams(selectedSeason || "");
+
+  // Filter teams by selected league and season
   const filteredTeams =
-    teams?.filter((team) => team.league_id === selectedLeague) || [];
+    teams?.filter((team) => {
+      const isInLeague = !selectedLeague || team.league_id === selectedLeague;
+      const isInSeason =
+        !selectedSeason || seasonTeams?.some((st) => st.team_id === team.id);
+      return isInLeague && isInSeason;
+    }) || [];
 
   const onSubmit = async (data: CreateMatch | UpdateMatch) => {
     const promise =
@@ -380,7 +391,7 @@ export default function MatchForm({
                             <SelectValue placeholder="Select a venue" />
                           </SelectTrigger>
                           <SelectContent>
-                            {venues?.map((venue) => (
+                            {venues?.map((venue: any) => (
                               <SelectItem key={venue.id} value={venue.id}>
                                 {venue.name_en}
                               </SelectItem>
@@ -420,21 +431,26 @@ export default function MatchForm({
 
                   <FormField
                     control={form.control}
-                    name="season"
+                    name="season_id"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="font-medium text-foreground">
+                        <FormLabel className="flex items-center gap-2 font-medium text-foreground">
+                          <CalendarDays className="h-4 w-4 text-primary" />
                           Season
                         </FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="2023/2024"
-                            {...field}
-                            className="h-11 bg-background border-input focus:border-primary transition-colors rounded-lg"
+                          <SeasonSelector
+                            value={field.value || ""}
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              // Optionally reset teams if season changes
+                              form.setValue("home_team_id", "");
+                              form.setValue("away_team_id", "");
+                            }}
                           />
                         </FormControl>
                         <FormDescription>
-                          The season this match belongs to
+                          Select the competition season
                         </FormDescription>
                         <FormMessage />
                       </FormItem>

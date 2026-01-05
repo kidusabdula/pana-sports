@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { useLiveMatches } from "@/lib/hooks/public/useMatches";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -24,166 +23,190 @@ import {
   BarChart3,
   Flame,
   ChevronDown,
+  ChevronRight,
+  Clock,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Suspense } from "react";
 import { useLiveMatchTime } from "@/components/shared/LiveMatchTime";
+import { motion, AnimatePresence } from "framer-motion";
 
-// Separate component to use the hook - must be outside main component
-function CompactMatchItemInner({
+// Status constants
+const runningStatuses = ["live", "second_half", "extra_time"];
+
+// Enhanced Match Card Component
+function LiveMatchCard({
   match,
-  showMinute,
-  onMatchClick,
+  onClick,
 }: {
   match: any;
-  showMinute?: boolean;
-  onMatchClick: (id: string) => void;
+  onClick: (id: string) => void;
 }) {
-  // Use hook for real-time minute calculation
   const displayMinute = useLiveMatchTime(match);
 
-  const getStatusDisplay = () => {
-    // Paused state - show paused indicator
-    if (match.status === "paused") {
-      return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 border border-yellow-500/30 transition-colors">
-          <div className="flex flex-col items-center justify-center">
-            <span className="text-[9px] font-bold text-yellow-500 leading-none">
-              PAUSE
-            </span>
-          </div>
-        </div>
-      );
-    }
-    // Half time state
-    if (match.status === "half_time") {
-      return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 border border-orange-500/30 transition-colors">
-          <div className="flex flex-col items-center justify-center">
-            <span className="text-[9px] font-bold text-orange-500 leading-none">
-              HT
-            </span>
-          </div>
-        </div>
-      );
-    }
-    // Penalties state
-    if (match.status === "penalties") {
-      return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 border border-purple-500/30 transition-colors">
-          <div className="flex flex-col items-center justify-center">
-            <span className="text-[9px] font-bold text-purple-500 leading-none">
-              PEN
-            </span>
-          </div>
-        </div>
-      );
-    }
-    // Active running states - live, second_half, extra_time
-    if (["live", "second_half", "extra_time"].includes(match.status)) {
-      return (
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 group-hover:border-red-500/30 transition-colors">
-          <div className="flex flex-col items-center justify-center">
-            <span className="text-[9px] font-bold text-red-500 leading-none">
-              {showMinute ? `${displayMinute}'` : "LIVE"}
-            </span>
-          </div>
-        </div>
-      );
-    }
-    if (match.date) {
-      const matchTime = new Date(match.date).toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
-      return (
-        <div className="flex items-center justify-center w-8 h-8">
-          <span className="text-[10px] font-medium text-zinc-500">
-            {matchTime}
-          </span>
-        </div>
-      );
-    }
-    return <div className="w-8" />;
-  };
+  const isPaused = match.status === "paused";
+  const isHalfTime = match.status === "half_time";
+  const isPenalties = match.status === "penalties";
+  const isRunning = runningStatuses.includes(match.status);
 
   return (
-    <div
-      className="flex items-center gap-2 md:gap-4 px-2 py-1 hover:bg-zinc-800/40 transition-colors cursor-pointer border-b border-zinc-800/20 last:border-0 h-10"
-      onClick={() => onMatchClick(match.id)}
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -2 }}
+      onClick={() => onClick(match.id)}
+      className="group cursor-pointer relative"
     >
-      {/* Status Badge */}
-      <div className="shrink-0">{getStatusDisplay()}</div>
+      {/* Background Glow */}
+      <div className="absolute -inset-1 bg-linear-to-r from-primary/10 via-purple-500/5 to-primary/10 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition duration-500"></div>
 
-      {/* Match Content Grid */}
-      <div className="flex-1 grid grid-cols-[1fr_auto_1fr] items-center gap-2 md:gap-4">
-        {/* Home Team */}
-        <div className="flex items-center justify-end gap-2 min-w-0">
-          <span className="text-xs font-medium text-zinc-300 truncate text-right group-hover:text-white transition-colors">
-            {match.home_team?.name_en}
-          </span>
-          <div className="w-5 h-5 rounded-full overflow-hidden border border-zinc-700/30 shrink-0 bg-zinc-800/50 flex items-center justify-center">
-            {match.home_team?.logo_url ? (
-              <Image
-                src={match.home_team.logo_url}
-                alt={match.home_team?.name_en || ""}
-                width={20}
-                height={20}
-                className="object-cover"
-              />
-            ) : (
-              <span className="text-[8px] font-bold text-zinc-500">
-                {match.home_team?.name_en?.substring(0, 2).toUpperCase() || "?"}
-              </span>
+      <Card className="relative bg-zinc-900/40 backdrop-blur-xl border-white/5 overflow-hidden transition-all duration-300 group-hover:border-primary/30 group-hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.1)] rounded-2xl">
+        {/* Status Header */}
+        <div
+          className={cn(
+            "px-4 py-2 flex items-center justify-center gap-2 border-b border-white/5",
+            isPaused
+              ? "bg-yellow-500/5"
+              : isHalfTime
+              ? "bg-orange-500/5"
+              : isPenalties
+              ? "bg-purple-500/5"
+              : "bg-red-500/5"
+          )}
+        >
+          {isRunning && (
+            <div className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+            </div>
+          )}
+          <span
+            className={cn(
+              "text-[10px] font-black uppercase tracking-widest",
+              isPaused
+                ? "text-yellow-500"
+                : isHalfTime
+                ? "text-orange-500"
+                : isPenalties
+                ? "text-purple-500"
+                : "text-red-500"
             )}
+          >
+            {isPaused && "PAUSED"}
+            {isHalfTime && "HALF TIME"}
+            {isPenalties && "PENALTIES"}
+            {isRunning && `LIVE • ${displayMinute}'`}
+          </span>
+        </div>
+
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex items-center justify-between gap-4">
+            {/* Home Team */}
+            <div className="flex-1 flex flex-col items-center gap-3">
+              <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center p-2 transition-transform group-hover:scale-105">
+                {match.home_team?.logo_url ? (
+                  <Image
+                    src={match.home_team.logo_url}
+                    alt={match.home_team.name_en}
+                    width={48}
+                    height={48}
+                    className="object-contain w-full h-full drop-shadow-lg"
+                  />
+                ) : (
+                  <span className="text-zinc-500 font-bold text-lg">
+                    {match.home_team?.name_en?.substring(0, 2).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <span className="text-xs sm:text-sm font-bold text-white text-center line-clamp-2">
+                {match.home_team?.name_en}
+              </span>
+            </div>
+
+            {/* Score Center */}
+            <div className="flex flex-col items-center shrink-0 min-w-[80px]">
+              <div className="bg-white/5 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 flex items-center gap-2 shadow-inner">
+                <span className="text-2xl sm:text-3xl font-black text-white tabular-nums drop-shadow-sm">
+                  {match.score_home ?? 0}
+                </span>
+                <span className="text-zinc-600 font-bold">:</span>
+                <span className="text-2xl sm:text-3xl font-black text-white tabular-nums drop-shadow-sm">
+                  {match.score_away ?? 0}
+                </span>
+              </div>
+              <div className="mt-2 flex items-center gap-1.5 opacity-50">
+                <BarChart3 className="h-3 w-3 text-zinc-400" />
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">
+                  Stats
+                </span>
+              </div>
+            </div>
+
+            {/* Away Team */}
+            <div className="flex-1 flex flex-col items-center gap-3">
+              <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center p-2 transition-transform group-hover:scale-105">
+                {match.away_team?.logo_url ? (
+                  <Image
+                    src={match.away_team.logo_url}
+                    alt={match.away_team.name_en}
+                    width={48}
+                    height={48}
+                    className="object-contain w-full h-full drop-shadow-lg"
+                  />
+                ) : (
+                  <span className="text-zinc-500 font-bold text-lg">
+                    {match.away_team?.name_en?.substring(0, 2).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <span className="text-xs sm:text-sm font-bold text-white text-center line-clamp-2">
+                {match.away_team?.name_en}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+
+        {/* Bottom Detail Strip */}
+        <div className="px-4 py-2 bg-white/5 border-t border-white/5 flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] text-zinc-500 font-medium">
+              {match.league?.name_en}
+            </span>
+          </div>
+          <div className="flex items-center gap-1 text-primary">
+            <span className="text-[10px] font-bold uppercase tracking-wider">
+              Details
+            </span>
+            <ChevronRight className="h-3 w-3" />
           </div>
         </div>
 
-        {/* Score */}
-        <div className="flex items-center justify-center bg-zinc-800/30 rounded px-2 py-0.5 min-w-[40px]">
-          <span className="text-xs font-bold text-white tracking-wider">
-            {match.score_home ?? 0} - {match.score_away ?? 0}
-          </span>
-        </div>
-
-        {/* Away Team */}
-        <div className="flex items-center justify-start gap-2 min-w-0">
-          <div className="w-5 h-5 rounded-full overflow-hidden border border-zinc-700/30 shrink-0 bg-zinc-800/50 flex items-center justify-center">
-            {match.away_team?.logo_url ? (
-              <Image
-                src={match.away_team.logo_url}
-                alt={match.away_team?.name_en || ""}
-                width={20}
-                height={20}
-                className="object-cover"
-              />
-            ) : (
-              <span className="text-[8px] font-bold text-zinc-500">
-                {match.away_team?.name_en?.substring(0, 2).toUpperCase() || "?"}
-              </span>
-            )}
+        {/* Live Progress Bar */}
+        {isRunning && (
+          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/5">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{
+                width: `${Math.min(((match.minute || 0) / 90) * 100, 100)}%`,
+              }}
+              className="h-full bg-linear-to-r from-red-500 to-primary"
+            />
           </div>
-          <span className="text-xs font-medium text-zinc-300 truncate text-left group-hover:text-white transition-colors">
-            {match.away_team?.name_en}
-          </span>
-        </div>
-      </div>
-    </div>
+        )}
+      </Card>
+    </motion.div>
   );
 }
 
 function LiveMatchesPageContent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [leagueFilter, setLeagueFilter] = useState("all");
-  const [refreshInterval, setRefreshInterval] = useState(30); // seconds (kept for UI)
   const router = useRouter();
 
-  // Real-time subscriptions are now handled within useLiveMatches hook
   const { data: matches, isLoading, refetch } = useLiveMatches();
 
-  // Filter matches by search term and league
   const filteredMatches = matches
     ? matches.filter((match) => {
         const matchesSearch =
@@ -204,7 +227,6 @@ function LiveMatchesPageContent() {
       })
     : [];
 
-  // Get unique leagues from matches
   const uniqueLeagues = matches
     ? Array.from(
         new Map(
@@ -213,29 +235,10 @@ function LiveMatchesPageContent() {
       ).filter(Boolean)
     : [];
 
-  // Handle match click
   const handleMatchClick = (matchId: string) => {
     router.push(`/matches/${matchId}`);
   };
 
-  // Component for a single match - ultra compact horizontal design
-  const CompactMatchItem = ({
-    match,
-    showMinute,
-  }: {
-    match: any;
-    showMinute?: boolean;
-  }) => {
-    return (
-      <CompactMatchItemInner
-        match={match}
-        showMinute={showMinute}
-        onMatchClick={handleMatchClick}
-      />
-    );
-  };
-
-  // Component for league group with matches - more compact
   const LeagueMatchGroup = ({
     league,
     matches,
@@ -245,87 +248,84 @@ function LiveMatchesPageContent() {
   }) => {
     const [isExpanded, setIsExpanded] = useState(true);
     const leagueMatches = matches.filter((m) => m.league?.id === league.id);
-    // Count only actively running matches, not paused/halftime
-    const liveCount = leagueMatches.filter((m) =>
-      ["live", "second_half", "extra_time"].includes(m.status)
-    ).length;
-    const pausedCount = leagueMatches.filter((m) =>
-      ["paused", "half_time"].includes(m.status)
-    ).length;
-    const totalGoals = leagueMatches.reduce(
-      (sum, m) => sum + (m.score_home || 0) + (m.score_away || 0),
-      0
-    );
+    const liveCount = leagueMatches.length;
 
     return (
-      <Card className="bg-zinc-900/50 backdrop-blur-sm border-zinc-800/40 overflow-hidden">
-        {/* League Header - Compact */}
-        <div
-          className="flex items-center justify-between px-2 md:px-3 py-1.5 md:py-2 border-b border-zinc-800/40 cursor-pointer hover:bg-zinc-800/40 transition-colors"
-          onClick={() => setIsExpanded(!isExpanded)}
+      <div className="space-y-3">
+        {/* League Header - Revamped */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex items-center justify-between px-1"
         >
-          <div className="flex items-center gap-1.5 md:gap-2">
-            <div className="w-4 h-4 md:w-5 md:h-5 rounded-full overflow-hidden border border-zinc-700/50 bg-zinc-800/50 flex items-center justify-center shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-white/10 p-1.5 flex items-center justify-center shrink-0">
               {league.logo_url ? (
                 <Image
                   src={league.logo_url}
                   alt={league.name_en || ""}
-                  width={20}
-                  height={20}
-                  className="object-cover"
+                  width={24}
+                  height={24}
+                  className="object-contain"
                 />
               ) : (
-                <span className="text-[7px] md:text-[8px] font-bold text-zinc-500">
-                  {league.name_en?.substring(0, 2).toUpperCase() || "?"}
-                </span>
+                <Trophy className="h-4 w-4 text-zinc-500" />
               )}
             </div>
-            <h3 className="text-xs md:text-sm font-semibold text-zinc-100">
-              {league.name_en}
-            </h3>
+            <div className="flex flex-col">
+              <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                {league.name_en}
+              </h3>
+              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em]">
+                {liveCount} Active Matches
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 md:gap-2">
-            {liveCount > 0 && (
-              <Badge className="bg-red-500/10 text-red-400 border-red-500/20 text-[9px] md:text-[10px] px-1.5 py-0 h-4">
-                {liveCount} Live
-              </Badge>
-            )}
-            {pausedCount > 0 && (
-              <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20 text-[9px] md:text-[10px] px-1.5 py-0 h-4">
-                {pausedCount} Paused
-              </Badge>
-            )}
-            {/* Goals badge - desktop only */}
-            {totalGoals > 0 && (
-              <Badge className="hidden md:inline-flex bg-amber-500/10 text-amber-400 border-amber-500/20 text-[10px] px-1.5 py-0 h-4">
-                {totalGoals}G
-              </Badge>
-            )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="text-zinc-500 hover:text-white transition-colors"
+          >
             <ChevronDown
               className={cn(
-                "h-3 md:h-3.5 w-3 md:w-3.5 text-zinc-500 transition-transform",
+                "h-4 w-4 transition-transform duration-300",
                 isExpanded && "rotate-180"
               )}
             />
-          </div>
-        </div>
+          </Button>
+        </motion.div>
 
-        {/* Matches List */}
-        {isExpanded && (
-          <div>
-            {leagueMatches.map((match) => (
-              <CompactMatchItem key={match.id} match={match} showMinute />
-            ))}
-          </div>
-        )}
-      </Card>
+        {/* Matches Grid */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            >
+              {leagueMatches.map((match) => (
+                <LiveMatchCard
+                  key={match.id}
+                  match={match}
+                  onClick={handleMatchClick}
+                />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     );
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="relative w-20 h-20">
+          <div className="absolute inset-0 rounded-full border-4 border-primary/20 animate-pulse"></div>
+          <div className="absolute inset-0 rounded-full border-t-4 border-primary animate-spin"></div>
+        </div>
       </div>
     );
   }
@@ -336,195 +336,172 @@ function LiveMatchesPageContent() {
   );
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
-      {/* Header - More Compact */}
-      <div className="bg-zinc-900/90 backdrop-blur-md border-b border-zinc-800/50 sticky top-0 z-40">
-        <div className="container mx-auto px-3 sm:px-4">
-          <div className="flex items-center justify-between py-4.5">
-            {/* Left Section */}
-            <div className="flex items-center gap-2 sm:gap-3">
+    <div className="min-h-screen bg-zinc-950 text-white selection:bg-primary/30">
+      {/* Background Gradients */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 rounded-full blur-[120px]"></div>
+      </div>
+
+      {/* Header - Premium Refined */}
+      <div className="sticky top-0 border-b border-white/5 bg-zinc-950/80 backdrop-blur-2xl z-30">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between py-6">
+            <div className="flex items-center gap-4">
               <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.back()}
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all h-8 px-2"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                <span className="hidden sm:inline ml-1 text-xs">Back</span>
-              </Button>
-
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                </div>
-                <h1 className="text-sm sm:text-base font-bold text-white">
-                  Live Matches
-                </h1>
-                <Badge className="bg-red-500/10 text-red-400 border-red-500/20 text-[10px] h-4 px-1.5">
-                  {filteredMatches.length}
-                </Badge>
-              </div>
-            </div>
-
-            {/* Right Section */}
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="hidden sm:flex items-center gap-1 bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/30 p-0.5 rounded-lg">
-                <Button
-                  variant={refreshInterval === 10 ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setRefreshInterval(10)}
-                  className={cn(
-                    "text-[10px] font-medium transition-all h-6 px-2",
-                    refreshInterval === 10
-                      ? "bg-zinc-700 text-white"
-                      : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-                  )}
-                >
-                  10s
-                </Button>
-                <Button
-                  variant={refreshInterval === 30 ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setRefreshInterval(30)}
-                  className={cn(
-                    "text-[10px] font-medium transition-all h-6 px-2",
-                    refreshInterval === 30
-                      ? "bg-zinc-700 text-white"
-                      : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-                  )}
-                >
-                  30s
-                </Button>
-                <Button
-                  variant={refreshInterval === 60 ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setRefreshInterval(60)}
-                  className={cn(
-                    "text-[10px] font-medium transition-all h-6 px-2",
-                    refreshInterval === 60
-                      ? "bg-zinc-700 text-white"
-                      : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-                  )}
-                >
-                  1m
-                </Button>
-              </div>
-
-              <Button
-                variant="ghost"
+                variant="outline"
                 size="icon"
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-all h-8 w-8"
-                onClick={() => refetch()}
+                onClick={() => router.back()}
+                className="rounded-xl border-white/10 hover:border-primary/50 transition-all bg-white/5"
               >
-                <RefreshCw className="h-4 w-4" />
+                <ChevronLeft className="h-5 w-5" />
               </Button>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-3">
+                  <div className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]"></span>
+                  </div>
+                  <h1 className="text-2xl font-black text-white tracking-tight uppercase">
+                    Live Arena
+                  </h1>
+                </div>
+                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.3em] ml-6">
+                  Real-time Sports Intelligence
+                </p>
+              </div>
             </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="hidden sm:flex items-center gap-2 rounded-xl border-white/10 hover:border-primary/50 bg-white/5 transition-all"
+              onClick={() => refetch()}
+            >
+              <RefreshCw className="h-4 w-4" />
+              <span className="text-xs font-bold uppercase tracking-wider">
+                Refresh
+              </span>
+            </Button>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-3 sm:px-4 py-4 space-y-4">
-        {/* Stats Cards - Compact */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
-          <Card className="bg-zinc-900/50 backdrop-blur-sm border-zinc-800/40 overflow-hidden">
-            <CardContent className="p-3">
-              <div className="flex flex-col items-center gap-1">
-                <Flame className="h-4 w-4 text-red-400" />
-                <div className="text-xl sm:text-2xl font-bold text-white">
-                  {filteredMatches.length}
-                </div>
-                <div className="text-[10px] text-zinc-500 text-center">
-                  Live Matches
-                </div>
+      <div className="container mx-auto px-4 py-8 space-y-10 relative">
+        {/* Statistics Dashboard */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col items-center gap-2 text-center group"
+          >
+            <div className="w-10 h-10 rounded-2xl bg-red-500/10 flex items-center justify-center transition-colors group-hover:bg-red-500/20">
+              <Flame className="h-5 w-5 text-red-500" />
+            </div>
+            <div>
+              <div className="text-3xl font-black text-white tracking-tight">
+                {filteredMatches.length}
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-zinc-900/50 backdrop-blur-sm border-zinc-800/40 overflow-hidden">
-            <CardContent className="p-3">
-              <div className="flex flex-col items-center gap-1">
-                <BarChart3 className="h-4 w-4 text-blue-400" />
-                <div className="text-xl sm:text-2xl font-bold text-white">
-                  {totalGoals}
-                </div>
-                <div className="text-[10px] text-zinc-500 text-center">
-                  Total Goals
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-zinc-900/50 backdrop-blur-sm border-zinc-800/40 overflow-hidden">
-            <CardContent className="p-3">
-              <div className="flex flex-col items-center gap-1">
-                <Trophy className="h-4 w-4 text-amber-400" />
-                <div className="text-xl sm:text-2xl font-bold text-white">
-                  {uniqueLeagues.length}
-                </div>
-                <div className="text-[10px] text-zinc-500 text-center">
-                  Leagues
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Filters - Compact */}
-        <Card className="bg-zinc-900/50 backdrop-blur-sm border-zinc-800/40 overflow-hidden">
-          <CardContent className="p-3">
-            <div className="flex flex-col sm:flex-row gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
-                <Input
-                  placeholder="Search teams or leagues..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8 h-8 text-xs bg-zinc-800/50 border-zinc-700/50 text-white placeholder:text-zinc-600"
-                />
-              </div>
-              <div className="w-full sm:w-48">
-                <Select value={leagueFilter} onValueChange={setLeagueFilter}>
-                  <SelectTrigger className="h-8 text-xs bg-zinc-800/50 border-zinc-700/50 text-white">
-                    <SelectValue placeholder="Filter by league" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700/50">
-                    <SelectItem value="all" className="text-xs">
-                      All Leagues
-                    </SelectItem>
-                    {uniqueLeagues.map((league) => (
-                      <SelectItem
-                        key={league.id}
-                        value={league.slug || league.id}
-                        className="text-xs"
-                      >
-                        {league.name_en}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">
+                Live Feed
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </motion.div>
 
-        {/* Live Matches - Grouped by League */}
-        <div className="space-y-2">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col items-center gap-2 text-center group"
+          >
+            <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center transition-colors group-hover:bg-primary/20">
+              <Zap className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <div className="text-3xl font-black text-white tracking-tight">
+                {totalGoals}
+              </div>
+              <div className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">
+                Total Goals
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col items-center gap-2 text-center group"
+          >
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center transition-colors group-hover:bg-amber-500/20">
+              <Trophy className="h-5 w-5 text-amber-500" />
+            </div>
+            <div>
+              <div className="text-3xl font-black text-white tracking-tight">
+                {uniqueLeagues.length}
+              </div>
+              <div className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">
+                Active Leagues
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Global Control Bar */}
+        <div className="flex flex-col sm:flex-row gap-4 items-center">
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-500" />
+            <Input
+              placeholder="Filter by match, team or competition..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-12 h-12 rounded-2xl bg-white/5 border-white/5 text-white placeholder:text-zinc-600 focus:border-primary/50 transition-all"
+            />
+          </div>
+          <div className="w-full sm:w-64">
+            <Select value={leagueFilter} onValueChange={setLeagueFilter}>
+              <SelectTrigger className="h-12 rounded-2xl bg-white/5 border-white/5 text-white focus:border-primary/50 transition-all">
+                <SelectValue placeholder="All Competitions" />
+              </SelectTrigger>
+              <SelectContent className="bg-zinc-900 border-white/10 rounded-2xl backdrop-blur-xl">
+                <SelectItem value="all">All Competitions</SelectItem>
+                {uniqueLeagues.map((league) => (
+                  <SelectItem key={league.id} value={league.slug || league.id}>
+                    {league.name_en}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Dynamic League Feeds */}
+        <div className="space-y-12">
           {filteredMatches.length === 0 ? (
-            <Card className="bg-zinc-900/50 backdrop-blur-sm border-zinc-800/40">
-              <CardContent className="p-8 text-center text-zinc-500 text-sm">
-                No live matches available
-              </CardContent>
-            </Card>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-20 text-center"
+            >
+              <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6">
+                <Clock className="h-10 w-10 text-zinc-500" />
+              </div>
+              <h3 className="text-xl font-black text-white uppercase tracking-widest">
+                No Active Matches
+              </h3>
+              <p className="text-zinc-500 mt-2 font-medium">
+                Please check back later for live coverage.
+              </p>
+            </motion.div>
           ) : (
-            <div className="space-y-2">
-              {uniqueLeagues.map((league) => (
-                <LeagueMatchGroup
-                  key={league.id}
-                  league={league}
-                  matches={filteredMatches}
-                />
-              ))}
+            <div className="space-y-12 pb-20">
+              {uniqueLeagues
+                .filter((l) =>
+                  filteredMatches.some((m) => m.league?.id === l.id)
+                )
+                .map((league) => (
+                  <LeagueMatchGroup
+                    key={league.id}
+                    league={league}
+                    matches={filteredMatches}
+                  />
+                ))}
             </div>
           )}
         </div>
@@ -538,7 +515,10 @@ export default function LiveMatchesPage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <div className="relative w-20 h-20">
+            <div className="absolute inset-0 rounded-full border-4 border-primary/20 animate-pulse"></div>
+            <div className="absolute inset-0 rounded-full border-t-4 border-primary animate-spin"></div>
+          </div>
         </div>
       }
     >

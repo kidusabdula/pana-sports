@@ -1,6 +1,6 @@
 // components/cms/matches/match-control/types.ts
 import { Match } from "@/lib/schemas/match";
-import { MatchEvent } from "@/lib/schemas/matchEvent";
+import { MatchEvent, UpdateMatchEvent } from "@/lib/schemas/matchEvent";
 import { MatchLineup } from "@/lib/schemas/matchLineup";
 
 // Match Status Types
@@ -129,9 +129,16 @@ export interface ControlTabProps {
 }
 
 export interface EventsTabProps {
+  match: Match;
   events: MatchEvent[] | undefined;
   isLoading: boolean;
+  homeTeamPlayers: Player[];
+  awayTeamPlayers: Player[];
   onRefresh: () => void;
+  onUpdateEvent: (eventId: string, updates: UpdateMatchEvent) => void;
+  onDeleteEvent: (eventId: string) => void;
+  isUpdating: boolean;
+  isDeleting: boolean;
 }
 
 export interface LineupsTabProps {
@@ -293,6 +300,6 @@ export interface CreateEventPayload {
   team_id: string | null;
   is_assist: boolean;
   confirmed: boolean;
-  subbed_in_player_id?: string;
-  subbed_out_player_id?: string;
+  subbed_in_player_id?: string | null;
+  subbed_out_player_id?: string | null;
 }

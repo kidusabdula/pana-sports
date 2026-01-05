@@ -4,7 +4,8 @@
 import React from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Users } from "lucide-react";
 import type { MatchLineup } from "@/lib/hooks/public/useMatchDetail";
 
 interface FormationFieldMapProps {
@@ -280,6 +281,15 @@ export function FormationFieldMap({
   homeCoach,
   awayCoach,
 }: FormationFieldMapProps) {
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const homeStarters = homeLineup.filter((l) => l.is_starting).slice(0, 11);
   const awayStarters = awayLineup.filter((l) => l.is_starting).slice(0, 11);
   const homeSubs = homeLineup.filter((l) => !l.is_starting).slice(0, 7);
@@ -293,289 +303,355 @@ export function FormationFieldMap({
   const hasAwayLineup = awayStarters.length > 0;
 
   return (
-    <div className="w-full space-y-3">
+    <div className="w-full space-y-4">
       {/* Team header bar */}
-      <div className="bg-teal-700 rounded-lg px-3 py-2.5 flex items-center justify-between">
+      <div className="bg-zinc-900/60 backdrop-blur-md rounded-2xl border border-white/5 px-4 py-3 flex items-center justify-between">
         {/* Home team */}
-        <div className="flex items-center gap-2">
-          {homeTeamLogo && (
-            <div className="w-6 h-6 rounded-full overflow-hidden bg-white/20 flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-teal-500/20 border border-teal-500/30 flex items-center justify-center p-1">
+            {homeTeamLogo ? (
               <Image
                 src={homeTeamLogo}
                 alt={homeTeamName}
-                width={24}
-                height={24}
+                width={32}
+                height={32}
                 className="w-full h-full object-contain"
               />
-            </div>
-          )}
-          <span className="text-white text-sm font-semibold">
-            {homeTeamName}
-          </span>
-          <Badge className="bg-white/20 text-white text-[10px] hover:bg-white/30 border-0">
-            {homeFormation}
-          </Badge>
+            ) : (
+              <span className="text-teal-500 text-[10px] font-bold">H</span>
+            )}
+          </div>
+          <div className="flex flex-col">
+            <span className="text-white text-xs sm:text-sm font-bold truncate max-w-[80px] sm:max-w-none">
+              {homeTeamName}
+            </span>
+            <span className="text-teal-400 text-[10px] font-medium">
+              {homeFormation}
+            </span>
+          </div>
+        </div>
+
+        <div className="text-zinc-500 font-black text-xs tracking-widest italic opacity-50">
+          VS
         </div>
 
         {/* Away team */}
-        <div className="flex items-center gap-2">
-          <Badge className="bg-white/20 text-white text-[10px] hover:bg-white/30 border-0">
-            {awayFormation}
-          </Badge>
-          <span className="text-white text-sm font-semibold">
-            {awayTeamName}
-          </span>
-          {awayTeamLogo && (
-            <div className="w-6 h-6 rounded-full overflow-hidden bg-white/20 flex items-center justify-center">
+        <div className="flex items-center gap-3 flex-row-reverse">
+          <div className="w-8 h-8 rounded-lg bg-orange-500/20 border border-orange-500/30 flex items-center justify-center p-1">
+            {awayTeamLogo ? (
               <Image
                 src={awayTeamLogo}
                 alt={awayTeamName}
-                width={24}
-                height={24}
+                width={32}
+                height={32}
                 className="w-full h-full object-contain"
               />
-            </div>
+            ) : (
+              <span className="text-orange-500 text-[10px] font-bold">A</span>
+            )}
+          </div>
+          <div className="flex flex-col items-end">
+            <span className="text-white text-xs sm:text-sm font-bold truncate max-w-[80px] sm:max-w-none">
+              {awayTeamName}
+            </span>
+            <span className="text-orange-400 text-[10px] font-medium">
+              {awayFormation}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Football pitch - adaptive layout */}
+      <div
+        className={cn(
+          "relative w-full rounded-3xl overflow-hidden bg-zinc-950/50 border border-white/10 shadow-3xl transition-all duration-500",
+          isMobile ? "aspect-2/3" : "aspect-16/10 sm:aspect-2/1"
+        )}
+      >
+        {/* Pitch texture/gradient */}
+        <div className="absolute inset-0 bg-linear-to-b from-teal-900/40 via-teal-800/40 to-teal-900/40"></div>
+
+        {/* Field markings */}
+        <svg
+          className="absolute inset-0 w-full h-full opacity-60"
+          viewBox={isMobile ? "0 0 100 200" : "0 0 200 100"}
+          preserveAspectRatio="none"
+        >
+          {isMobile ? (
+            // Vertical Pitch (Mobile)
+            <>
+              <rect
+                x="2"
+                y="2"
+                width="96"
+                height="196"
+                fill="none"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+              <line
+                x1="2"
+                y1="100"
+                x2="98"
+                y2="100"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+              <circle
+                cx="50"
+                cy="100"
+                r="15"
+                fill="none"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+              <rect
+                x="25"
+                y="2"
+                width="50"
+                height="25"
+                fill="none"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+              <rect
+                x="35"
+                y="2"
+                width="30"
+                height="10"
+                fill="none"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+              <rect
+                x="25"
+                y="173"
+                width="50"
+                height="25"
+                fill="none"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+              <rect
+                x="35"
+                y="188"
+                width="30"
+                height="10"
+                fill="none"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+              <path
+                d="M 40 27 A 10 10 0 0 1 60 27"
+                fill="none"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+              <path
+                d="M 40 173 A 10 10 0 0 0 60 173"
+                fill="none"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+            </>
+          ) : (
+            // Horizontal Pitch (Desktop)
+            <>
+              <rect
+                x="2"
+                y="2"
+                width="196"
+                height="96"
+                fill="none"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+              <line
+                x1="100"
+                y1="2"
+                x2="100"
+                y2="98"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+              <circle
+                cx="100"
+                cy="50"
+                r="15"
+                fill="none"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+              <rect
+                x="2"
+                y="25"
+                width="30"
+                height="50"
+                fill="none"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+              <rect
+                x="168"
+                y="25"
+                width="30"
+                height="50"
+                fill="none"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+              <path
+                d="M 32 40 A 10 10 0 0 1 32 60"
+                fill="none"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+              <path
+                d="M 168 40 A 10 10 0 0 0 168 60"
+                fill="none"
+                stroke="white"
+                strokeWidth="0.5"
+              />
+            </>
+          )}
+        </svg>
+
+        {/* Home team players */}
+        <div
+          className="absolute inset-0"
+          style={
+            isMobile
+              ? { height: "50%", width: "100%" }
+              : { width: "50%", height: "100%" }
+          }
+        >
+          {(hasHomeLineup ? homeStarters : homePositions.slice(0, 11)).map(
+            (player, index) => {
+              const pos = homePositions[index] || { x: 25, y: 50 };
+              const scaledPos = isMobile
+                ? {
+                    x: pos.y, // Swapped for vertical
+                    y: pos.x * 0.5, // Scaled to top half
+                  }
+                : {
+                    x: pos.x * 0.5, // Scaled to left half
+                    y: pos.y,
+                  };
+              return (
+                <PlayerMarker
+                  key={
+                    hasHomeLineup ? (player as MatchLineup).id : `home-${index}`
+                  }
+                  player={hasHomeLineup ? (player as MatchLineup) : undefined}
+                  position={scaledPos}
+                  isAway={false}
+                  index={index}
+                />
+              );
+            }
+          )}
+        </div>
+
+        {/* Away team players */}
+        <div
+          className="absolute inset-0"
+          style={
+            isMobile
+              ? { top: "50%", height: "50%", width: "100%" }
+              : { left: "50%", width: "50%", height: "100%" }
+          }
+        >
+          {(hasAwayLineup ? awayStarters : awayPositions.slice(0, 11)).map(
+            (player, index) => {
+              const pos = awayPositions[index] || { x: 75, y: 50 };
+              const scaledPos = isMobile
+                ? {
+                    x: pos.y, // Swapped for vertical
+                    y: (pos.x - 50) * 0.5, // Scaled to bottom half (local coords)
+                  }
+                : {
+                    x: (pos.x - 50) * 0.5, // Scaled to right half (local coords)
+                    y: pos.y,
+                  };
+              return (
+                <PlayerMarker
+                  key={
+                    hasAwayLineup ? (player as MatchLineup).id : `away-${index}`
+                  }
+                  player={hasAwayLineup ? (player as MatchLineup) : undefined}
+                  position={scaledPos}
+                  isAway={true}
+                  index={index}
+                />
+              );
+            }
           )}
         </div>
       </div>
 
-      {/* Football pitch - side by side layout */}
-      <div className="relative w-full aspect-[16/10] sm:aspect-[2/1] bg-teal-600 rounded-lg overflow-hidden">
-        {/* Field markings */}
-        <svg
-          className="absolute inset-0 w-full h-full"
-          viewBox="0 0 200 100"
-          preserveAspectRatio="none"
-        >
-          {/* Outer border */}
-          <rect
-            x="2"
-            y="2"
-            width="196"
-            height="96"
-            fill="none"
-            stroke="rgba(255,255,255,0.4)"
-            strokeWidth="0.5"
-          />
-
-          {/* Center line */}
-          <line
-            x1="100"
-            y1="2"
-            x2="100"
-            y2="98"
-            stroke="rgba(255,255,255,0.4)"
-            strokeWidth="0.5"
-          />
-
-          {/* Center circle */}
-          <circle
-            cx="100"
-            cy="50"
-            r="12"
-            fill="none"
-            stroke="rgba(255,255,255,0.4)"
-            strokeWidth="0.5"
-          />
-          <circle cx="100" cy="50" r="1" fill="rgba(255,255,255,0.5)" />
-
-          {/* Left penalty area */}
-          <rect
-            x="2"
-            y="25"
-            width="20"
-            height="50"
-            fill="none"
-            stroke="rgba(255,255,255,0.4)"
-            strokeWidth="0.5"
-          />
-          <rect
-            x="2"
-            y="35"
-            width="8"
-            height="30"
-            fill="none"
-            stroke="rgba(255,255,255,0.4)"
-            strokeWidth="0.5"
-          />
-          <circle cx="16" cy="50" r="1" fill="rgba(255,255,255,0.4)" />
-
-          {/* Right penalty area */}
-          <rect
-            x="178"
-            y="25"
-            width="20"
-            height="50"
-            fill="none"
-            stroke="rgba(255,255,255,0.4)"
-            strokeWidth="0.5"
-          />
-          <rect
-            x="190"
-            y="35"
-            width="8"
-            height="30"
-            fill="none"
-            stroke="rgba(255,255,255,0.4)"
-            strokeWidth="0.5"
-          />
-          <circle cx="184" cy="50" r="1" fill="rgba(255,255,255,0.4)" />
-
-          {/* Left goal */}
-          <rect
-            x="0"
-            y="40"
-            width="2"
-            height="20"
-            fill="none"
-            stroke="rgba(255,255,255,0.6)"
-            strokeWidth="0.5"
-          />
-
-          {/* Right goal */}
-          <rect
-            x="198"
-            y="40"
-            width="2"
-            height="20"
-            fill="none"
-            stroke="rgba(255,255,255,0.6)"
-            strokeWidth="0.5"
-          />
-
-          {/* Left goal arc */}
-          <path
-            d="M 22 42 A 8 8 0 0 1 22 58"
-            fill="none"
-            stroke="rgba(255,255,255,0.4)"
-            strokeWidth="0.5"
-          />
-
-          {/* Right goal arc */}
-          <path
-            d="M 178 42 A 8 8 0 0 0 178 58"
-            fill="none"
-            stroke="rgba(255,255,255,0.4)"
-            strokeWidth="0.5"
-          />
-        </svg>
-
-        {/* Home team players (left half) */}
-        <div className="absolute inset-0" style={{ width: "50%" }}>
-          {hasHomeLineup
-            ? homeStarters.map((player, index) => {
-                const pos = homePositions[index] || { x: 25, y: 50 };
-                // Scale X to left half (0-50%)
-                const scaledPos = {
-                  x: pos.x * 0.5,
-                  y: pos.y,
-                };
-                return (
-                  <PlayerMarker
+      {/* Substitutes section (Improved UI) */}
+      {(homeSubs.length > 0 || awaySubs.length > 0) && (
+        <Card className="bg-zinc-900/40 backdrop-blur-xl border-white/5 overflow-hidden rounded-2xl">
+          <CardHeader className="py-3 px-4 border-b border-white/5 flex flex-row items-center justify-between">
+            <CardTitle className="text-xs font-black text-zinc-400 uppercase tracking-[0.2em]">
+              Bench
+            </CardTitle>
+            <Users className="h-4 w-4 text-zinc-500" />
+          </CardHeader>
+          <CardContent className="p-2 sm:p-4">
+            <div className="grid grid-cols-2 gap-4">
+              {/* Home subs */}
+              <div className="space-y-1">
+                {homeSubs.map((player) => (
+                  <SubstituteRow
                     key={player.id}
                     player={player}
-                    position={scaledPos}
                     isAway={false}
-                    index={index}
                   />
-                );
-              })
-            : // Show placeholder positions
-              homePositions.slice(0, 11).map((pos, index) => {
-                const scaledPos = {
-                  x: pos.x * 0.5,
-                  y: pos.y,
-                };
-                return (
-                  <PlayerMarker
-                    key={`home-placeholder-${index}`}
-                    position={scaledPos}
-                    isAway={false}
-                    index={index}
-                  />
-                );
-              })}
-        </div>
-
-        {/* Away team players (right half) */}
-        <div className="absolute inset-0" style={{ left: "50%", width: "50%" }}>
-          {hasAwayLineup
-            ? awayStarters.map((player, index) => {
-                const pos = awayPositions[index] || { x: 75, y: 50 };
-                // Scale X to right half (50-100%)
-                const scaledPos = {
-                  x: (pos.x - 50) * 1 + 50 - (pos.x - 50) * 0.5,
-                  y: pos.y,
-                };
-                return (
-                  <PlayerMarker
+                ))}
+              </div>
+              {/* Away subs */}
+              <div className="space-y-1">
+                {awaySubs.map((player) => (
+                  <SubstituteRow
                     key={player.id}
                     player={player}
-                    position={scaledPos}
                     isAway={true}
-                    index={index}
                   />
-                );
-              })
-            : // Show placeholder positions
-              awayPositions.slice(0, 11).map((pos, index) => {
-                const scaledPos = {
-                  x: (pos.x - 50) * 1 + 50 - (pos.x - 50) * 0.5,
-                  y: pos.y,
-                };
-                return (
-                  <PlayerMarker
-                    key={`away-placeholder-${index}`}
-                    position={scaledPos}
-                    isAway={true}
-                    index={index}
-                  />
-                );
-              })}
-        </div>
-      </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Coach section */}
       {(homeCoach || awayCoach) && (
-        <div className="bg-zinc-800/50 rounded-lg p-3">
-          <div className="text-center text-[10px] text-zinc-500 uppercase tracking-wide mb-2">
-            Coach
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center">
-                <span className="text-zinc-400 text-xs">👤</span>
-              </div>
-              <span className="text-sm text-white">{homeCoach || "TBD"}</span>
+        <div className="flex gap-4">
+          <div className="flex-1 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-2xl p-3 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-400">
+              <UserCircle className="h-5 w-5" />
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-white">{awayCoach || "TBD"}</span>
-              <div className="w-8 h-8 rounded-full bg-zinc-700 flex items-center justify-center">
-                <span className="text-zinc-400 text-xs">👤</span>
-              </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                Home Coach
+              </p>
+              <p className="text-sm font-bold text-white truncate">
+                {homeCoach || "TBD"}
+              </p>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Substitutes section */}
-      {(homeSubs.length > 0 || awaySubs.length > 0) && (
-        <div className="bg-zinc-800/50 rounded-lg p-3">
-          <div className="text-center text-[10px] text-zinc-500 uppercase tracking-wide mb-2">
-            Substitutes
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            {/* Home subs */}
-            <div className="space-y-1">
-              {homeSubs.map((player) => (
-                <SubstituteRow key={player.id} player={player} isAway={false} />
-              ))}
+          <div className="flex-1 bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-2xl p-3 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400">
+              <UserCircle className="h-5 w-5" />
             </div>
-            {/* Away subs */}
-            <div className="space-y-1">
-              {awaySubs.map((player) => (
-                <SubstituteRow key={player.id} player={player} isAway={true} />
-              ))}
+            <div className="min-w-0">
+              <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                Away Coach
+              </p>
+              <p className="text-sm font-bold text-white truncate">
+                {awayCoach || "TBD"}
+              </p>
             </div>
           </div>
         </div>
@@ -583,5 +659,23 @@ export function FormationFieldMap({
     </div>
   );
 }
+
+const UserCircle = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
 
 export default FormationFieldMap;

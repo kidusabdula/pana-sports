@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Calendar,
   MapPin,
   Users,
   Trophy,
@@ -21,7 +20,6 @@ import {
   Share2,
   Bookmark,
   ArrowRightLeft,
-  Clock,
   Thermometer,
   Wind,
   Eye,
@@ -675,7 +673,6 @@ export function MatchDetailPage({ matchId }: MatchDetailPageProps) {
   const isHalfTime = match.status === "half_time";
   const isPenalties = match.status === "penalties";
   const isCompleted = match.status === "completed";
-  const isScheduled = match.status === "scheduled";
 
   // Separate lineups by team
   const homeLineups = lineups.filter((l) => l.team_id === match.home_team.id);
@@ -819,141 +816,199 @@ export function MatchDetailPage({ matchId }: MatchDetailPageProps) {
           )}
         </div>
 
-        {/* Match Score Card */}
-        <Card className="bg-zinc-900/60 backdrop-blur-xl border-zinc-800/50 overflow-hidden">
-          <CardContent className="p-4">
-            {/* Teams and Score */}
-            <div className="flex items-center justify-between mb-4">
-              {/* Home Team */}
-              <div className="flex flex-col items-center flex-1">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden mb-2 bg-zinc-800/50 p-2 border border-zinc-700/30">
-                  {match.home_team.logo_url ? (
-                    <Image
-                      src={match.home_team.logo_url}
-                      alt={match.home_team.name_en}
-                      width={80}
-                      height={80}
-                      className="object-contain w-full h-full"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-zinc-600 font-bold text-xl">
-                      {match.home_team.name_en.substring(0, 2).toUpperCase()}
-                    </div>
-                  )}
-                </div>
-                <h3 className="text-sm sm:text-base font-semibold text-white text-center">
-                  {match.home_team.name_en}
-                </h3>
-                {match.home_formation && (
-                  <Badge variant="outline" className="mt-1 text-[10px]">
-                    {match.home_formation}
-                  </Badge>
-                )}
-              </div>
+        {/* Match Score Card - Revamped for Premium Feel */}
+        <div className="relative group">
+          {/* Background Glow Effect */}
+          <div className="absolute -inset-1 bg-linear-to-r from-primary/20 via-purple-500/10 to-primary/20 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
 
-              {/* Score */}
-              <div className="flex flex-col items-center px-4">
-                <div className="text-3xl sm:text-5xl font-bold text-white mb-1">
+          <Card className="relative bg-zinc-900/40 backdrop-blur-2xl border-white/5 overflow-hidden rounded-3xl">
+            <CardContent className="p-6 sm:p-10">
+              {/* Teams and Score */}
+              <div className="flex items-center justify-between gap-4 sm:gap-12">
+                {/* Home Team */}
+                <div className="flex flex-col items-center flex-1 space-y-4">
+                  <div className="relative group/logo">
+                    <div className="absolute -inset-2 bg-primary/20 rounded-2xl blur-md opacity-0 group-hover/logo:opacity-100 transition duration-500"></div>
+                    <div className="relative w-20 h-20 sm:w-32 sm:h-32 rounded-2xl bg-linear-to-br from-white/10 to-transparent border border-white/10 flex items-center justify-center p-3 sm:p-5 transition-transform duration-500 group-hover/logo:scale-105">
+                      {match.home_team.logo_url ? (
+                        <Image
+                          src={match.home_team.logo_url}
+                          alt={match.home_team.name_en}
+                          width={120}
+                          height={120}
+                          className="object-contain w-full h-full drop-shadow-2xl"
+                        />
+                      ) : (
+                        <div className="text-zinc-600 font-bold text-3xl sm:text-4xl">
+                          {match.home_team.name_en
+                            .substring(0, 2)
+                            .toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-center space-y-1">
+                    <h3 className="text-lg sm:text-2xl font-black text-white tracking-tight uppercase">
+                      {match.home_team.name_en}
+                    </h3>
+                    {match.home_formation && (
+                      <Badge
+                        variant="outline"
+                        className="bg-zinc-800/50 text-zinc-400 text-[10px] sm:text-xs font-bold px-3"
+                      >
+                        {match.home_formation}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+
+                {/* Score / VS Center */}
+                <div className="flex flex-col items-center justify-center min-w-[120px] sm:min-w-[200px]">
                   {isActive || isCompleted ? (
-                    <div className="flex items-center gap-3">
-                      <span>{match.score_home}</span>
-                      <span className="text-zinc-600">-</span>
-                      <span>{match.score_away}</span>
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="flex items-center gap-4 sm:gap-8 bg-white/5 backdrop-blur-md px-6 sm:px-10 py-3 sm:py-5 rounded-4xl border border-white/10 shadow-2xl">
+                        <span className="text-5xl sm:text-7xl font-black text-white tabular-nums drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                          {match.score_home}
+                        </span>
+                        <div className="w-px h-10 sm:h-14 bg-white/10"></div>
+                        <span className="text-5xl sm:text-7xl font-black text-white tabular-nums drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                          {match.score_away}
+                        </span>
+                      </div>
+
+                      {(isLive || isPaused || isHalfTime) && (
+                        <div
+                          className={cn(
+                            "flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold uppercase tracking-widest border",
+                            isPaused
+                              ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
+                              : isHalfTime
+                              ? "bg-orange-500/10 text-orange-500 border-orange-500/20"
+                              : "bg-red-500/10 text-red-500 border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
+                          )}
+                        >
+                          {!isPaused && !isHalfTime && (
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                            </span>
+                          )}
+                          {isPaused && "PAUSED"}
+                          {isHalfTime && "HT"}
+                          <LiveMinuteDisplay match={match} />
+                        </div>
+                      )}
+
+                      {isPenalties && (
+                        <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 px-4 py-1 text-sm font-black italic">
+                          PENALTIES
+                        </Badge>
+                      )}
+
+                      {isCompleted && (
+                        <Badge className="bg-white/10 text-zinc-400 border-white/5 px-4 py-1 text-xs sm:text-sm font-bold tracking-widest">
+                          FULL TIME
+                        </Badge>
+                      )}
                     </div>
                   ) : (
-                    <span className="text-2xl text-zinc-500">VS</span>
-                  )}
-                </div>
-                {(isLive || isPaused || isHalfTime) && (
-                  <div
-                    className={`flex items-center gap-1.5 text-xs font-medium ${
-                      isPaused
-                        ? "text-yellow-400"
-                        : isHalfTime
-                        ? "text-orange-400"
-                        : "text-red-400"
-                    }`}
-                  >
-                    <Clock className="h-3 w-3" />
-                    {isPaused && "PAUSED "}
-                    {isHalfTime && "HT "}
-                    <LiveMinuteDisplay match={match} />
-                  </div>
-                )}
-                {isPenalties && (
-                  <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/30 text-xs">
-                    Penalties
-                  </Badge>
-                )}
-                {isCompleted && (
-                  <Badge className="bg-green-500/10 text-green-400 border-green-500/30 text-xs">
-                    Full Time
-                  </Badge>
-                )}
-                {isScheduled && (
-                  <div className="text-xs text-zinc-400 text-center mt-1">
-                    {format(new Date(match.date), "HH:mm")}
-                  </div>
-                )}
-              </div>
-
-              {/* Away Team */}
-              <div className="flex flex-col items-center flex-1">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden mb-2 bg-zinc-800/50 p-2 border border-zinc-700/30">
-                  {match.away_team.logo_url ? (
-                    <Image
-                      src={match.away_team.logo_url}
-                      alt={match.away_team.name_en}
-                      width={80}
-                      height={80}
-                      className="object-contain w-full h-full"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-zinc-600 font-bold text-xl">
-                      {match.away_team.name_en.substring(0, 2).toUpperCase()}
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="bg-white/5 backdrop-blur-md px-8 py-4 rounded-4xl border border-white/10">
+                        <span className="text-2xl sm:text-4xl font-black text-zinc-500 tracking-widest">
+                          VS
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <div className="text-2xl sm:text-3xl font-black text-white tracking-widest">
+                          {format(new Date(match.date), "HH:mm")}
+                        </div>
+                        <div className="text-[10px] sm:text-xs text-zinc-500 font-bold uppercase tracking-widest mt-1">
+                          Starts in {format(new Date(match.date), "MMM dd")}
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
-                <h3 className="text-sm sm:text-base font-semibold text-white text-center">
-                  {match.away_team.name_en}
-                </h3>
-                {match.away_formation && (
-                  <Badge variant="outline" className="mt-1 text-[10px]">
-                    {match.away_formation}
-                  </Badge>
-                )}
-              </div>
-            </div>
 
-            {/* Match Info Bar */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-zinc-800/50">
-              <div className="flex items-center gap-1.5 text-zinc-400 text-xs">
-                <Calendar className="h-3 w-3" />
-                <span className="truncate">
-                  {format(new Date(match.date), "MMM dd, yyyy")}
-                </span>
+                {/* Away Team */}
+                <div className="flex flex-col items-center flex-1 space-y-4">
+                  <div className="relative group/logo">
+                    <div className="absolute -inset-2 bg-primary/20 rounded-2xl blur-md opacity-0 group-hover/logo:opacity-100 transition duration-500"></div>
+                    <div className="relative w-20 h-20 sm:w-32 sm:h-32 rounded-2xl bg-linear-to-br from-white/10 to-transparent border border-white/10 flex items-center justify-center p-3 sm:p-5 transition-transform duration-500 group-hover/logo:scale-105">
+                      {match.away_team.logo_url ? (
+                        <Image
+                          src={match.away_team.logo_url}
+                          alt={match.away_team.name_en}
+                          width={120}
+                          height={120}
+                          className="object-contain w-full h-full drop-shadow-2xl"
+                        />
+                      ) : (
+                        <div className="text-zinc-600 font-bold text-3xl sm:text-4xl">
+                          {match.away_team.name_en
+                            .substring(0, 2)
+                            .toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-center space-y-1">
+                    <h3 className="text-lg sm:text-2xl font-black text-white tracking-tight uppercase">
+                      {match.away_team.name_en}
+                    </h3>
+                    {match.away_formation && (
+                      <Badge
+                        variant="outline"
+                        className="bg-zinc-800/50 text-zinc-400 text-[10px] sm:text-xs font-bold px-3"
+                      >
+                        {match.away_formation}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
               </div>
-              {match.venue && (
-                <div className="flex items-center gap-1.5 text-zinc-400 text-xs">
-                  <MapPin className="h-3 w-3" />
-                  <span className="truncate">{match.venue.name_en}</span>
+
+              {/* Enhanced Match Info Row */}
+              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 mt-10 pt-8 border-t border-white/5">
+                <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                    {match.venue?.name_en || "TBD"}
+                  </span>
                 </div>
-              )}
-              {match.attendance && (
-                <div className="flex items-center gap-1.5 text-zinc-400 text-xs">
-                  <Users className="h-3 w-3" />
-                  <span>{match.attendance.toLocaleString()}</span>
+                {match.attendance && (
+                  <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5">
+                    <Users className="h-4 w-4 text-primary" />
+                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                      {match.attendance.toLocaleString()} Attendance
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/5">
+                  <Trophy className="h-4 w-4 text-primary" />
+                  <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                    Matchday {match.match_day || match.round || "N/A"}
+                  </span>
                 </div>
-              )}
-              {match.surface && (
-                <div className="flex items-center gap-1.5 text-zinc-400 text-xs">
-                  <Target className="h-3 w-3" />
-                  <span className="capitalize">{match.surface}</span>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            </CardContent>
+
+            {/* Bottom Progress Bar (Active Only) */}
+            {isLive && (
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/5">
+                <div
+                  className="h-full bg-linear-to-r from-red-500 via-primary to-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]"
+                  style={{
+                    width: `${Math.min(
+                      ((match.minute || 0) / 90) * 100,
+                      100
+                    )}%`,
+                  }}
+                ></div>
+              </div>
+            )}
+          </Card>
+        </div>
 
         {/* Tabs Section */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

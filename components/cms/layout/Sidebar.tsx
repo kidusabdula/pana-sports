@@ -35,6 +35,11 @@ const navigation = [
     icon: Trophy,
   },
   {
+    name: "Seasons",
+    href: "/cms/seasons",
+    icon: Calendar,
+  },
+  {
     name: "Teams",
     href: "/cms/teams",
     icon: Users,

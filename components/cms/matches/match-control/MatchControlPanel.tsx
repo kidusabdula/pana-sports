@@ -114,9 +114,18 @@ export default function MatchControlPanel({ match }: MatchControlPanelProps) {
             {/* Events Tab */}
             <TabsContent value="events" className="space-y-4">
               <EventsTab
+                match={match}
                 events={state.events}
                 isLoading={state.isEventsLoading}
+                homeTeamPlayers={state.homeTeamPlayers}
+                awayTeamPlayers={state.awayTeamPlayers}
                 onRefresh={state.refetchEvents}
+                onUpdateEvent={(eventId, updates) =>
+                  state.handleUpdateEvent({ eventId, updates })
+                }
+                onDeleteEvent={state.handleDeleteEvent}
+                isUpdating={state.isUpdatingEvent}
+                isDeleting={state.isDeletingEvent}
               />
             </TabsContent>
 

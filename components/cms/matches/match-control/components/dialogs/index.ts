@@ -2,3 +2,4 @@
 export { SubstitutionDialog } from "./SubstitutionDialog";
 export { VARDialog } from "./VARDialog";
 export { PenaltyDialog } from "./PenaltyDialog";
+export { EventEditDialog } from "./EventEditDialog";

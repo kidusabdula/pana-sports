@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -15,8 +16,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useTopScorers, useDeleteTopScorer } from "@/lib/hooks/cms/useTopScorers";
+import {
+  useTopScorers,
+  useDeleteTopScorer,
+} from "@/lib/hooks/cms/useTopScorers";
 import { useLeagues } from "@/lib/hooks/cms/useLeagues";
+import { SeasonSelector } from "../seasons/SeasonSelector";
 import {
   Edit,
   Trash2,
@@ -24,7 +29,6 @@ import {
   Search,
   Trophy,
   TrendingUp,
-  TrendingDown,
   ChevronDown,
   User,
   Target,
@@ -53,7 +57,11 @@ export default function TopScorersTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLeague, setFilterLeague] = useState("all");
   const [filterSeason, setFilterSeason] = useState("all");
-  const { data: topScorers, isLoading, error } = useTopScorers({
+  const {
+    data: topScorers,
+    isLoading,
+    error,
+  } = useTopScorers({
     league_id: filterLeague === "all" ? undefined : filterLeague,
     season: filterSeason === "all" ? undefined : filterSeason,
   });
@@ -63,7 +71,9 @@ export default function TopScorersTable() {
   const filteredTopScorers =
     topScorers?.filter((topScorer) => {
       const matchesSearch =
-        topScorer.player?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        topScorer.player?.name_en
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
         (topScorer.player?.name_am?.toLowerCase() ?? "").includes(
           searchTerm.toLowerCase()
         );
@@ -84,7 +94,9 @@ export default function TopScorersTable() {
       loading: `Deleting "${playerName}"...`,
       success: `Top scorer deleted successfully`,
       error: (error) => {
-        return error instanceof Error ? error.message : "Failed to delete top scorer";
+        return error instanceof Error
+          ? error.message
+          : "Failed to delete top scorer";
       },
     });
 
@@ -118,12 +130,6 @@ export default function TopScorersTable() {
       </Card>
     );
 
-  const seasons = [
-    { value: "all", label: "All Seasons" },
-    { value: "2023/2024", label: "2023/2024" },
-    { value: "2024/2025", label: "2024/2025" },
-  ];
-
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Stats Cards */}
@@ -154,7 +160,10 @@ export default function TopScorersTable() {
                   Total Goals
                 </p>
                 <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
-                  {topScorers?.reduce((sum, scorer) => sum + (scorer.goals || 0), 0) || 0}
+                  {topScorers?.reduce(
+                    (sum, scorer) => sum + (scorer.goals || 0),
+                    0
+                  ) || 0}
                 </p>
               </div>
               <div className="p-2 sm:p-3 bg-green-500/10 rounded-full">
@@ -172,7 +181,10 @@ export default function TopScorersTable() {
                   Total Assists
                 </p>
                 <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
-                  {topScorers?.reduce((sum, scorer) => sum + (scorer.assists || 0), 0) || 0}
+                  {topScorers?.reduce(
+                    (sum, scorer) => sum + (scorer.assists || 0),
+                    0
+                  ) || 0}
                 </p>
               </div>
               <div className="p-2 sm:p-3 bg-blue-500/10 rounded-full">
@@ -190,7 +202,7 @@ export default function TopScorersTable() {
                   Active Leagues
                 </p>
                 <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
-                  {new Set(topScorers?.map(s => s.league?.id)).size || 0}
+                  {new Set(topScorers?.map((s) => s.league?.id)).size || 0}
                 </p>
               </div>
               <div className="p-2 sm:p-3 bg-purple-500/10 rounded-full">
@@ -240,18 +252,12 @@ export default function TopScorersTable() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Select value={filterSeason} onValueChange={setFilterSeason}>
-                  <SelectTrigger className="h-9 w-full sm:w-40">
-                    <SelectValue placeholder="Filter by season" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {seasons.map((season) => (
-                      <SelectItem key={season.value} value={season.value}>
-                        {season.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SeasonSelector
+                  value={filterSeason}
+                  onValueChange={setFilterSeason}
+                  showAll={true}
+                  className="w-full sm:w-40"
+                />
                 <Link href="/cms/top-scorers/create">
                   <Button size="sm" className="h-9 gap-2 rounded-lg shadow-sm">
                     <Plus className="h-4 w-4" />
@@ -303,7 +309,9 @@ export default function TopScorersTable() {
                   <TableCell colSpan={7} className="text-center py-12">
                     <div className="flex flex-col items-center space-y-3">
                       <Trophy className="h-12 w-12 text-muted-foreground/20" />
-                      <p className="text-muted-foreground">No top scorers found.</p>
+                      <p className="text-muted-foreground">
+                        No top scorers found.
+                      </p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -324,12 +332,13 @@ export default function TopScorersTable() {
                     </TableCell>
                     <TableCell className="pl-6">
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                        <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center relative overflow-hidden">
                           {topScorer.player?.photo_url ? (
-                            <img
+                            <Image
                               src={topScorer.player.photo_url}
                               alt={topScorer.player.name_en}
-                              className="h-full w-full object-contain"
+                              fill
+                              className="object-contain"
                             />
                           ) : (
                             <User className="h-5 w-5 text-primary" />
@@ -348,11 +357,14 @@ export default function TopScorersTable() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         {topScorer.team?.logo_url && (
-                          <img
-                            src={topScorer.team.logo_url}
-                            alt={topScorer.team.name_en}
-                            className="h-5 w-5 object-contain"
-                          />
+                          <div className="h-5 w-5 relative">
+                            <Image
+                              src={topScorer.team.logo_url}
+                              alt={topScorer.team.name_en}
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
                         )}
                         <span className="text-sm text-foreground truncate max-w-[150px]">
                           {topScorer.team?.name_en}
@@ -398,15 +410,19 @@ export default function TopScorersTable() {
                           </AlertDialogTrigger>
                           <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Top Scorer</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                Delete Top Scorer
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
                                 Are you sure you want to delete &quot;
-                                {topScorer.player?.name_en}&quot;? This action cannot be
-                                undone.
+                                {topScorer.player?.name_en}&quot;? This action
+                                cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                              <AlertDialogCancel className="m-0">Cancel</AlertDialogCancel>
+                              <AlertDialogCancel className="m-0">
+                                Cancel
+                              </AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() =>
                                   handleDelete(
@@ -457,7 +473,8 @@ export default function TopScorersTable() {
                             {topScorer.player?.name_en}
                           </h3>
                           <p className="text-xs text-muted-foreground truncate">
-                            #{topScorer.player?.jersey_number} • {topScorer.team?.name_en}
+                            #{topScorer.player?.jersey_number} •{" "}
+                            {topScorer.team?.name_en}
                           </p>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">

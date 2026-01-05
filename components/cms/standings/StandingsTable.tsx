@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { format } from "date-fns";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,11 +24,11 @@ import {
   Search,
   Trophy,
   TrendingUp,
-  TrendingDown,
   ChevronDown,
   Shield,
 } from "lucide-react";
 import { toast } from "sonner";
+import { SeasonSelector } from "../seasons/SeasonSelector";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,7 +52,11 @@ export default function StandingsTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLeague, setFilterLeague] = useState("all");
   const [filterSeason, setFilterSeason] = useState("all");
-  const { data: standings, isLoading, error } = useStandings({
+  const {
+    data: standings,
+    isLoading,
+    error,
+  } = useStandings({
     league_id: filterLeague === "all" ? undefined : filterLeague,
     season: filterSeason === "all" ? undefined : filterSeason,
   });
@@ -62,7 +66,9 @@ export default function StandingsTable() {
   const filteredStandings =
     standings?.filter((standing) => {
       const matchesSearch =
-        standing.team?.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        standing.team?.name_en
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
         (standing.team?.name_am?.toLowerCase() ?? "").includes(
           searchTerm.toLowerCase()
         );
@@ -70,6 +76,7 @@ export default function StandingsTable() {
       const matchesLeague =
         filterLeague === "all" || standing.league?.id === filterLeague;
 
+      // Filter by season string (legacy field)
       const matchesSeason =
         filterSeason === "all" || standing.season === filterSeason;
 
@@ -83,7 +90,9 @@ export default function StandingsTable() {
       loading: `Deleting "${teamName}"...`,
       success: `Standing deleted successfully`,
       error: (error) => {
-        return error instanceof Error ? error.message : "Failed to delete standing";
+        return error instanceof Error
+          ? error.message
+          : "Failed to delete standing";
       },
     });
 
@@ -116,12 +125,6 @@ export default function StandingsTable() {
         </CardContent>
       </Card>
     );
-
-  const seasons = [
-    { value: "all", label: "All Seasons" },
-    { value: "2023/2024", label: "2023/2024" },
-    { value: "2024/2025", label: "2024/2025" },
-  ];
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -171,7 +174,7 @@ export default function StandingsTable() {
                   Active Leagues
                 </p>
                 <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
-                  {new Set(standings?.map(s => s.league?.id)).size || 0}
+                  {new Set(standings?.map((s) => s.league?.id)).size || 0}
                 </p>
               </div>
               <div className="p-2 sm:p-3 bg-blue-500/10 rounded-full">
@@ -189,7 +192,8 @@ export default function StandingsTable() {
                   Total Goals
                 </p>
                 <p className="text-2xl sm:text-3xl font-bold text-foreground mt-1">
-                  {standings?.reduce((sum, s) => sum + (s.goals_for || 0), 0) || 0}
+                  {standings?.reduce((sum, s) => sum + (s.goals_for || 0), 0) ||
+                    0}
                 </p>
               </div>
               <div className="p-2 sm:p-3 bg-purple-500/10 rounded-full">
@@ -239,18 +243,14 @@ export default function StandingsTable() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Select value={filterSeason} onValueChange={setFilterSeason}>
-                  <SelectTrigger className="h-9 w-full sm:w-40">
-                    <SelectValue placeholder="Filter by season" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {seasons.map((season) => (
-                      <SelectItem key={season.value} value={season.value}>
-                        {season.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="w-full sm:w-40">
+                  <SeasonSelector
+                    value={filterSeason}
+                    onValueChange={setFilterSeason}
+                    showAll={true}
+                    placeholder="All Seasons"
+                  />
+                </div>
                 <Link href="/cms/standings/create">
                   <Button size="sm" className="h-9 gap-2 rounded-lg shadow-sm">
                     <Plus className="h-4 w-4" />
@@ -314,7 +314,9 @@ export default function StandingsTable() {
                   <TableCell colSpan={11} className="text-center py-12">
                     <div className="flex flex-col items-center space-y-3">
                       <Trophy className="h-12 w-12 text-muted-foreground/20" />
-                      <p className="text-muted-foreground">No standings found.</p>
+                      <p className="text-muted-foreground">
+                        No standings found.
+                      </p>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -336,11 +338,14 @@ export default function StandingsTable() {
                     <TableCell className="pl-6">
                       <div className="flex items-center gap-3">
                         {standing.team?.logo_url && (
-                          <img
-                            src={standing.team.logo_url}
-                            alt={standing.team.name_en}
-                            className="h-8 w-8 object-contain"
-                          />
+                          <div className="relative h-8 w-8">
+                            <Image
+                              src={standing.team.logo_url}
+                              alt={standing.team.name_en}
+                              fill
+                              className="object-contain"
+                            />
+                          </div>
                         )}
                         <div className="flex flex-col">
                           <span className="font-medium text-foreground truncate max-w-[200px]">
@@ -384,7 +389,13 @@ export default function StandingsTable() {
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={standing.gd > 0 ? "default" : standing.gd < 0 ? "destructive" : "secondary"}
+                        variant={
+                          standing.gd > 0
+                            ? "default"
+                            : standing.gd < 0
+                            ? "destructive"
+                            : "secondary"
+                        }
                         className="font-medium"
                       >
                         {standing.gd > 0 ? "+" : ""}
@@ -418,15 +429,20 @@ export default function StandingsTable() {
                           </AlertDialogTrigger>
                           <AlertDialogContent className="max-w-[90vw] sm:max-w-md">
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Standing</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                Delete Standing
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete the standing for &quot;
-                                {standing.team?.name_en}&quot;? This action cannot be
-                                undone.
+                                Are you sure you want to delete the standing for
+                                &quot;
+                                {standing.team?.name_en}&quot;? This action
+                                cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                              <AlertDialogCancel className="m-0">Cancel</AlertDialogCancel>
+                              <AlertDialogCancel className="m-0">
+                                Cancel
+                              </AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() =>
                                   handleDelete(
@@ -506,7 +522,8 @@ export default function StandingsTable() {
                                   Delete Standing
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete the standing for &quot;
+                                  Are you sure you want to delete the standing
+                                  for &quot;
                                   {standing.team?.name_en}&quot;? This action
                                   cannot be undone.
                                 </AlertDialogDescription>
@@ -553,7 +570,13 @@ export default function StandingsTable() {
                         <div className="flex items-center gap-1.5">
                           <span className="text-muted-foreground">GD:</span>
                           <Badge
-                            variant={standing.gd > 0 ? "default" : standing.gd < 0 ? "destructive" : "secondary"}
+                            variant={
+                              standing.gd > 0
+                                ? "default"
+                                : standing.gd < 0
+                                ? "destructive"
+                                : "secondary"
+                            }
                             className="font-medium text-xs"
                           >
                             {standing.gd > 0 ? "+" : ""}

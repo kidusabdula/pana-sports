@@ -141,7 +141,7 @@ export const createMatchInputSchema = z
     wind: z.string().optional(),
     surface: z.string().default("grass").optional(),
     // Season and Cup
-    season_id: z.string().uuid().optional(),
+    season_id: z.string().uuid("Season is required"),
     cup_edition_id: z.string().uuid().optional(),
     is_cup_match: z.boolean().default(false).optional(),
     // TIME PERSISTENCE FIELDS

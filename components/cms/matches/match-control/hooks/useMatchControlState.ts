@@ -10,6 +10,8 @@ import { useMatch } from "@/lib/hooks/cms/useMatches";
 import {
   useMatchEvents,
   useCreateMatchEvent,
+  useUpdateMatchEvent,
+  useDeleteMatchEvent,
 } from "@/lib/hooks/cms/useMatchEvents";
 import { useMatchControl } from "@/lib/hooks/cms/useMatchControl";
 import {
@@ -63,6 +65,8 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
 
   // ============ Mutations ============
   const createEventMutation = useCreateMatchEvent(match.id);
+  const updateEventMutation = useUpdateMatchEvent(match.id);
+  const deleteEventMutation = useDeleteMatchEvent(match.id);
   const matchControlMutation = useMatchControl(match.id);
   const createLineupsMutation = useCreateMatchLineups(match.id);
   const deleteLineupsMutation = useDeleteMatchLineups(match.id);
@@ -252,7 +256,7 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
   // Polling fallback for active matches
   useEffect(() => {
     const isActiveMatch = ACTIVE_MATCH_STATUSES.includes(
-      currentMatch.status as any
+      currentMatch.status as (typeof ACTIVE_MATCH_STATUSES)[number]
     );
     if (!isActiveMatch) return;
 
@@ -325,21 +329,24 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
     }
   };
 
-  const createEvent = (payload: CreateEventPayload) => {
-    createEventMutation.mutate(payload);
-  };
+  const createEvent = useCallback(
+    (payload: CreateEventPayload) => {
+      createEventMutation.mutate(payload);
+    },
+    [createEventMutation]
+  );
 
-  const resetEventForm = () => {
+  const resetEventForm = useCallback(() => {
     setSelectedPlayer("");
     setSelectedTeam("");
     setEventDescription("");
-  };
+  }, []);
 
-  const resetSubstitutionForm = () => {
+  const resetSubstitutionForm = useCallback(() => {
     setSelectedSubInPlayer("");
     setSelectedSubOutPlayer("");
     setEventDescription("");
-  };
+  }, []);
 
   // ============ Match Control Actions ============
   const startMatch = useCallback(() => {
@@ -384,7 +391,7 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
       is_assist: false,
       confirmed: false,
     });
-  }, [match.id, matchMinute, matchControlMutation]);
+  }, [match.id, matchMinute, matchControlMutation, createEvent]);
 
   const resumeMatch = useCallback(() => {
     // Resume match - we need to recalculate the timestamp based on stored minute
@@ -410,7 +417,7 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
       is_assist: false,
       confirmed: false,
     });
-  }, [match.id, matchMinute, matchControlMutation]);
+  }, [match.id, matchMinute, matchControlMutation, createEvent]);
 
   const halfTime = useCallback(() => {
     const payload = createMatchControlPayload("half_time");
@@ -428,7 +435,7 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
       is_assist: false,
       confirmed: false,
     });
-  }, [match.id, matchControlMutation]);
+  }, [match.id, matchControlMutation, createEvent]);
 
   const secondHalf = useCallback(() => {
     const payload = createMatchControlPayload("second_half");
@@ -448,21 +455,11 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
       is_assist: false,
       confirmed: false,
     });
-  }, [match.id, matchControlMutation]);
+  }, [match.id, matchControlMutation, createEvent]);
 
   const fullTime = useCallback(() => {
     const payload = createMatchControlPayload("full_time");
-    console.log("fullTime called, payload:", payload);
-    matchControlMutation.mutate(payload, {
-      onSuccess: (data) => {
-        console.log("fullTime mutation success, new status:", data?.status);
-        toast.success("Match ended - Full Time");
-      },
-      onError: (error) => {
-        console.error("fullTime mutation error:", error);
-        toast.error("Failed to end match");
-      },
-    });
+    matchControlMutation.mutate(payload);
     setIsClockRunning(false);
 
     createEvent({
@@ -476,7 +473,7 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
       is_assist: false,
       confirmed: false,
     });
-  }, [match.id, matchControlMutation]);
+  }, [match.id, matchControlMutation, createEvent]);
 
   const startExtraTime = useCallback(() => {
     const payload = createMatchControlPayload("extra_time");
@@ -497,7 +494,7 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
       is_assist: false,
       confirmed: false,
     });
-  }, [match.id, matchControlMutation]);
+  }, [match.id, matchControlMutation, createEvent]);
 
   const endExtraTime = useCallback(() => {
     const payload = createMatchControlPayload("end_extra_time");
@@ -515,7 +512,7 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
       is_assist: false,
       confirmed: false,
     });
-  }, [match.id, matchControlMutation]);
+  }, [match.id, matchControlMutation, createEvent]);
 
   const startPenaltyShootout = useCallback(() => {
     const payload = createMatchControlPayload("penalties");
@@ -534,24 +531,11 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
       is_assist: false,
       confirmed: false,
     });
-  }, [match.id, matchControlMutation]);
+  }, [match.id, matchControlMutation, createEvent]);
 
   const endPenaltyShootout = useCallback(() => {
     const payload = createMatchControlPayload("end_penalties");
-    console.log("endPenaltyShootout called, payload:", payload);
-    matchControlMutation.mutate(payload, {
-      onSuccess: (data) => {
-        console.log(
-          "endPenaltyShootout mutation success, new status:",
-          data?.status
-        );
-        toast.success("Penalty shootout ended");
-      },
-      onError: (error) => {
-        console.error("endPenaltyShootout mutation error:", error);
-        toast.error("Failed to end penalty shootout");
-      },
-    });
+    matchControlMutation.mutate(payload);
 
     createEvent({
       match_id: match.id,
@@ -564,7 +548,7 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
       is_assist: false,
       confirmed: false,
     });
-  }, [match.id, matchControlMutation]);
+  }, [match.id, matchControlMutation, createEvent]);
 
   const restartMatch = useCallback(() => {
     // Reset match back to scheduled status with cleared timestamps
@@ -648,15 +632,13 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
   );
 
   const addGoal = useCallback(() => {
-    if (!selectedPlayer || !selectedTeam) {
-      toast.error("Please select a player and team");
-      return;
-    }
+    const teamId = selectedTeam === "none" ? null : selectedTeam;
+    const playerId = selectedPlayer === "none" ? null : selectedPlayer;
 
     createEvent({
       match_id: match.id,
-      player_id: selectedPlayer,
-      team_id: selectedTeam,
+      player_id: playerId || null,
+      team_id: teamId || null,
       minute: matchMinute,
       type: "goal",
       description_en: eventDescription,
@@ -664,7 +646,7 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
       confirmed: false,
     });
 
-    const isHomeTeam = selectedTeam === match.home_team_id;
+    const isHomeTeam = teamId === match.home_team_id;
     updateScore(isHomeTeam, 1);
     resetEventForm();
   }, [
@@ -675,18 +657,18 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
     matchMinute,
     eventDescription,
     updateScore,
+    createEvent,
+    resetEventForm,
   ]);
 
   const addOwnGoal = useCallback(() => {
-    if (!selectedPlayer || !selectedTeam) {
-      toast.error("Please select a player and team");
-      return;
-    }
+    const teamId = selectedTeam === "none" ? null : selectedTeam;
+    const playerId = selectedPlayer === "none" ? null : selectedPlayer;
 
     createEvent({
       match_id: match.id,
-      player_id: selectedPlayer,
-      team_id: selectedTeam,
+      player_id: playerId || null,
+      team_id: teamId || null,
       minute: matchMinute,
       type: "own_goal",
       description_en: eventDescription,
@@ -695,7 +677,7 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
     });
 
     // Own goal scores for opposite team
-    const isHomeTeam = selectedTeam === match.home_team_id;
+    const isHomeTeam = teamId === match.home_team_id;
     updateScore(!isHomeTeam, 1);
     resetEventForm();
   }, [
@@ -706,18 +688,18 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
     matchMinute,
     eventDescription,
     updateScore,
+    createEvent,
+    resetEventForm,
   ]);
 
   const addPenaltyGoal = useCallback(() => {
-    if (!selectedPlayer || !selectedTeam) {
-      toast.error("Please select a player and team");
-      return;
-    }
+    const teamId = selectedTeam === "none" ? null : selectedTeam;
+    const playerId = selectedPlayer === "none" ? null : selectedPlayer;
 
     createEvent({
       match_id: match.id,
-      player_id: selectedPlayer,
-      team_id: selectedTeam,
+      player_id: playerId || null,
+      team_id: teamId || null,
       minute: matchMinute,
       type: "penalty_goal",
       description_en: eventDescription,
@@ -725,7 +707,7 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
       confirmed: false,
     });
 
-    const isHomeTeam = selectedTeam === match.home_team_id;
+    const isHomeTeam = teamId === match.home_team_id;
     updateScore(isHomeTeam, 1);
     resetEventForm();
   }, [
@@ -736,18 +718,18 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
     matchMinute,
     eventDescription,
     updateScore,
+    createEvent,
+    resetEventForm,
   ]);
 
   const addMissedPenalty = useCallback(() => {
-    if (!selectedPlayer || !selectedTeam) {
-      toast.error("Please select a player and team");
-      return;
-    }
+    const teamId = selectedTeam === "none" ? null : selectedTeam;
+    const playerId = selectedPlayer === "none" ? null : selectedPlayer;
 
     createEvent({
       match_id: match.id,
-      player_id: selectedPlayer,
-      team_id: selectedTeam,
+      player_id: playerId || null,
+      team_id: teamId || null,
       minute: matchMinute,
       type: "penalty_miss",
       description_en: eventDescription,
@@ -756,18 +738,24 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
     });
 
     resetEventForm();
-  }, [match.id, selectedPlayer, selectedTeam, matchMinute, eventDescription]);
+  }, [
+    match.id,
+    selectedPlayer,
+    selectedTeam,
+    matchMinute,
+    eventDescription,
+    createEvent,
+    resetEventForm,
+  ]);
 
   const addYellowCard = useCallback(() => {
-    if (!selectedPlayer || !selectedTeam) {
-      toast.error("Please select a player and team");
-      return;
-    }
+    const teamId = selectedTeam === "none" ? null : selectedTeam;
+    const playerId = selectedPlayer === "none" ? null : selectedPlayer;
 
     createEvent({
       match_id: match.id,
-      player_id: selectedPlayer,
-      team_id: selectedTeam,
+      player_id: playerId || null,
+      team_id: teamId || null,
       minute: matchMinute,
       type: "yellow",
       description_en: eventDescription,
@@ -776,18 +764,24 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
     });
 
     resetEventForm();
-  }, [match.id, selectedPlayer, selectedTeam, matchMinute, eventDescription]);
+  }, [
+    match.id,
+    selectedPlayer,
+    selectedTeam,
+    matchMinute,
+    eventDescription,
+    createEvent,
+    resetEventForm,
+  ]);
 
   const addRedCard = useCallback(() => {
-    if (!selectedPlayer || !selectedTeam) {
-      toast.error("Please select a player and team");
-      return;
-    }
+    const teamId = selectedTeam === "none" ? null : selectedTeam;
+    const playerId = selectedPlayer === "none" ? null : selectedPlayer;
 
     createEvent({
       match_id: match.id,
-      player_id: selectedPlayer,
-      team_id: selectedTeam,
+      player_id: playerId || null,
+      team_id: teamId || null,
       minute: matchMinute,
       type: "red",
       description_en: eventDescription,
@@ -796,18 +790,24 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
     });
 
     resetEventForm();
-  }, [match.id, selectedPlayer, selectedTeam, matchMinute, eventDescription]);
+  }, [
+    match.id,
+    selectedPlayer,
+    selectedTeam,
+    matchMinute,
+    eventDescription,
+    createEvent,
+    resetEventForm,
+  ]);
 
   const addSecondYellow = useCallback(() => {
-    if (!selectedPlayer || !selectedTeam) {
-      toast.error("Please select a player and team");
-      return;
-    }
+    const teamId = selectedTeam === "none" ? null : selectedTeam;
+    const playerId = selectedPlayer === "none" ? null : selectedPlayer;
 
     createEvent({
       match_id: match.id,
-      player_id: selectedPlayer,
-      team_id: selectedTeam,
+      player_id: playerId || null,
+      team_id: teamId || null,
       minute: matchMinute,
       type: "second_yellow",
       description_en: eventDescription,
@@ -816,22 +816,31 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
     });
 
     resetEventForm();
-  }, [match.id, selectedPlayer, selectedTeam, matchMinute, eventDescription]);
+  }, [
+    match.id,
+    selectedPlayer,
+    selectedTeam,
+    matchMinute,
+    eventDescription,
+    createEvent,
+    resetEventForm,
+  ]);
 
   const addSubstitution = useCallback(() => {
-    if (!selectedSubInPlayer || !selectedSubOutPlayer || !selectedTeam) {
-      toast.error("Please select both players and team");
-      return;
-    }
+    const teamId = selectedTeam === "none" ? null : selectedTeam;
+    const subInPlayerId =
+      selectedSubInPlayer === "none" ? null : selectedSubInPlayer;
+    const subOutPlayerId =
+      selectedSubOutPlayer === "none" ? null : selectedSubOutPlayer;
 
     createEvent({
       match_id: match.id,
-      team_id: selectedTeam,
+      team_id: teamId || null,
       minute: matchMinute,
       type: "sub",
       description_en: eventDescription,
-      subbed_in_player_id: selectedSubInPlayer,
-      subbed_out_player_id: selectedSubOutPlayer,
+      subbed_in_player_id: subInPlayerId || null,
+      subbed_out_player_id: subOutPlayerId || null,
       is_assist: false,
       confirmed: false,
       player_id: null,
@@ -846,17 +855,15 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
     eventDescription,
     selectedSubInPlayer,
     selectedSubOutPlayer,
+    createEvent,
+    resetSubstitutionForm,
   ]);
 
   const addCorner = useCallback(() => {
-    if (!selectedTeam) {
-      toast.error("Please select a team");
-      return;
-    }
-
+    const teamId = selectedTeam === "none" ? null : selectedTeam;
     createEvent({
       match_id: match.id,
-      team_id: selectedTeam,
+      team_id: teamId || null,
       minute: matchMinute,
       type: "corner",
       description_en: eventDescription,
@@ -866,17 +873,13 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
     });
 
     setEventDescription("");
-  }, [match.id, selectedTeam, matchMinute, eventDescription]);
+  }, [match.id, selectedTeam, matchMinute, eventDescription, createEvent]);
 
   const addFreeKick = useCallback(() => {
-    if (!selectedTeam) {
-      toast.error("Please select a team");
-      return;
-    }
-
+    const teamId = selectedTeam === "none" ? null : selectedTeam;
     createEvent({
       match_id: match.id,
-      team_id: selectedTeam,
+      team_id: teamId || null,
       minute: matchMinute,
       type: "free_kick",
       description_en: eventDescription,
@@ -886,17 +889,13 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
     });
 
     setEventDescription("");
-  }, [match.id, selectedTeam, matchMinute, eventDescription]);
+  }, [match.id, selectedTeam, matchMinute, eventDescription, createEvent]);
 
   const addOffside = useCallback(() => {
-    if (!selectedTeam) {
-      toast.error("Please select a team");
-      return;
-    }
-
+    const teamId = selectedTeam === "none" ? null : selectedTeam;
     createEvent({
       match_id: match.id,
-      team_id: selectedTeam,
+      team_id: teamId || null,
       minute: matchMinute,
       type: "offside",
       description_en: eventDescription,
@@ -906,7 +905,7 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
     });
 
     setEventDescription("");
-  }, [match.id, selectedTeam, matchMinute, eventDescription]);
+  }, [match.id, selectedTeam, matchMinute, eventDescription, createEvent]);
 
   const addInjuryTime = useCallback(
     (half: "first" | "second", minutes: number) => {
@@ -925,7 +924,7 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
         confirmed: false,
       });
     },
-    [match.id]
+    [match.id, createEvent]
   );
 
   const addVarCheck = useCallback(() => {
@@ -948,17 +947,14 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
 
     setVarType("");
     setVarDialogOpen(false);
-  }, [match.id, matchMinute, varType]);
+  }, [match.id, matchMinute, varType, createEvent]);
 
   const addPenaltyShootoutResult = useCallback(() => {
-    if (!penaltyTeam || !penaltyResult) {
-      toast.error("Please select a team and result");
-      return;
-    }
+    const teamId = penaltyTeam === "none" ? null : penaltyTeam;
 
     createEvent({
       match_id: match.id,
-      team_id: penaltyTeam,
+      team_id: teamId || null,
       minute: 120,
       type:
         penaltyResult === "scored"
@@ -980,7 +976,7 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
     setPenaltyTeam("");
     setPenaltyResult("");
     setPenaltyDialogOpen(false);
-  }, [match.id, penaltyTeam, penaltyResult]);
+  }, [match.id, penaltyTeam, penaltyResult, createEvent]);
 
   // ============ Lineup Actions ============
   const saveLineups = useCallback(() => {
@@ -1168,6 +1164,12 @@ export function useMatchControlState({ match }: UseMatchControlStateProps) {
     addInjuryTime,
     addVarCheck,
     addPenaltyShootoutResult,
+
+    // Event Management
+    handleUpdateEvent: updateEventMutation.mutate,
+    handleDeleteEvent: deleteEventMutation.mutate,
+    isUpdatingEvent: updateEventMutation.isPending,
+    isDeletingEvent: deleteEventMutation.isPending,
 
     // Lineup actions
     saveLineups,

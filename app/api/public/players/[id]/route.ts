@@ -19,16 +19,22 @@ export async function GET(
     const supabase = await createClient();
 
     // Fetch the player with related data
-    const { data: player, error: playerError } = await supabase
-      .from("players")
-      .select(
-        `
+    const isUUID =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        id
+      );
+
+    const playerQuery = supabase.from("players").select(
+      `
         *,
         team:teams(id, name_en, name_am, slug, logo_url)
       `
-      )
-      .eq("id", id)
-      .single();
+    );
+
+    const { data: player, error: playerError } = await (isUUID
+      ? playerQuery.eq("id", id)
+      : playerQuery.eq("slug", id)
+    ).single();
 
     if (playerError) {
       console.error("Supabase error fetching player:", playerError);
@@ -55,7 +61,7 @@ export async function GET(
         team:teams(id, name_en, name_am, slug, logo_url)
       `
       )
-      .eq("player_id", id)
+      .eq("player_id", player.id)
       .order("season", { ascending: false })
       .limit(5);
 

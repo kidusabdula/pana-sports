@@ -253,7 +253,7 @@ export default function Navbar() {
         {/* Dropdown Menu */}
         <div
           className={cn(
-            "absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-[#0a0a0a] border border-zinc-800 rounded-xl shadow-2xl p-2 transform transition-all duration-200 origin-top",
+            "absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-[#0a0a0a] border border-zinc-800 rounded-xl shadow-2xl p-2 transform transition-all duration-200 origin-top z-100",
             isOpen
               ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
               : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
@@ -286,13 +286,15 @@ export default function Navbar() {
     "/womens-league",
     "/ethiopian-cup",
     "/cups",
+    "/matches",
+    "/live",
   ].some((path) => pathname.startsWith(path));
 
   return (
     <>
       <header
         className={cn(
-          "z-40 transition-all duration-500 border-b",
+          "z-100 transition-all duration-500 border-b",
           isCompetitionPage ? "relative" : "sticky top-0",
           scrolled
             ? "bg-black/20 backdrop-blur-xl border-white/5"

@@ -10,6 +10,7 @@ export async function GET(request: Request) {
       : undefined;
     const leagueId = searchParams.get("league_id");
     const season = searchParams.get("season");
+    const seasonId = searchParams.get("season_id");
 
     const supabase = await createClient();
 
@@ -30,6 +31,10 @@ export async function GET(request: Request) {
 
     if (season && season !== "undefined") {
       query = query.eq("season", season);
+    }
+
+    if (seasonId && seasonId !== "undefined") {
+      query = query.eq("season_id", seasonId);
     }
 
     if (limit) {

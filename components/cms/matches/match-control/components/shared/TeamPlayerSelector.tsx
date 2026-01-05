@@ -39,7 +39,11 @@ export function TeamPlayerSelector({
   showDescription = true,
 }: TeamPlayerSelectorProps) {
   const activePlayers =
-    selectedTeam === match.home_team_id ? homeTeamPlayers : awayTeamPlayers;
+    selectedTeam === match.home_team_id
+      ? homeTeamPlayers
+      : selectedTeam === match.away_team_id
+      ? awayTeamPlayers
+      : [...homeTeamPlayers, ...awayTeamPlayers];
 
   return (
     <div className="space-y-4">
@@ -47,9 +51,10 @@ export function TeamPlayerSelector({
         <Label htmlFor="team">Team</Label>
         <Select value={selectedTeam} onValueChange={onTeamChange}>
           <SelectTrigger>
-            <SelectValue placeholder="Select team" />
+            <SelectValue placeholder="Select team (optional)" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="none">None (Optional)</SelectItem>
             <SelectItem value={match.home_team_id}>
               {match.home_team?.name_en}
             </SelectItem>
@@ -62,17 +67,12 @@ export function TeamPlayerSelector({
 
       <div>
         <Label htmlFor="player">Player</Label>
-        <Select
-          value={selectedPlayer}
-          onValueChange={onPlayerChange}
-          disabled={!selectedTeam}
-        >
+        <Select value={selectedPlayer} onValueChange={onPlayerChange}>
           <SelectTrigger>
-            <SelectValue
-              placeholder={selectedTeam ? "Select player" : "Select team first"}
-            />
+            <SelectValue placeholder="Select player (optional)" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="none">None (Optional)</SelectItem>
             {activePlayers.map((player) => (
               <SelectItem key={player.id} value={player.id}>
                 {player.jersey_number ? `${player.jersey_number} - ` : ""}

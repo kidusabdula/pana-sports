@@ -56,65 +56,36 @@ export const matchEventEntitySchema = z.object({
 });
 
 // API input schema for creating match events
-export const createMatchEventInputSchema = z
-  .object({
-    match_id: z.string().uuid(),
-    player_id: z.string().uuid().nullable(),
-    team_id: z.string().uuid().nullable(),
-    minute: z.number(),
-    type: z.enum(eventTypes),
-    description_en: z.string().optional(),
-    description_am: z.string().optional(),
-    // New fields from schema update
-    subbed_in_player_id: z.string().uuid().nullable().optional(),
-    subbed_out_player_id: z.string().uuid().nullable().optional(),
-    is_assist: z.boolean().default(false),
-    confirmed: z.boolean().default(false),
-  })
-  .refine(
-    (data) => {
-      // Only validate player for goal-related events
-      if (["goal", "own_goal", "penalty", "penalty_goal"].includes(data.type)) {
-        return !!data.player_id;
-      }
-      return true;
-    },
-    {
-      message: "Goal events must have a player",
-      path: ["player_id"],
-    }
-  )
-  .refine(
-    (data) => {
-      // Only validate player for card events
-      if (["yellow", "red", "second_yellow"].includes(data.type)) {
-        return !!data.player_id;
-      }
-      return true;
-    },
-    {
-      message: "Card events must have a player",
-      path: ["player_id"],
-    }
-  )
-  .refine(
-    (data) => {
-      // Validate substitution events have both players
-      if (data.type === "sub") {
-        return !!(data.subbed_in_player_id && data.subbed_out_player_id);
-      }
-      return true;
-    },
-    {
-      message:
-        "Substitution events must have both subbed in and subbed out players",
-      path: ["subbed_in_player_id"],
-    }
-  );
+// Note: player_id and team_id are optional - events can be created without them
+// and updated later with the proper player/team assignments
+export const createMatchEventInputSchema = z.object({
+  match_id: z.string().uuid(),
+  player_id: z.string().uuid().nullable().optional(),
+  team_id: z.string().uuid().nullable().optional(),
+  minute: z.number(),
+  type: z.enum(eventTypes),
+  description_en: z.string().optional().nullable(),
+  description_am: z.string().optional().nullable(),
+  // Fields for substitution events
+  subbed_in_player_id: z.string().uuid().nullable().optional(),
+  subbed_out_player_id: z.string().uuid().nullable().optional(),
+  is_assist: z.boolean().default(false),
+  confirmed: z.boolean().default(false),
+});
 
-// API input schema for updating match events
-export const updateMatchEventInputSchema =
-  createMatchEventInputSchema.partial();
+// API input schema for updating match events - all fields optional
+export const updateMatchEventInputSchema = z.object({
+  player_id: z.string().uuid().nullable().optional(),
+  team_id: z.string().uuid().nullable().optional(),
+  minute: z.number().optional(),
+  type: z.enum(eventTypes).optional(),
+  description_en: z.string().optional().nullable(),
+  description_am: z.string().optional().nullable(),
+  subbed_in_player_id: z.string().uuid().nullable().optional(),
+  subbed_out_player_id: z.string().uuid().nullable().optional(),
+  is_assist: z.boolean().optional(),
+  confirmed: z.boolean().optional(),
+});
 
 // Schema for match events with joined relations
 export const matchEventWithRelationsSchema = matchEventEntitySchema.extend({

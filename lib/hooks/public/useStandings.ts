@@ -1,5 +1,5 @@
 // lib/hooks/public/useStandings.ts
-import { useQuery } from '@tanstack/react-query'
+import { useQuery } from "@tanstack/react-query";
 
 // Define types
 export type Standing = {
@@ -30,10 +30,16 @@ export type Standing = {
     slug: string;
     category: string;
   };
+  season_id?: string;
 };
 
 // API helper functions
-async function fetchStandings(params?: { league_id?: string; season?: string; limit?: number }) {
+async function fetchStandings(params?: {
+  league_id?: string;
+  season?: string;
+  season_id?: string;
+  limit?: number;
+}) {
   const queryString = new URLSearchParams(
     Object.entries(params || {}).reduce((acc, [key, value]) => {
       if (value !== undefined && value !== null) {
@@ -42,19 +48,26 @@ async function fetchStandings(params?: { league_id?: string; season?: string; li
       return acc;
     }, {} as Record<string, string>)
   ).toString();
-  
-  const res = await fetch(`/api/public/standings${queryString ? '?' + queryString : ''}`)
+
+  const res = await fetch(
+    `/api/public/standings${queryString ? "?" + queryString : ""}`
+  );
   if (!res.ok) {
-    const error = await res.json()
-    throw new Error(error.error || 'Failed to fetch standings')
+    const error = await res.json();
+    throw new Error(error.error || "Failed to fetch standings");
   }
-  return res.json() as Promise<Standing[]>
+  return res.json() as Promise<Standing[]>;
 }
 
 // React Query hooks
-export function useStandings(params?: { league_id?: string; season?: string; limit?: number }) {
+export function useStandings(params?: {
+  league_id?: string;
+  season?: string;
+  season_id?: string;
+  limit?: number;
+}) {
   return useQuery({
-    queryKey: ['standings', params],
+    queryKey: ["standings", params],
     queryFn: () => fetchStandings(params),
-  })
+  });
 }
