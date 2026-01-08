@@ -20,8 +20,13 @@ export default function OtherNews() {
 
   return (
     <section className="bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-bold text-white">More Stories</h3>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="h-6 w-1 rounded-full bg-primary" />
+          <h3 className="text-xl font-bold tracking-tight text-white">
+            More Stories
+          </h3>
+        </div>
         <Link
           href="/news"
           className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"

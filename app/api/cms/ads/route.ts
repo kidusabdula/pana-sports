@@ -46,13 +46,20 @@ export async function POST(request: Request) {
     await requireAdmin();
     const supabase = await createClient();
     const body = await request.json();
+    const result = adImageSchema.safeParse(body);
 
-    const validatedData = adImageSchema.parse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Invalid input", details: result.error.format() },
+        { status: 400 }
+      );
+    }
 
     const { data, error } = await supabase
       .from("ad_images")
       .insert({
-        ...validatedData,
+        ...result.data,
+        image_url: result.data.image_url_large, // Fallback for legacy code/constraints
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
@@ -60,11 +67,25 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      console.error("Supabase Ad Image Insert Error:", {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+        data: result.data,
+      });
+      return NextResponse.json(
+        {
+          error: `Database error: ${error.message}`,
+          details: error.details,
+        },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
+    console.error("Ad creation unexpected error:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }

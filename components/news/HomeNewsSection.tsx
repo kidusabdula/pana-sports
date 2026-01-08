@@ -2,18 +2,15 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Image from "next/image";
 import { useHomeNews, useFilteredNews } from "@/lib/hooks/public/useNews";
-import {
-  transformNewsToUINews,
-  transformNewsList,
-} from "@/lib/utils/transformers";
+import { transformNewsList } from "@/lib/utils/transformers";
 import NewsCard from "@/components/news/NewsCard";
 import NewsFilter from "@/components/news/NewsFilter";
 import ErrorState from "@/components/shared/ErrorState";
 import HomeNewsSectionSkeleton from "@/components/shared/Skeletons/HomeNewsSectionSkeleton";
 import { motion } from "framer-motion";
 import { Zap } from "lucide-react";
-import { Suspense } from "react";
 
 export default function HomeNewsSection() {
   const [activeCategory, setActiveCategory] = useState("all");
@@ -53,13 +50,32 @@ export default function HomeNewsSection() {
   if (isError) {
     return (
       <div className="space-y-8">
-        <div className="space-y-3">
-          <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-3 bg-linear-to-r from-white via-zinc-400 to-zinc-600 bg-clip-text text-transparent">
-            PANA SPORTS
+        <div className="mb-12 relative">
+          <div className="mb-6 opacity-80 max-w-[200px] md:max-w-[280px]">
+            <Image
+              src="/Asset 3@4x.png"
+              alt="Pana Sports"
+              width={1251}
+              height={165}
+              className="w-full h-auto object-contain"
+              priority
+            />
+          </div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-px w-8 bg-primary"></div>
+            <span className="text-primary font-mono text-sm tracking-widest uppercase">
+              Daily Curated
+            </span>
+          </div>
+          <h2 className="text-6xl md:text-8xl font-black tracking-tighter mb-6 text-white leading-[0.9]">
+            PANA{" "}
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-zinc-400 via-zinc-200 to-white">
+              SPORTS
+            </span>
           </h2>
-          <p className="text-zinc-400 text-base md:text-lg max-w-2xl">
-            Stay ahead of the game with the latest updates and exclusive
-            insights.
+          <p className="text-zinc-400 text-lg md:text-xl max-w-2xl font-light leading-relaxed border-l-2 border-zinc-800 pl-6">
+            Stay ahead of the game with the latest updates, match reports, and
+            exclusive insights from the world of Ethiopian football.
           </p>
         </div>
         <ErrorState
@@ -80,19 +96,41 @@ export default function HomeNewsSection() {
 
   return (
     <div className="space-y-8">
-      {/* Header Section */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-3 bg-linear-to-r from-white via-zinc-400 to-zinc-600 bg-clip-text text-transparent">
-          PANA SPORTS
-        </h2>
-        <p className="text-zinc-400 text-base md:text-lg max-w-2xl">
-          Stay ahead of the game with the latest updates and exclusive insights.
-        </p>
-      </motion.div>
+      <div className="mb-12 relative">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="relative z-10"
+        >
+          <div className="mb-6 opacity-70 max-w-[200px] md:max-w-[180px]">
+            <Image
+              src="/Asset 3@4x.png"
+              alt="Pana Sports"
+              width={1251}
+              height={65}
+              className="w-full h-auto object-contain"
+              priority
+            />
+          </div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-px w-8 bg-primary"></div>
+            <span className="text-primary font-mono text-sm tracking-widest uppercase">
+              Daily Curated
+            </span>
+          </div>
+          <h2 className="text-6xl md:text-8xl font-black tracking-tighter mb-6 text-white leading-[0.9]">
+            PANA{" "}
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-zinc-400 via-zinc-200 to-white">
+              SPORTS
+            </span>
+          </h2>
+          <p className="text-zinc-400 text-lg md:text-xl max-w-2xl font-light leading-relaxed border-l-2 border-zinc-800 pl-6">
+            Stay ahead of the game with the latest updates, match reports, and
+            exclusive insights from the world of Ethiopian football.
+          </p>
+        </motion.div>
+      </div>
 
       <NewsFilter
         activeCategory={activeCategory}

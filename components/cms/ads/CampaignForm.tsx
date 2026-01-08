@@ -33,6 +33,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Label } from "@radix-ui/react-label";
 
 interface CampaignFormProps {
   initialData?: {
@@ -126,9 +127,7 @@ export function CampaignForm({ initialData, isEdit }: CampaignFormProps) {
       router.push("/cms/ads");
     } catch (error) {
       console.error("Failed to save campaign:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to save campaign"
-      );
+      toast.error(error instanceof Error ? error.message : "Failed to save campaign");
     }
   };
 
@@ -162,7 +161,7 @@ export function CampaignForm({ initialData, isEdit }: CampaignFormProps) {
                       <Input
                         {...field}
                         placeholder="e.g. Summer Sale 2024"
-                        className="bg-background border-input"
+                        className="bg-background border-input text-foreground"
                       />
                     </FormControl>
                     <FormDescription>
@@ -185,7 +184,7 @@ export function CampaignForm({ initialData, isEdit }: CampaignFormProps) {
                       <Input
                         {...field}
                         placeholder="e.g. Adidas"
-                        className="bg-background border-input"
+                        className="bg-background border-input text-foreground"
                       />
                     </FormControl>
                     <FormDescription>
@@ -210,7 +209,7 @@ export function CampaignForm({ initialData, isEdit }: CampaignFormProps) {
                       {...field}
                       placeholder="Notes about this campaign..."
                       rows={3}
-                      className="bg-background border-input resize-none"
+                      className="bg-background border-input resize-none text-foreground"
                     />
                   </FormControl>
                   <FormMessage />
@@ -231,7 +230,7 @@ export function CampaignForm({ initialData, isEdit }: CampaignFormProps) {
                       <Input
                         {...field}
                         placeholder="https://..."
-                        className="bg-background border-input"
+                        className="bg-background border-input text-foreground"
                       />
                     </FormControl>
                     <FormDescription>
@@ -257,7 +256,7 @@ export function CampaignForm({ initialData, isEdit }: CampaignFormProps) {
                         onChange={(e) =>
                           field.onChange(parseInt(e.target.value) || 0)
                         }
-                        className="bg-background border-input"
+                        className="bg-background border-input text-foreground"
                       />
                     </FormControl>
                     <FormDescription>
@@ -285,7 +284,7 @@ export function CampaignForm({ initialData, isEdit }: CampaignFormProps) {
                           type="date"
                           {...field}
                           value={field.value || ""}
-                          className="pl-10 bg-background border-input"
+                          className="pl-10 bg-background border-input text-foreground"
                         />
                       </div>
                     </FormControl>
@@ -307,7 +306,7 @@ export function CampaignForm({ initialData, isEdit }: CampaignFormProps) {
                           type="date"
                           {...field}
                           value={field.value || ""}
-                          className="pl-10 bg-background border-input"
+                          className="pl-10 bg-background border-input text-foreground"
                         />
                       </div>
                     </FormControl>
@@ -321,7 +320,10 @@ export function CampaignForm({ initialData, isEdit }: CampaignFormProps) {
               control={form.control}
               name="is_active"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border border-border p-4 bg-muted/20">
+                <FormItem className={cn(
+                  "flex flex-row items-start space-x-3 space-y-0 rounded-lg border border-border p-4 bg-muted/20",
+                  field.value ? "border-primary/50" : ""
+                )}>
                   <FormControl>
                     <Checkbox
                       checked={field.value}
@@ -329,7 +331,7 @@ export function CampaignForm({ initialData, isEdit }: CampaignFormProps) {
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel className="font-bold text-base text-foreground">
+                    <FormLabel className="font-bold text-base text-foreground cursor-pointer">
                       Campaign Active
                     </FormLabel>
                     <FormDescription>
@@ -395,7 +397,7 @@ export function CampaignForm({ initialData, isEdit }: CampaignFormProps) {
                 />
               </div>
 
-              <Separator />
+              <Separator className="bg-border/50" />
 
               <div className="grid gap-6 md:grid-cols-2">
                 <FormField
@@ -410,7 +412,7 @@ export function CampaignForm({ initialData, isEdit }: CampaignFormProps) {
                         <Input
                           {...field}
                           placeholder="Description for screen readers"
-                          className="bg-background border-input"
+                          className="bg-background border-input text-foreground"
                         />
                       </FormControl>
                       <FormMessage />
@@ -430,7 +432,7 @@ export function CampaignForm({ initialData, isEdit }: CampaignFormProps) {
                         <Input
                           {...field}
                           placeholder="መግለጫ"
-                          className="bg-background border-input"
+                          className="bg-background border-input text-foreground"
                         />
                       </FormControl>
                       <FormMessage />

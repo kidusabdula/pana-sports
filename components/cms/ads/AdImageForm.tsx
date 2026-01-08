@@ -33,6 +33,7 @@ import { AdImageUploader } from "./AdImageUploader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface AdImageFormProps {
   initialData?: {
@@ -100,7 +101,9 @@ export function AdImageForm({
       router.push(`/cms/ads/campaigns/${values.campaign_id}`);
     } catch (error) {
       console.error("Failed to save ad image:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to save ad image");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save ad image"
+      );
     }
   };
 
@@ -202,7 +205,7 @@ export function AdImageForm({
                       <Input
                         {...field}
                         placeholder="https://..."
-                        className="bg-background border-input"
+                        className="bg-background border-input text-foreground"
                       />
                     </FormControl>
                     <FormDescription>
@@ -228,7 +231,7 @@ export function AdImageForm({
                         onChange={(e) =>
                           field.onChange(parseInt(e.target.value) || 0)
                         }
-                        className="bg-background border-input"
+                        className="bg-background border-input text-foreground"
                       />
                     </FormControl>
                     <FormDescription>
@@ -291,7 +294,7 @@ export function AdImageForm({
               />
             </div>
 
-            <Separator />
+            <Separator className="bg-border/50" />
 
             <div className="grid gap-6 md:grid-cols-2">
               <FormField
@@ -306,7 +309,7 @@ export function AdImageForm({
                       <Input
                         {...field}
                         placeholder="Description for screen readers"
-                        className="bg-background border-input"
+                        className="bg-background border-input text-foreground"
                       />
                     </FormControl>
                     <FormMessage />
@@ -326,7 +329,7 @@ export function AdImageForm({
                       <Input
                         {...field}
                         placeholder="መግለጫ"
-                        className="bg-background border-input"
+                        className="bg-background border-input text-foreground"
                       />
                     </FormControl>
                     <FormMessage />
@@ -357,16 +360,13 @@ export function AdImageForm({
                         control={form.control}
                         name="target_pages"
                         render={({ field }) => {
+                          const currentValues = field.value || [];
                           return (
-                            <FormItem
-                              key={page.id}
-                              className="flex flex-row items-start space-x-3 space-y-0"
-                            >
+                            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                               <FormControl>
                                 <Checkbox
-                                  checked={field.value?.includes(page.id)}
+                                  checked={currentValues.includes(page.id)}
                                   onCheckedChange={(checked) => {
-                                    const currentValues = field.value || [];
                                     return checked
                                       ? field.onChange([
                                           ...currentValues,
@@ -401,7 +401,12 @@ export function AdImageForm({
               control={form.control}
               name="is_active"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border border-border p-4 bg-muted/20">
+                <FormItem
+                  className={cn(
+                    "flex flex-row items-start space-x-3 space-y-0 rounded-lg border border-border p-4 bg-muted/20",
+                    field.value ? "border-primary/50" : ""
+                  )}
+                >
                   <FormControl>
                     <Checkbox
                       checked={field.value}
@@ -409,9 +414,9 @@ export function AdImageForm({
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel className="font-bold text-foreground">
+                    <FormLabel className="font-bold text-foreground cursor-pointer">
                       Active Status
-                    </Label>
+                    </FormLabel>
                     <FormDescription>
                       Determine if this banner is currently visible on the site.
                     </FormDescription>

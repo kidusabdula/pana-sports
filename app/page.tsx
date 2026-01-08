@@ -13,8 +13,12 @@ export default function Home() {
       {/* Top Ad Banner */}
       <AdBanner variant="full" page="home" />
 
-      <main className="min-h-screen bg-black text-white pt-8 pb-10">
-        <div className="container mx-auto px-4 space-y-6">
+      <main className="min-h-screen bg-black text-white pt-8 pb-10 relative overflow-hidden">
+        {/* Background Glow */}
+        <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-primary/10 blur-[150px] -z-10 rounded-full pointer-events-none" />
+        <div className="fixed bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/5 blur-[150px] -z-10 rounded-full pointer-events-none" />
+
+        <div className="container mx-auto px-4 md:px-6 space-y-6 relative z-10">
           {/* Main Content Grid: News (Left) + Matches/Standings/Spotlight (Right) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Column - News Section (8 columns on desktop) */}

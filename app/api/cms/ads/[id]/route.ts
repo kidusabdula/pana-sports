@@ -48,12 +48,19 @@ export async function PATCH(
 
     const validatedData = adImageSchema.partial().parse(body);
 
+    // Maintain backward compatibility for the image_url field
+    const updateData: any = {
+      ...validatedData,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (validatedData.image_url_large) {
+      updateData.image_url = validatedData.image_url_large;
+    }
+
     const { data, error } = await supabase
       .from("ad_images")
-      .update({
-        ...validatedData,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updateData)
       .eq("id", id)
       .select()
       .single();

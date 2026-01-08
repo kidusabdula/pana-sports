@@ -116,7 +116,12 @@ export function useCreateAdImage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error("Failed to create ad image");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || errorData.message || "Failed to create ad image"
+        );
+      }
       return res.json();
     },
     onSuccess: (_, variables) => {
