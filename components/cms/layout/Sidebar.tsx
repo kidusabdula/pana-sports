@@ -21,6 +21,7 @@ import {
   Menu,
   UserCheck,
   TrendingUp,
+  Megaphone,
 } from "lucide-react";
 
 const navigation = [
@@ -32,6 +33,11 @@ const navigation = [
   {
     name: "Leagues",
     href: "/cms/leagues",
+    icon: Trophy,
+  },
+  {
+    name: "Cups",
+    href: "/cms/cups",
     icon: Trophy,
   },
   {
@@ -84,6 +90,11 @@ const navigation = [
   //   href: "/cms/comments",
   //   icon: MessageSquare,
   // },
+  {
+    name: "Ads",
+    href: "/cms/ads",
+    icon: Megaphone,
+  },
   {
     name: "Authors",
     href: "/cms/authors",

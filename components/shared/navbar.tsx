@@ -59,6 +59,8 @@ export default function Navbar() {
       u17: "Under 17",
       mens: "Men's",
       womens_team: "Women's",
+      cups: "Cups",
+      all_cups: "All Cups",
     },
     am: {
       home: "መነሻ",
@@ -77,6 +79,8 @@ export default function Navbar() {
       u17: "ከ17 ዓመት በታች",
       mens: "ወንዶች",
       womens_team: "ሴቶች",
+      cups: "ዋንጫዎች",
+      all_cups: "ሁሉም ዋንጫዎች",
     },
   };
 
@@ -92,10 +96,17 @@ export default function Navbar() {
       type: "dropdown",
       items: [
         { href: "/premier-league", label: t.pl },
-        { href: "/ethiopian-cup", label: t.ec },
         { href: "/higher-league", label: t.hl },
         { href: "/league-one", label: t.lo },
         { href: "/womens-league", label: t.womens },
+      ],
+    },
+    {
+      label: t.cups,
+      type: "dropdown",
+      items: [
+        { href: "/cups/ethiopian-cup", label: t.ec },
+        { href: "/cups", label: t.all_cups },
       ],
     },
     {
@@ -430,7 +441,7 @@ export default function Navbar() {
         {/* Content container */}
         <div className="relative h-full overflow-y-auto">
           {/* Close button at top */}
-          <div className="sticky top-0 z-10 flex justify-end p-6 bg-gradient-to-b from-black/80 to-transparent">
+          <div className="sticky top-0 z-10 flex justify-end p-6 bg-linear-to-b from-black/80 to-transparent">
             <Button
               variant="ghost"
               size="icon"

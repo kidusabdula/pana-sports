@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { usePublicAds } from "@/lib/hooks/public/useAds";
 
 interface AdBannerProps {
   variant?: "full" | "sidebar" | "inline";
@@ -24,28 +26,45 @@ export default function AdBanner({
   className,
   page = "home",
 }: AdBannerProps) {
+  const { data: ads } = usePublicAds(page, variant);
   const [currentAd, setCurrentAd] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
 
-  // TODO: Replace with useAds hook when API is ready
-  const ads = [
-    { id: 1, image: "/ad1.jpg", alt: "Advertisement 1" },
-    { id: 2, image: "/ad2.png", alt: "Advertisement 2" },
-    { id: 3, image: "/ad3.jpg", alt: "Advertisement 3" },
-  ];
-
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentAd((prev) => (prev + 1) % ads.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [ads.length]);
+    if (ads && ads.length > 0) {
+      const adId = ads[currentAd].id;
+      fetch("/api/public/ads/track", {
+        method: "POST",
+        body: JSON.stringify({
+          adImageId: adId,
+          eventType: "impression",
+          pageUrl: window.location.pathname,
+        }),
+      }).catch(console.error);
 
-  const nextAd = () => setCurrentAd((prev) => (prev + 1) % ads.length);
+      const interval = setInterval(() => {
+        setCurrentAd((prev) => (prev + 1) % ads.length);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [ads, currentAd]);
+
+  const handleAdClick = (adId: string) => {
+    fetch("/api/public/ads/track", {
+      method: "POST",
+      body: JSON.stringify({
+        adImageId: adId,
+        eventType: "click",
+        pageUrl: window.location.pathname,
+      }),
+    }).catch(console.error);
+  };
+
+  const nextAd = () => ads && setCurrentAd((prev) => (prev + 1) % ads.length);
   const prevAd = () =>
-    setCurrentAd((prev) => (prev - 1 + ads.length) % ads.length);
+    ads && setCurrentAd((prev) => (prev - 1 + ads.length) % ads.length);
 
-  if (!isVisible) return null;
+  if (!isVisible || !ads || ads.length === 0) return null;
 
   // Variant-based styling
   const variantStyles = {
@@ -55,6 +74,21 @@ export default function AdBanner({
   };
 
   const containerHeight = height || variantStyles[variant];
+
+  // Determine which image to use based on variant
+  // For sidebar/small placements, use small image; for full/inline use large
+  const getAdImage = (ad: {
+    image?: string;
+    imageLarge?: string;
+    imageSmall?: string;
+  }) => {
+    if (variant === "sidebar") {
+      // Prefer small image for sidebar, fallback to large then legacy
+      return ad.imageSmall || ad.imageLarge || ad.image || "";
+    }
+    // For full and inline, prefer large image
+    return ad.imageLarge || ad.image || "";
+  };
 
   return (
     <motion.div
@@ -76,18 +110,25 @@ export default function AdBanner({
             transition={{ duration: 0.5 }}
             className="absolute inset-0"
           >
-            <Image
-              src={ads[currentAd].image}
-              alt={ads[currentAd].alt}
-              fill
-              className="object-cover"
-              priority={currentAd === 0}
-            />
+            <Link
+              href={ads[currentAd].link || "#"}
+              target="_blank"
+              className="block w-full h-full"
+              onClick={() => handleAdClick(ads[currentAd].id)}
+            >
+              <Image
+                src={getAdImage(ads[currentAd])}
+                alt={ads[currentAd].alt || "Advertisement"}
+                fill
+                className="object-cover"
+                priority={currentAd === 0}
+              />
+            </Link>
           </motion.div>
         </AnimatePresence>
 
         {/* Controls */}
-        {showControls && (
+        {showControls && ads.length > 1 && (
           <>
             <Button
               variant="ghost"
@@ -109,20 +150,22 @@ export default function AdBanner({
         )}
 
         {/* Indicators */}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
-          {ads.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentAd(idx)}
-              className={cn(
-                "h-1.5 rounded-full transition-all duration-300",
-                idx === currentAd
-                  ? "w-6 bg-primary"
-                  : "w-1.5 bg-white/30 hover:bg-white/50"
-              )}
-            />
-          ))}
-        </div>
+        {ads.length > 1 && (
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+            {ads.map((_ad, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentAd(idx)}
+                className={cn(
+                  "h-1.5 rounded-full transition-all duration-300",
+                  idx === currentAd
+                    ? "w-6 bg-primary"
+                    : "w-1.5 bg-white/30 hover:bg-white/50"
+                )}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Close */}
         {showClose && (

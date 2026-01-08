@@ -8,6 +8,19 @@ export type DashboardStats = {
   news: number;
   comments: number;
   users: number;
+  upcomingMatches: Array<{
+    id: string;
+    home_team: { name_en: string; logo_url: string | null };
+    away_team: { name_en: string; logo_url: string | null };
+    scheduled_at: string;
+    status: string;
+  }>;
+  latestNews: Array<{
+    id: string;
+    title_en: string;
+    published_at: string;
+    author: string | null;
+  }>;
   recentActivities: Array<{
     type: "league" | "match" | "news";
     message: string;

@@ -1,6 +1,8 @@
 // app/ethiopian-cup/page.tsx
-import EthiopianCupPage from "@/components/ethiopian-cup/EthiopianCupPage";
+// Redirect page for backward compatibility
 
-export default function EthiopianCupRoute() {
-  return <EthiopianCupPage />;
+import { redirect } from "next/navigation";
+
+export default function EthiopianCupRedirectPage() {
+  redirect("/cups/ethiopian-cup");
 }

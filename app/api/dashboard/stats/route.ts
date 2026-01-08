@@ -110,7 +110,13 @@ export async function GET() {
     }
 
     // Fetch recent activity (latest updates across different entities)
-    const [recentLeagues, recentMatches, recentNews] = await Promise.all([
+    const [
+      recentLeagues,
+      recentMatches,
+      recentNews,
+      upcomingMatches,
+      latestNews,
+    ] = await Promise.all([
       supabase
         .from("leagues")
         .select("id, name_en, created_at")
@@ -134,6 +140,26 @@ export async function GET() {
         .eq("is_published", true)
         .order("published_at", { ascending: false })
         .limit(3),
+      supabase
+        .from("matches")
+        .select(
+          `
+          id,
+          scheduled_at,
+          status,
+          home_team:teams!matches_home_team_id_fkey(name_en, logo_url),
+          away_team:teams!matches_away_team_id_fkey(name_en, logo_url)
+        `
+        )
+        .eq("status", "scheduled")
+        .order("scheduled_at", { ascending: true })
+        .limit(5),
+      supabase
+        .from("news")
+        .select("id, title_en, published_at, author:authors(name)")
+        .eq("is_published", true)
+        .order("published_at", { ascending: false })
+        .limit(5),
     ]);
 
     // Combine and sort recent activities
@@ -199,6 +225,17 @@ export async function GET() {
       news: newsResult.count || 0,
       comments: commentsResult.count || 0,
       users: usersResult.data.users.length || 0,
+      upcomingMatches: (upcomingMatches.data || []).map((m) => ({
+        ...m,
+        home_team: Array.isArray(m.home_team) ? m.home_team[0] : m.home_team,
+        away_team: Array.isArray(m.away_team) ? m.away_team[0] : m.away_team,
+      })),
+      latestNews: (latestNews.data || []).map((n) => ({
+        ...n,
+        author: Array.isArray(n.author)
+          ? (n.author[0] as any)?.name
+          : (n.author as any)?.name || null,
+      })),
       recentActivities: sortedActivities,
     };
 
